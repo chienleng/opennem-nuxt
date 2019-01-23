@@ -6,6 +6,7 @@ export const DEBOUNCE_MILLISECONDS = 200
 export const HOVER_LAYER_CLASS = 'hover-layer'
 export const CURSOR_LINE_GROUP_CLASS = 'cursor-line-group'
 export const CURSOR_LINE_CLASS = 'cursor-line'
+export const BRUSH_CLASS = 'brush'
 
 export const X_AXIS_CLASS = 'x-axis'
 export const Y_AXIS_CLASS = 'y-axis'

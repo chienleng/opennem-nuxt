@@ -2,18 +2,27 @@ import { select, mouse } from 'd3-selection'
 import EventBus from '~/plugins/eventBus.js'
 import * as CONFIG from './config.js'
 
-function setupSignals(id, height, x) {
+function setupSignals(id, height, x, brush) {
   const hoverLayerClass = CONFIG.HOVER_LAYER_CLASS
   const cursorLineClass = CONFIG.CURSOR_LINE_CLASS
   const cursorLineGroupClass = CONFIG.CURSOR_LINE_GROUP_CLASS
 
   const hoverLayer = select(`#${id} .${hoverLayerClass}`)
   const cursorLineGroup = select(`#${id} .${cursorLineGroupClass}`)
-  cursorLineGroup.append('path').attr('class', cursorLineClass)
+
+  hoverLayer.selectAll(`.${CONFIG.BRUSH_CLASS}`).remove()
+  cursorLineGroup.selectAll(`.${cursorLineClass}`).remove()
 
   EventBus.$on('vis.mousemove', onMouseMove)
   EventBus.$on('vis.mouseover', onMouseOver)
   EventBus.$on('vis.mouseout', onMouseOut)
+
+  // Remove
+  cursorLineGroup.append('path').attr('class', cursorLineClass)
+  hoverLayer
+    .append('g')
+    .attr('class', 'brush')
+    .call(brush)
 
   function onMouseMove(date) {
     const m = x(date)
@@ -32,15 +41,16 @@ function setupSignals(id, height, x) {
     select(`#${id} .${cursorLineGroupClass}`).attr('opacity', 0)
   }
 
-  hoverLayer
   hoverLayer.on('mousemove', function(d) {
     const m = mouse(this)
     const date = x.invert(m[0])
     EventBus.$emit('vis.mousemove', date)
   })
+
   hoverLayer.on('mouseover', d => {
     EventBus.$emit('vis.mouseover')
   })
+
   hoverLayer.on('mouseout', d => {
     EventBus.$emit('vis.mouseout')
   })

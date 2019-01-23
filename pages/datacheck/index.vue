@@ -19,8 +19,10 @@
         v-if="type === 'energy'"
         v-model="year">
         <option value="all">All</option>
-        <option value="2017">2017</option>
         <option value="2018">2018</option>
+        <option value="2017">2017</option>
+        <option value="2016">2016</option>
+        <option value="2015">2015</option>
       </select>
 
       <div class="url">{{ url }}</div>
@@ -84,7 +86,7 @@ export default {
       mounted: false,
       type: 'energy',
       region: 'nem',
-      year: '2017',
+      year: 'all',
       data: [],
       flattenData: [],
       columns: {},
@@ -167,7 +169,7 @@ export default {
       }
     },
     getEnergyByRegion(region) {
-      DataService.getEnergyByRegion(region).then(res =>
+      DataService.getEnergyByRegionAll(region).then(res =>
         this.updateData(res.config.url, res.data)
       )
     },

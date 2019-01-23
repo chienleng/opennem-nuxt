@@ -1,5 +1,6 @@
 <template>
   <div class="vis">
+    <button @click="handleChartReset">reset</button>
     <svg
       :width="svgWidth"
       :height="svgHeight"
@@ -7,7 +8,15 @@
       class="stacked-area-chart">
       <g 
         :transform="gTransform"
-        class="stacked-area-group" />
+        class="stacked-area-group">
+        <defs>
+          <clipPath id="clip">
+            <rect
+              :width="width"
+              :height="height"/>
+          </clipPath>
+        </defs>
+      </g>
       <g 
         :transform="gTransform"
         class="axis-group">
@@ -26,7 +35,7 @@
         :class="hoverLayerClass">
         <rect
           :width="width"
-          :height="height" />
+          :height="height"/>
       </g>
     </svg>
   </div>
@@ -35,12 +44,15 @@
 <script>
 import { scaleOrdinal, scaleLinear, scaleTime } from 'd3-scale'
 import { axisBottom, axisLeft } from 'd3-axis'
-import { area, stack } from 'd3-shape'
+import { area, stack, curveStep, curveLinear } from 'd3-shape'
 import { extent, min, max } from 'd3-array'
 import { format } from 'd3-format'
-import { select, mouse } from 'd3-selection'
+import { timeFormat } from 'd3-time-format'
+import { select, mouse, event } from 'd3-selection'
 import { schemeCategory10 } from 'd3-scale-chromatic'
+import { brushX } from 'd3-brush'
 import debounce from 'lodash.debounce'
+import moment from 'moment'
 
 import * as CONFIG from './shared/config.js'
 import { setupSignals, destroySignals } from './shared/signals.js'
@@ -51,20 +63,24 @@ export default {
       type: Array,
       default: () => []
     },
-    ids: {
+    fuelTechs: {
       type: Array,
       default: () => []
     },
-    domainColours: {
-      type: Object,
-      default: () => {}
+    visHeight: {
+      type: Number,
+      default: () => CONFIG.DEFAULT_SVG_HEIGHT
+    },
+    step: {
+      type: Boolean,
+      default: () => false
     }
   },
 
   data() {
     return {
       svgWidth: 0,
-      svgHeight: CONFIG.DEFAULT_SVG_HEIGHT,
+      svgHeight: 0,
       width: 0,
       height: 0,
       margin: CONFIG.DEFAULT_MARGINS,
@@ -79,8 +95,10 @@ export default {
       xAxisGroup: null,
       yAxisGroup: null,
       area: null,
+      stackedArea: null,
       colours: schemeCategory10,
       stack: null,
+      brush: null,
       hoverLayerClass: CONFIG.HOVER_LAYER_CLASS,
       cursorLineGroupClass: CONFIG.CURSOR_LINE_GROUP_CLASS
     }
@@ -92,16 +110,24 @@ export default {
       this.data.forEach((d, i) => {
         let total = 0
         let min = 0
-        this.ids.forEach(k => {
-          total += d[k].value || 0
-          if (d[k].value < 0) {
-            min += d[k].value || 0
+        this.fuelTechIds.forEach(k => {
+          if (d[k]) {
+            total += d[k].value || 0
+            if (d[k].value < 0) {
+              min += d[k].value || 0
+            }
           }
         })
         updated[i]._totalFuelTech = total
         updated[i]._min = min
       })
       return updated
+    },
+    fuelTechIds() {
+      return this.fuelTechs.map(d => d.id).reverse()
+    },
+    fuelTechColours() {
+      return this.fuelTechs.map(d => d.colour).reverse()
     },
     id() {
       return `${CONFIG.CHART_STACKED_AREA}-${this._uid}`
@@ -119,9 +145,13 @@ export default {
       this.update()
     },
 
-    domainColours(newColours) {
-      this.colours = Object.values(newColours)
+    fuelTechs() {
+      this.update()
     }
+  },
+
+  created() {
+    this.svgHeight = this.visHeight
   },
 
   mounted() {
@@ -157,12 +187,56 @@ export default {
       this.height = this.svgHeight - this.margin.top - this.margin.bottom
     },
 
+    handleChartReset() {
+      const g = select(`#${this.id} .${CONFIG.CHART_STACKED_AREA}-group`)
+      const transition = g.transition().duration(250)
+
+      this.x.domain(extent(this.updatedData, d => d.date))
+      this.xAxisGroup.transition(transition).call(this.xAxis)
+
+      g.selectAll('path')
+        .transition(transition)
+        .attr('d', this.area)
+    },
+
+    brushEnded(d) {
+      console.log('ended', event)
+      // prevent an infinite loop by not moving the brush in response to you moving the brush
+      if (!event.selection) return
+      const s = event.selection
+
+      const hoverLayer = select(`#${this.id} .${CONFIG.HOVER_LAYER_CLASS}`)
+      // get the dates based on x value
+      console.log(s.map(this.x.invert, this.x))
+      // this.x.domain(s.map(this.x.invert, this.x))
+      this.x.domain([this.x.invert(s[0]), this.x.invert(s[1])])
+      select('.brush').call(this.brush.move, null)
+      // this.x.domain([s[0][0], s[1][0]].map(this.x.invert, this.x))
+
+      const g = select(`#${this.id} .${CONFIG.CHART_STACKED_AREA}-group`)
+      const transition = g.transition().duration(250)
+      this.xAxisGroup.transition(transition).call(this.xAxis)
+      g.selectAll('path')
+        .transition(transition)
+        .attr('d', this.area)
+    },
+
     setup() {
       this.x = scaleTime().range([0, this.width])
       this.y = scaleLinear().range([this.height, 0])
       this.z = scaleOrdinal()
 
       this.xAxis = axisBottom(this.x)
+        .ticks(5)
+        .tickFormat(d => {
+          console.log(d)
+          // const format = timeFormat('%c')
+          // return format(d)
+
+          return moment(d)
+            .utcOffset(600)
+            .format('lll')
+        })
       this.yAxis = axisLeft(this.y)
         .ticks(5)
         .tickFormat(d => format(CONFIG.Y_AXIS_FORMAT_STRING)(d))
@@ -171,19 +245,27 @@ export default {
       this.yAxisGroup = select(`#${this.id} .${this.yAxisClass}`)
 
       this.stack = stack()
+      this.brush = brushX()
+        .extent([[0, 0], [this.width, this.height]])
+        .on('end', this.brushEnded)
 
       this.area = area()
         .x(d => this.x(d.data.date))
         .y0(d => this.y(d[0]))
         .y1(d => this.y(d[1]))
+
+      // Hover signals
+      setupSignals(this.id, this.height, this.x, this.brush)
     },
 
     update() {
-      console.log('vis update')
+      console.log('vis update', this.step)
       const g = select(`#${this.id} .${CONFIG.CHART_STACKED_AREA}-group`)
 
-      // Remove previous stacked
+      // Remove previous stacked area
       g.selectAll(`.${CONFIG.CHART_STACKED_AREA}`).remove()
+
+      g.on('dblclick', this.handleChartDoubleClicked)
 
       this.x.domain(extent(this.updatedData, d => d.date))
       this.y
@@ -192,24 +274,29 @@ export default {
           max(this.updatedData, d => d._totalFuelTech)
         ])
         .nice()
-      this.z.range(this.colours).domain(this.ids)
+      this.z.range(this.fuelTechColours).domain(this.fuelTechIds)
 
       this.xAxisGroup.call(this.xAxis)
       this.yAxisGroup.call(this.yAxis)
 
-      setupSignals(this.id, this.height, this.x)
+      if (this.step) {
+        this.area.curve(curveStep)
+      } else {
+        this.area.curve(curveLinear)
+      }
 
-      this.stack.keys(this.ids).value((d, key) => d[key].value)
-      const stackedArea = g
+      this.stack
+        .keys(this.fuelTechIds)
+        .value((d, key) => (d[key] ? d[key].value : 0))
+      this.stackedArea = g
         .selectAll(`.${CONFIG.CHART_STACKED_AREA}`)
         .data(this.stack(this.updatedData))
 
-      stackedArea
+      this.stackedArea
         .enter()
-        .append('g')
-        .attr('class', CONFIG.CHART_STACKED_AREA)
         .append('path')
-        .attr('class', 'area-path')
+        .attr('clip-path', 'url(#clip)')
+        .attr('class', `${CONFIG.CHART_STACKED_AREA}`)
         .style('fill', d => this.z(d.key))
         .attr('d', this.area)
     }

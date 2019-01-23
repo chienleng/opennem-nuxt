@@ -199,22 +199,23 @@ export default {
       const ids = data.map(d => d.id)
       let flatData = transformData(data)
 
-      // const rollUp = rollupTo30Mins(ids, flatData)
       resolve(flatData)
     })
 
     return promise
   },
 
-  flattenAndInterpolate(data) {
+  flattenAndInterpolate(data, period) {
     const promise = new Promise(resolve => {
       const ids = data.map(d => d.id)
       const interpolateSeriesTypes = findInterpolateSeriesTypes(data)
       let flatData = transformData(data)
       mutateDataForInterpolation(flatData, interpolateSeriesTypes)
-
-      const rollUp = rollupTo30Mins(ids, flatData)
-      resolve(flatData)
+      if (period === '30min') {
+        resolve(rollupTo30Mins(ids, flatData))
+      } else {
+        resolve(flatData)
+      }
     })
 
     return promise

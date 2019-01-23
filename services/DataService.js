@@ -10,8 +10,11 @@ const apiClient = axios.create({
 })
 
 export default {
-  getEnergyByRegion(region) {
+  getEnergyByRegionAll(region) {
     return apiClient.get(`/testing/${region}/energy/monthly/all.json`)
+  },
+  getEnergyByRegion(region) {
+    return apiClient.get(`/energy/history/daily/${region}.json`)
   },
   getEnergyByRegionYear(region, year) {
     return apiClient.get(`/testing/${region}/energy/daily/${year}.json`)

@@ -3,6 +3,7 @@
     <nuxt-link to="/">Home</nuxt-link> |
     <nuxt-link to="/datacheck">Data Check</nuxt-link> |
     <nuxt-link to="/allregions">All Regions</nuxt-link> |
+    <nuxt-link to="/region">Region: SA</nuxt-link> |
     <nuxt-link to="/dailyreport">Daily Report</nuxt-link>
   </nav>
 </template>
