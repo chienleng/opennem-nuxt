@@ -5,7 +5,6 @@
 </template>
 
 <script>
-import data from '~/static/data/daily.json'
 import ReportCard from '~/components/ReportCard/index.vue'
 
 export default {
@@ -15,7 +14,7 @@ export default {
 
   data() {
     return {
-      data
+      data: []
     }
   }
 }

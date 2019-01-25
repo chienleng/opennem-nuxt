@@ -12,7 +12,6 @@
 </template>
 
 <script>
-import data from '~/static/data/nem.json'
 import axios from 'axios'
 import DataService from '~/services/DataService.js'
 import DataList from '~/components/DataList.vue'
