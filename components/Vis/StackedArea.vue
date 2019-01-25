@@ -6,17 +6,19 @@
       :height="svgHeight"
       :id="id"
       class="stacked-area-chart">
+      <defs>
+        <clipPath id="clip">
+          <rect
+            :width="width"
+            :height="height"/>
+        </clipPath>
+      </defs>
       <g 
         :transform="gTransform"
-        class="stacked-area-group">
-        <defs>
-          <clipPath id="clip">
-            <rect
-              :width="width"
-              :height="height"/>
-          </clipPath>
-        </defs>
-      </g>
+        class="guide-group" />
+      <g 
+        :transform="gTransform"
+        class="stacked-area-group" />
       <g 
         :transform="gTransform"
         class="axis-group">
@@ -42,8 +44,8 @@
 </template>
 
 <script>
-import { scaleOrdinal, scaleLinear, scaleTime } from 'd3-scale'
-import { axisBottom, axisLeft } from 'd3-axis'
+import { scaleOrdinal, scaleLinear, scaleTime, scaleUtc } from 'd3-scale'
+import { axisBottom, axisRight } from 'd3-axis'
 import { area, stack, curveStep, curveLinear } from 'd3-shape'
 import { extent, min, max } from 'd3-array'
 import { format } from 'd3-format'
@@ -51,17 +53,28 @@ import { timeFormat } from 'd3-time-format'
 import { select, mouse, event } from 'd3-selection'
 import { schemeCategory10 } from 'd3-scale-chromatic'
 import { brushX } from 'd3-brush'
+import { timeDay } from 'd3-time'
 import debounce from 'lodash.debounce'
 import moment from 'moment'
 
 import * as CONFIG from './shared/config.js'
 import { setupSignals, destroySignals } from './shared/signals.js'
+import axisTimeFormat from './shared/timeFormat.js'
 
 export default {
   props: {
     data: {
       type: Array,
       default: () => []
+    },
+    guideData: {
+      type: Array,
+      default: () => [
+        {
+          start: '2019-01-20T22:00Z',
+          end: '2019-01-21T06:00Z'
+        }
+      ]
     },
     fuelTechs: {
       type: Array,
@@ -88,12 +101,15 @@ export default {
       y: null,
       z: null,
       g: null,
+      guides: null,
       xAxis: null,
       yAxis: null,
       xAxisClass: CONFIG.X_AXIS_CLASS,
       yAxisClass: CONFIG.Y_AXIS_CLASS,
+      guideGroupClass: 'guide-group',
       xAxisGroup: null,
       yAxisGroup: null,
+      guideGroup: null,
       area: null,
       stackedArea: null,
       colours: schemeCategory10,
@@ -197,6 +213,16 @@ export default {
       g.selectAll('path')
         .transition(transition)
         .attr('d', this.area)
+
+      const start = this.updatedData[100].date
+      const end = this.updatedData[200].date
+      this.guideGroup
+        .selectAll('.guide')
+        .attr('x', d => this.x(start))
+        .attr('y', 0)
+        .attr('width', this.x(end) - this.x(start))
+        .attr('height', this.height)
+        .attr('fill', '#ddd')
     },
 
     brushEnded(d) {
@@ -219,6 +245,16 @@ export default {
       g.selectAll('path')
         .transition(transition)
         .attr('d', this.area)
+
+      const start = this.updatedData[100].date
+      const end = this.updatedData[200].date
+      this.guideGroup
+        .selectAll('.guide')
+        .attr('x', d => this.x(start))
+        .attr('y', 0)
+        .attr('width', this.x(end) - this.x(start))
+        .attr('height', this.height)
+        .attr('fill', '#ddd')
     },
 
     setup() {
@@ -227,22 +263,31 @@ export default {
       this.z = scaleOrdinal()
 
       this.xAxis = axisBottom(this.x)
-        .ticks(5)
-        .tickFormat(d => {
-          console.log(d)
-          // const format = timeFormat('%c')
-          // return format(d)
+        .tickSize(-this.height)
+        .tickFormat(d => axisTimeFormat(d))
+      // this.xAxis = axisBottom(this.x)
+      //   .ticks(5)
+      //   .tickFormat(d => {
+      //     return moment(d)
+      //       .utcOffset(600)
+      //       .format('DD/MM/YY h:mma')
+      //   })
 
-          return moment(d)
-            .utcOffset(600)
-            .format('lll')
-        })
-      this.yAxis = axisLeft(this.y)
-        .ticks(5)
+      // this.xAxis = axisBottom(this.x)
+      //   .ticks(timeDay.every(1))
+      //   .tickFormat(d =>
+      //     moment
+      //       .utc(d)
+      //       .utcOffset(600)
+      //       .format('DD/MM/YY h:mma')
+      //   )
+      this.yAxis = axisRight(this.y)
+        .tickSize(this.width)
         .tickFormat(d => format(CONFIG.Y_AXIS_FORMAT_STRING)(d))
 
       this.xAxisGroup = select(`#${this.id} .${this.xAxisClass}`)
       this.yAxisGroup = select(`#${this.id} .${this.yAxisClass}`)
+      this.guideGroup = select(`#${this.id} .${this.guideGroupClass}`)
 
       this.stack = stack()
       this.brush = brushX()
@@ -264,6 +309,7 @@ export default {
 
       // Remove previous stacked area
       g.selectAll(`.${CONFIG.CHART_STACKED_AREA}`).remove()
+      g.selectAll('.guide').remove()
 
       g.on('dblclick', this.handleChartDoubleClicked)
 
@@ -276,13 +322,40 @@ export default {
         .nice()
       this.z.range(this.fuelTechColours).domain(this.fuelTechIds)
 
+      const yAxis = this.yAxis
       this.xAxisGroup.call(this.xAxis)
-      this.yAxisGroup.call(this.yAxis)
+      this.yAxisGroup.call(customYAxis)
+
+      function customYAxis(g) {
+        g.call(yAxis)
+        g.selectAll('.tick text')
+          .attr('x', 4)
+          .attr('dy', -4)
+      }
 
       if (this.step) {
         this.area.curve(curveStep)
       } else {
         this.area.curve(curveLinear)
+      }
+
+      const dd = this.updatedData[100] ? this.updatedData[100].date : null
+      if (dd) {
+        console.log(this.x(this.updatedData[100].date))
+        const start = this.updatedData[100].date
+        const end = this.updatedData[200].date
+        this.guides = this.guideGroup
+          .selectAll('.guide')
+          .data(this.guideData)
+          .enter()
+          .append('rect')
+          .attr('class', 'guide')
+          .attr('clip-path', 'url(#clip)')
+          .attr('x', d => this.x(start))
+          .attr('y', 0)
+          .attr('width', this.x(end) - this.x(start))
+          .attr('height', this.height)
+          .attr('fill', '#ddd')
       }
 
       this.stack
@@ -317,7 +390,15 @@ path.line {
 .hover-layer {
   fill: transparent;
 }
-.area-path {
+.stacked-area {
   opacity: 0.9;
+}
+.x-axis .tick line {
+  stroke-dasharray: 3.8;
+  stroke: rgba(0, 0, 0, 0.2);
+}
+.y-axis .tick:not(:first-of-type) line {
+  stroke-dasharray: 3.8;
+  stroke: rgba(0, 0, 0, 0.2);
 }
 </style>

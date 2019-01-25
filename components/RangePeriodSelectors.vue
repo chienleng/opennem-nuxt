@@ -1,17 +1,20 @@
 <template>
   <div style="padding: 10px;">
     <button
+      class="btn btn--primary"
       type="button"
       @click="handleRangeChange('7D')">
       7D
     </button>
     <button
+      class="btn btn--primary"
       type="button"
       @click="handleRangeChange('30D')"
     >
       30D
     </button>
     <button
+      class="btn btn--primary"
       type="button"
       @click="handleRangeChange('1Y')"
     >
@@ -19,18 +22,21 @@
     </button>
     |
     <button
+      class="btn btn--primary"
       type="button"
       @click="handlePeriodChange('5min')"
     >
       5min
     </button>
     <button
+      class="btn btn--primary"
       type="button"
       @click="handlePeriodChange('30min')"
     >
       30min
     </button>
     <button
+      class="btn btn--primary"
       type="button"
       @click="handlePeriodChange('Daily')"
     >

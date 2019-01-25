@@ -101,7 +101,7 @@ export default {
     cursor: move;
 
     &.drag-placeholder {
-      opacity: 0;
+      opacity: 0.1;
     }
   }
 

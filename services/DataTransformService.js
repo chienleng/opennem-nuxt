@@ -60,13 +60,24 @@ function transformData(data) {
    */
   function parseHistory(id, fuelTech, type, history) {
     const historyData = history.data
+    // const offsetHrs = moment().utcOffset()
+    // let historyDate = moment(history.start).utcOffset(offsetHrs)
+    // const year = historyDate.year()
+    // const month = historyDate.month() + 1
+    // const date = historyDate.date()
+    // const hour = historyDate.hour()
+    // const minute = historyDate.minute()
+    // let currentDate = moment.utc(
+    //   `${year}-${month}-${date} ${hour}:${minute}`,
+    //   'YYYY-MM-DD HH:mm'
+    // )
     let currentDate = moment(history.start)
     let interval = parseInterval(history.interval)
 
     function createHistoryObject(hData) {
       return hData.map(h => {
         const newObj = {
-          date: moment(currentDate).valueOf(),
+          date: currentDate.valueOf(),
           value: h
         }
         currentDate.add(interval.value, interval.key)

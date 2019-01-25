@@ -26,6 +26,7 @@
 <script>
 import moment from 'moment'
 import { timeMinute, timeDay } from 'd3-time'
+import find from 'lodash.find'
 import EventBus from '~/plugins/eventBus.js'
 import Items from './Items.vue'
 
@@ -140,20 +141,28 @@ export default {
     },
 
     handleVisCursor(date) {
+      const updatedDate = moment(date)
       const rounded = this.getEveryTime(date)
-      console.log(date, rounded)
-      const find = this.data.find(d => {
-        // console.log(
-        //   this.period,
-        //   moment(date).format('DD/MM/YYYY, h:mma'),
-        //   moment(d.date).format('DD/MM/YYYY, h:mma'),
-        //   moment(rounded).format('DD/MM/YYYY, h:mma')
-        // )
-        return d.date === moment(rounded).valueOf()
+      const dataFound = this.data.find(d => {
+        const fDate = moment(d.date)
+        const rDate = moment(rounded)
+        if (this.period === 'Daily') {
+          fDate.hour(0)
+          fDate.minute(0)
+          fDate.second(0)
+
+          return fDate.valueOf() === rDate.valueOf()
+        } else {
+          return d.date === rDate.valueOf()
+        }
       })
+
       this.hoveredTemperature =
-        find && find[this.temperatureId] ? find[this.temperatureId].value : ''
-      this.hoveredObject = find || {}
+        dataFound && dataFound[this.temperatureId]
+          ? dataFound[this.temperatureId].value
+          : ''
+
+      this.hoveredObject = dataFound || {}
     },
 
     handleSourcesOrderUpdate(newSourceOrder) {

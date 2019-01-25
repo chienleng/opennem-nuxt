@@ -4,7 +4,7 @@ import { format } from 'd3-format'
 
 Vue.filter('formatDate', time => {
   const formatted = moment(time)
-    .utcOffset(600)
+    // .utcOffset(600)
     .format('DD/MM/YYYY, h:mma')
   return formatted === 'Invalid Date' ? '' : formatted
 })

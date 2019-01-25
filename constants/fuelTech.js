@@ -18,8 +18,8 @@ export const ROOFTOP_SOLAR = 'rooftop_solar'
 
 // Fuel tech default order
 export const DEFAULT_FUEL_TECH_ORDER = [
-  PUMPS,
   BATTERY_CHARGING,
+  PUMPS,
   EXPORTS,
   IMPORTS,
   BROWN_COAL,

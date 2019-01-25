@@ -1,7 +1,8 @@
 @import 'app/mixins';
-// @import 'app/reset';
+@import 'app/reset';
 @import 'app/breakpoints';
 @import 'app/colours';
+@import 'app/buttons';
 @import 'app/typography';
 @import 'app/forms';
 
@@ -12,7 +13,7 @@ $font-stack: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-se
 $primary-color: #333;
 
 body {
-  font: 100% $font-stack;
+  font: 13px $font-stack;
   color: $primary-color;
   background-color: var(--color-bg, white);
   padding: 0;
