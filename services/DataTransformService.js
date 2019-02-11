@@ -3,6 +3,7 @@ import sortBy from 'lodash.sortby'
 import { nest } from 'd3-collection'
 import { mean } from 'd3-array'
 import parseInterval from '~/plugins/intervalParser.js'
+import * as FUEL_TECHS from '~/constants/fuelTech.js'
 
 /**
  *
@@ -31,21 +32,24 @@ function transformData(data) {
           newObj[key] = {
             fuelTech: null,
             type: null,
-            value: null
+            value: null,
+            category: null
           }
         })
 
         newObj[id] = {
           fuelTech,
           type,
-          value: r.value
+          value: r.value,
+          category: FUEL_TECHS.FUEL_TECH_CATEGORY[fuelTech]
         }
         flatData.push(newObj)
       } else {
         findDate[id] = {
           fuelTech,
           type,
-          value: r.value
+          value: r.value,
+          category: FUEL_TECHS.FUEL_TECH_CATEGORY[fuelTech]
         }
       }
     })
@@ -117,7 +121,8 @@ function rollupTo30Mins(ids, data) {
         obj[id] = {
           fuelTech: a[0][id].fuelTech,
           type: a[0][id].type,
-          value: mean(a, d => d[id].value || 0)
+          value: mean(a, d => d[id].value || 0),
+          category: a[0][id].category
         }
       })
       return obj
@@ -136,7 +141,8 @@ function rollupTo30Mins(ids, data) {
       object[k] = {
         fuelTech: e.value[k].fuelTech,
         type: e.value[k].type,
-        value: e.value[k].value
+        value: e.value[k].value,
+        category: e.value[k].category
       }
     })
     return object
@@ -144,6 +150,7 @@ function rollupTo30Mins(ids, data) {
 }
 
 function findInterpolateSeriesTypes(data) {
+  // TODO: refactor this
   const temperatureItem = data.find(d => d.type === 'temperature')
   const priceItem = data.find(d => d.type === 'price')
   const rooftopSolarItem = data.find(d => d['fuel_tech'] === 'rooftop_solar')

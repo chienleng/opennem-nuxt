@@ -28,10 +28,10 @@ module.exports = {
   /*
   ** Global CSS
   */
-  css: ['@/assets/css/main.scss'],
+  css: ['@/assets/css/style.scss'],
 
   router: {
-    base: '/v2/'
+    base: '/'
   },
 
   /*

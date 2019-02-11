@@ -85,3 +85,4 @@ static/data/
 
 # 
 sw.*
+.DS_Store

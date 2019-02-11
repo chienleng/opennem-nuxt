@@ -9,6 +9,7 @@
 import AppNav from '~/components/Nav.vue'
 
 export default {
+  middleware: 'meta',
   components: {
     AppNav
   }

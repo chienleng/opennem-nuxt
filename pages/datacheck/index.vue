@@ -50,11 +50,11 @@
           :data="flattenData"
           :keys="[selectedId]"/>
         
-        <div style="width: 50%">
+        <!-- <div style="width: 50%">
           <LineVis 
             :data="flattenData"
             :keys="[selectedId]"/>
-        </div>
+        </div> -->
         
         <DataTable 
           :data="flattenData"
@@ -65,9 +65,12 @@
 </template>
 
 <script>
-import * as FUEL_TECHS from '~/constants/fuelTech.js'
+import moment from 'moment'
+import { timeMinute, timeDay } from 'd3-time'
 import uniq from 'lodash.uniq'
 import axios from 'axios'
+import EventBus from '~/plugins/eventBus.js'
+import * as FUEL_TECHS from '~/constants/fuelTech.js'
 import DataService from '~/services/DataService.js'
 import DataTransformService from '~/services/DataTransformService.js'
 import DataList from '~/components/DataList.vue'
@@ -131,7 +134,7 @@ export default {
       const find = this.data.find(d => d.id === id)
       if (find) {
         this.columns = DataTransformService.getColumns([find])
-        DataTransformService.flattenAndInterpolate([find]).then(res => {
+        DataTransformService.flattenAndInterpolate([find], '5min').then(res => {
           this.flattenData = res
         })
       }
@@ -154,6 +157,11 @@ export default {
     this.mounted = true
     this.fetchData(this.type, this.region, this.year)
     // this.$store.commit('nem', this.data)
+    EventBus.$on('vis.mousemove', this.handleVisCursor)
+  },
+
+  beforeDestroy() {
+    EventBus.$off('vis.mousemove')
   },
 
   methods: {
@@ -189,6 +197,11 @@ export default {
     },
     itemSelected(id) {
       this.selectedId = id
+    },
+
+    handleVisCursor(date) {
+      const rounded = timeMinute.every(5).round(date)
+      console.log(rounded)
     }
   }
 }

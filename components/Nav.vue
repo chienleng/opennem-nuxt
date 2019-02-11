@@ -3,7 +3,11 @@
     <nuxt-link to="/">Home</nuxt-link> |
     <nuxt-link to="/datacheck">Data Check</nuxt-link> |
     <nuxt-link to="/allregions">All Regions</nuxt-link> |
-    <nuxt-link to="/region">Region: SA</nuxt-link> |
+    <nuxt-link to="/nsw">Region: NSW</nuxt-link> |
+    <nuxt-link to="/qld">Region: QLD</nuxt-link> |
+    <nuxt-link to="/sa">Region: SA</nuxt-link> |
+    <nuxt-link to="/tas">Region: TAS</nuxt-link> |
+    <nuxt-link to="/vic">Region: VIC</nuxt-link> |
     <nuxt-link to="/dailyreport">Daily Report</nuxt-link>
   </nav>
 </template>

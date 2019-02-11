@@ -92,6 +92,7 @@ export default {
 
   data() {
     return {
+      updatedData: [],
       svgWidth: 0,
       svgHeight: 0,
       width: 0,
@@ -121,24 +122,24 @@ export default {
   },
 
   computed: {
-    updatedData() {
-      const updated = this.data.slice(0)
-      this.data.forEach((d, i) => {
-        let total = 0
-        let min = 0
-        this.fuelTechIds.forEach(k => {
-          if (d[k]) {
-            total += d[k].value || 0
-            if (d[k].value < 0) {
-              min += d[k].value || 0
-            }
-          }
-        })
-        updated[i]._totalFuelTech = total
-        updated[i]._min = min
-      })
-      return updated
-    },
+    // updatedData() {
+    //   const updated = this.data.slice(0)
+    //   this.data.forEach((d, i) => {
+    //     let total = 0
+    //     let min = 0
+    //     this.fuelTechIds.forEach(k => {
+    //       if (d[k]) {
+    //         total += d[k].value || 0
+    //         if (d[k].value < 0) {
+    //           min += d[k].value || 0
+    //         }
+    //       }
+    //     })
+    //     updated[i]._totalFuelTech = total
+    //     updated[i]._min = min
+    //   })
+    //   return updated
+    // },
     fuelTechIds() {
       return this.fuelTechs.map(d => d.id).reverse()
     },
@@ -157,7 +158,25 @@ export default {
   },
 
   watch: {
-    data() {
+    data(newData) {
+      const updated = newData.slice(0)
+      newData.forEach((d, i) => {
+        let total = 0
+        let min = 0
+        this.fuelTechIds.forEach(k => {
+          if (d[k]) {
+            total += d[k].value || 0
+            if (d[k].value < 0) {
+              min += d[k].value || 0
+            }
+          }
+        })
+        updated[i]._totalFuelTech = total
+        updated[i]._min = min
+      })
+      this.updatedData = updated
+
+      console.log(newData, updated)
       this.update()
     },
 

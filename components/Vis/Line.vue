@@ -39,6 +39,7 @@ import { line } from 'd3-shape'
 import { extent } from 'd3-array'
 import { format } from 'd3-format'
 import { select, mouse } from 'd3-selection'
+import { brushX } from 'd3-brush'
 import debounce from 'lodash.debounce'
 
 import * as CONFIG from './shared/config.js'
@@ -73,6 +74,7 @@ export default {
       xAxisGroup: null,
       yAxisGroup: null,
       line: null,
+      brush: null,
       hoverLayerClass: CONFIG.HOVER_LAYER_CLASS,
       cursorLineGroupClass: CONFIG.CURSOR_LINE_GROUP_CLASS
     }
@@ -146,9 +148,14 @@ export default {
       this.xAxisGroup = select(`#${this.id} .${this.xAxisClass}`)
       this.yAxisGroup = select(`#${this.id} .${this.yAxisClass}`)
 
+      this.brush = brushX().extent([[0, 0], [this.width, this.height]])
+
       this.line = line()
         .x(d => this.x(d.date))
         .y(d => this.y(d[this.testKey].value))
+
+      // Hover signals
+      setupSignals(this.id, this.height, this.x, this.brush)
     },
 
     update() {
@@ -163,8 +170,6 @@ export default {
 
       this.xAxisGroup.call(this.xAxis)
       this.yAxisGroup.call(this.yAxis)
-
-      setupSignals(this.id, this.height, this.x)
 
       g.append('path')
         .datum(this.data)

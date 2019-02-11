@@ -7,7 +7,7 @@
 
     <items
       :original-order="sourcesOrder"
-      :group="'ft'"
+      :group="'ft-order'"
       :point-summary="hoveredObject"
       :summary="summary"
       @update="handleSourcesOrderUpdate"
@@ -15,7 +15,7 @@
     <hr>
     <items
       :original-order="loadsOrder"
-      :group="'ft'"
+      :group="'ft-loads'"
       :point-summary="hoveredObject"
       :summary="summary"
       @update="handleLoadsOrderUpdate"

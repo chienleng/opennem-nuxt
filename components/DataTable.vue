@@ -13,6 +13,7 @@
       <template slot="tbody">
         <tr 
           v-for="(d, i) in data"
+          :data-time="d.date"
           :key="i">
           
           <td

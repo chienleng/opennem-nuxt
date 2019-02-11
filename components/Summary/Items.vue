@@ -2,7 +2,7 @@
   <draggable
     v-model="order"
     :options="{ 
-      group: 'fuelTech',
+      group: group,
       direction: 'horizontal',
       ghostClass: 'drag-placeholder',
       animation: 150

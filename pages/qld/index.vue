@@ -1,6 +1,8 @@
 <template>
   <section>    
-    <AppHeader />
+    <header>
+      Queensland
+    </header>
 
     <RangePeriodSelectors
       @range="handleRangeChange"
@@ -18,14 +20,12 @@
 </template>
 
 <script>
-import AppHeader from '~/components/Header.vue'
+import RegionPageMethods from '~/methods/regionPage.js'
 import RangePeriodSelectors from '~/components/RangePeriodSelectors.vue'
 import Generation from '~/components/Generation.vue'
-import RegionPageMethods from '~/methods/regionPage.js'
 
 export default {
   components: {
-    AppHeader,
     RangePeriodSelectors,
     Generation
   },
@@ -33,7 +33,7 @@ export default {
   data() {
     return {
       mounted: false,
-      region: 'nem',
+      region: 'qld1',
       type: '',
       range: '',
       period: '',
@@ -46,12 +46,6 @@ export default {
   },
 
   computed: {
-    fuelTechNames() {
-      return this.$store.getters.fuelTechNames
-    },
-    fuelTechGroup() {
-      return this.$store.getters.fuelTechGroup
-    },
     availableKeys() {
       return RegionPageMethods.computedAvailableKeys(
         this.$store.getters.fuelTechOrder,
@@ -70,7 +64,6 @@ export default {
     this.mounted = true
     this.range = this.$route.query.range || '7D'
     this.period = this.$route.query.period || '30min'
-    console.log(this.fuelTechNames, this.fuelTechGroup)
 
     this.fetchData(this.region, this.range)
   },
@@ -120,4 +113,27 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+header {
+  border-bottom: 1px solid #999;
+  background-color: #fff;
+  display: flex;
+  padding: 10px;
+
+  select {
+    padding: 10px;
+    margin: 0 5px;
+    display: inline-block;
+
+    option {
+      font-size: 13px;
+    }
+  }
+
+  .url {
+    margin-left: 10px;
+    padding-top: 2px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+}
 </style>
