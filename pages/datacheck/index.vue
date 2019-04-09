@@ -56,10 +56,15 @@
               Net: {{ summaryTotal | formatValue }}
             </th>
             <th class="has-text-right">
-              <!-- Gross: {{ marketValueGrossTotal / 1000 | formatCurrency }}<br> -->
-              Net: {{ marketValueNetTotal / 1000 | formatCurrency }}
+              Sum (positive loads market value): {{ marketValueGrossTotal / 1000 | formatCurrency }}<br>
+              Sum: {{ marketValueNetTotal / 1000 | formatCurrency }}
             </th>
-            <th class="has-text-right">{{ marketValueNetTotal / summaryTotal / 1000 | formatCurrency }}</th>
+            <th class="has-text-right">
+              {{ marketValueGrossTotal / 1000 | formatCurrency }} / {{ summaryTotal | formatValue }}:
+              {{ marketValueGrossTotal / summaryTotal / 1000 | formatCurrency }}<br>
+              {{ marketValueNetTotal / 1000 | formatCurrency }} / {{ summaryTotal | formatValue }}:
+              {{ marketValueNetTotal / summaryTotal / 1000 | formatCurrency }}
+            </th>
           </tr>
           <tr
             v-for="(key, i) in keys"
