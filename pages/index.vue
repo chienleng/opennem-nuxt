@@ -2,7 +2,7 @@
   <section class="container">
     <div>
       <logo/>
-      <h1 class="title">
+      <!-- <h1 class="title">
         OpenNEM
       </h1>
       <h2 class="subtitle">
@@ -13,7 +13,7 @@
           href="https://github.com/opennem"
           target="_blank"
           class="button--grey">GitHub</a>
-      </div>
+      </div> -->
     </div>
   </section>
 </template>

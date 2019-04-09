@@ -10,6 +10,11 @@ Vue.filter('formatDate', time => {
 })
 
 Vue.filter('formatValue', value => {
-  const f = format('.1f')
+  const f = format(',.1f')
+  return f(value)
+})
+
+Vue.filter('formatCurrency', value => {
+  const f = format('$,.2f')
   return f(value)
 })

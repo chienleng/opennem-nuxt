@@ -1,33 +1,59 @@
 <template>
-  <section>
-    <div 
-      v-for="(d) in nemData"
-      :key="d.id"
-      :class="{ 
-        'selected': d.id === selected
-      }"
-      class="item"
-      @click="handleItemClicked(d.id)">
-
-      <div class="item-title">
-        <!-- {{ d.id }} -->
-        {{ d.fuel_tech }} {{ d.type }}
-      </div>
-      
-      <!-- <div>
-        {{ d.region }} — {{ d.type }} — {{ d.units }} — {{ d.fuel_tech }}   
-      </div> -->
-
-      <!-- <div>
-        data history: <strong>{{ d.history.data.length }}</strong> points
-      </div>
-
-      <div>start: <strong>{{ d.history.start | formatDate }}</strong></div>
-      <div>last: <strong>{{ d.history.last | formatDate }}</strong></div>
-      <div>interval: <strong>{{ d.history.interval }}</strong></div> -->
-
+  <nav class="panel">
+    <p class="panel-heading has-background-dark has-text-white">
+      properties
+    </p>
+    <!-- <div class="panel-block">
+      <p class="control has-icons-left">
+        <input
+          class="input is-small"
+          type="text"
+          placeholder="search">
+        <span class="icon is-small is-left">
+          <i
+            class="fas fa-search"
+            aria-hidden="true" />
+        </span>
+      </p>
     </div>
-  </section>
+    <p class="panel-tabs">
+      <a class="is-active">all</a>
+      <a>public</a>
+      <a>private</a>
+      <a>sources</a>
+      <a>forks</a>
+    </p> -->
+    <div
+      :style="{
+        'max-height': `${height}px`
+      }"
+      class="panel-scrollbody"
+    >
+      <a
+        v-for="(d) in nemData"
+        :key="d.id"
+        :class="{ 
+          'is-active': d.id === selected
+        }"
+        class="panel-block"
+        @click="handleItemClicked(d.id)">
+        <strong>{{ d.fuel_tech }}</strong>: {{ d.type }}
+      </a>
+    </div>
+    
+    <!-- <label class="panel-block">
+      <input type="checkbox">
+      remember me
+    </label> -->
+    <div 
+      class="panel-block"
+      style="border-top: 1px solid #000;">
+      length: {{ nemDataLength }}
+      <!-- <button class="button is-link is-outlined is-fullwidth">
+        reset all filters
+      </button> -->
+    </div>
+  </nav>
 </template>
 
 <script>
@@ -43,6 +69,22 @@ export default {
     }
   },
 
+  data() {
+    return {
+      height: 0
+    }
+  },
+
+  computed: {
+    nemDataLength() {
+      return this.nemData.length
+    }
+  },
+
+  mounted() {
+    this.height = window.innerHeight - 150
+  },
+
   methods: {
     handleItemClicked(id) {
       this.$emit('selected', id)
@@ -52,27 +94,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-section {
-  margin-top: 10px;
-  border-top: 1px solid #000;
-  border-bottom: 1px solid #000;
-}
-.item {
-  font-size: 9px;
-  padding: 2px 4px;
-  border-bottom: 1px solid #ddd;
+.panel {
+  font-size: 80%;
+  padding: 1rem;
 
-  &.selected {
-    background-color: #ccc;
+  .panel-heading {
+    box-shadow: 0 2px 4px rgba(100, 100, 100, 0.1);
   }
 
-  &.invalid {
-    background-color: red;
-  }
-
-  .item-title {
-    font-size: 11px;
-    font-weight: bold;
+  .panel-scrollbody {
+    overflow-y: auto;
   }
 }
 </style>

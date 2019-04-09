@@ -64,6 +64,19 @@ function transformData(data) {
    */
   function parseHistory(id, fuelTech, type, history) {
     const historyData = history.data
+    console.log(type)
+    // const shouldReverseValue =
+    //   (fuelTech === 'pumps' ||
+    //     fuelTech === 'battery_charging' ||
+    //     fuelTech === 'imports' ||
+    //     fuelTech === 'exports') &&
+    //   type === 'energy'
+    const shouldReverseValue =
+      fuelTech === 'pumps' ||
+      fuelTech === 'battery_charging' ||
+      fuelTech === 'imports' ||
+      fuelTech === 'exports'
+
     // const offsetHrs = moment().utcOffset()
     // let historyDate = moment(history.start).utcOffset(offsetHrs)
     // const year = historyDate.year()
@@ -82,7 +95,7 @@ function transformData(data) {
       return hData.map(h => {
         const newObj = {
           date: currentDate.valueOf(),
-          value: h
+          value: shouldReverseValue ? -h : h
         }
         currentDate.add(interval.value, interval.key)
         return newObj
