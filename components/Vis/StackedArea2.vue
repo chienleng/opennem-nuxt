@@ -73,9 +73,14 @@ import axisTimeFormat from './shared/timeFormat.js'
 
 export default {
   props: {
-    data: {
-      type: Array,
-      default: () => []
+    visData: {
+      type: Object,
+      default: () => {
+        return {
+          domains: [],
+          data: []
+        }
+      }
     },
     guideData: {
       type: Array,
@@ -85,10 +90,6 @@ export default {
           end: '2019-01-21T06:00Z'
         }
       ]
-    },
-    domains: {
-      type: Array,
-      default: () => []
     },
     visHeight: {
       type: Number,
@@ -152,11 +153,14 @@ export default {
     //   })
     //   return updated
     // },
+    domains() {
+      return this.visData.domains
+    },
     domainIds() {
-      return this.domains.map(d => d.id).reverse()
+      return this.visData.domains.map(d => d.id).reverse()
     },
     domainColours() {
-      return this.domains.map(d => d.colour).reverse()
+      return this.visData.domains.map(d => d.colour).reverse()
     },
     id() {
       return `${CONFIG.CHART_STACKED_AREA}-${this._uid}`
@@ -170,7 +174,36 @@ export default {
   },
 
   watch: {
-    data(newData) {
+    // data(newData) {
+    //   const updated = newData.slice(0)
+    //   newData.forEach((d, i) => {
+    //     let total = 0
+    //     let min = 0
+    //     this.domainIds.forEach(k => {
+    //       if (d[k]) {
+    //         total += d[k].value || 0
+    //         if (d[k].value < 0) {
+    //           min += d[k].value || 0
+    //         }
+    //       }
+    //     })
+    //     updated[i]._totalFuelTech = total
+    //     updated[i]._min = min
+    //   })
+    //   this.updatedData = updated
+
+    //   console.log(newData, updated)
+    //   this.update()
+    // },
+
+    // domains() {
+    //   this.update()
+    // },
+
+    visData(updatedVisData) {
+      console.log(updatedVisData)
+
+      const newData = updatedVisData.data
       const updated = newData.slice(0)
       newData.forEach((d, i) => {
         let total = 0
@@ -187,12 +220,6 @@ export default {
         updated[i]._min = min
       })
       this.updatedData = updated
-
-      console.log(newData, updated)
-      this.update()
-    },
-
-    domains() {
       this.update()
     }
   },
@@ -209,6 +236,25 @@ export default {
 
     this.setupWidthHeight()
     this.setup()
+
+    const newData = this.visData.data
+    const updated = newData.slice(0)
+    newData.forEach((d, i) => {
+      let total = 0
+      let min = 0
+      this.domainIds.forEach(k => {
+        if (d[k]) {
+          total += d[k].value || 0
+          if (d[k].value < 0) {
+            min += d[k].value || 0
+          }
+        }
+      })
+      updated[i]._totalFuelTech = total
+      updated[i]._min = min
+    })
+    this.updatedData = updated
+    this.update()
   },
 
   beforeDestroy() {

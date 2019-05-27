@@ -5,13 +5,13 @@
       <div style="width: 60%" >
         <StackedAreaVis 
           :data="flattenData"
-          :fuel-techs="fuelTechs"
+          :domains="domains"
           :step="step"
           :vis-height="350"/>
       </div>
       
       <Summary
-        :fuel-techs="fuelTechs"
+        :fuel-techs="domains"
         :data="flattenData"
         :period="period"
         style="width: 40%" />
@@ -42,7 +42,7 @@ export default {
       type: String,
       default: () => ''
     },
-    fuelTechs: {
+    domains: {
       type: Array,
       default: () => []
     }

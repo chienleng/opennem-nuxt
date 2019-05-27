@@ -41,13 +41,14 @@ function setupSignals(id, height, x, brush) {
     select(`#${id} .${cursorLineGroupClass}`).attr('opacity', 0)
   }
 
-  hoverLayer.on('mousemove', function(d) {
+  hoverLayer.on('touchmove mousemove', function(d) {
     const m = mouse(this)
     const date = x.invert(m[0])
+    console.log(date)
     EventBus.$emit('vis.mousemove', date)
   })
 
-  hoverLayer.on('mouseover', d => {
+  hoverLayer.on('touchover mouseover', d => {
     EventBus.$emit('vis.mouseover')
   })
 

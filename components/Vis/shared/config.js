@@ -10,6 +10,7 @@ export const BRUSH_CLASS = 'brush'
 
 export const X_AXIS_CLASS = 'x-axis'
 export const Y_AXIS_CLASS = 'y-axis'
+export const Y_AXIS_TICK_CLASS = 'y-axis-tick'
 export const Y_AXIS_FORMAT_STRING = '~s'
 
 export const CHART_LINE = 'line'

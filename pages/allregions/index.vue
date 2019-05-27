@@ -7,13 +7,24 @@
       @period="handlePeriodChange"
     />
 
-    <Generation
+    <!-- <Generation
       v-if="mounted"
       :flatten-data="flattenData"
       :period="period"
       :type="type"
-      :fuel-techs="fuelTechs"
-    />  
+      :domains="fuelTechs"
+    />   -->
+
+    <div
+      v-if="mounted"
+      style="width: 100%;"
+    >
+      <StackedAreaVis 
+        :data="flattenData"
+        :domains="fuelTechs"
+        :step="false"
+        :vis-height="350" />
+    </div>
   </section>
 </template>
 
@@ -22,12 +33,14 @@ import AppHeader from '~/components/Header.vue'
 import RangePeriodSelectors from '~/components/RangePeriodSelectors.vue'
 import Generation from '~/components/Generation.vue'
 import RegionPageMethods from '~/methods/regionPage.js'
+import StackedAreaVis from '~/components/Vis/StackedArea.vue'
 
 export default {
   components: {
     AppHeader,
     RangePeriodSelectors,
-    Generation
+    Generation,
+    StackedAreaVis
   },
 
   data() {

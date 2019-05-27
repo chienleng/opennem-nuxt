@@ -14,7 +14,7 @@
       :flatten-data="flattenData"
       :period="period"
       :type="type"
-      :fuel-techs="fuelTechs"
+      :domains="fuelTechs"
     />  
   </section>
 </template>
