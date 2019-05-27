@@ -454,7 +454,7 @@ export default {
       this.stackedArea
         .enter()
         .append('path')
-        .attr('clip-path', 'url(#clip)')
+        // .attr('clip-path', 'url(#clip)')
         .attr('class', `${CONFIG.CHART_STACKED_AREA}`)
         .style('fill', d => this.z(d.key))
         .attr('d', this.area)
@@ -478,6 +478,7 @@ path.line {
 }
 .stacked-area {
   opacity: 0.9;
+  clip-path: url(#clip);
 }
 
 // axis
