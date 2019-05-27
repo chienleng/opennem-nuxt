@@ -1,4 +1,5 @@
 import { select, mouse } from 'd3-selection'
+import { timeMinute, timeDay } from 'd3-time'
 import EventBus from '~/plugins/eventBus.js'
 import * as CONFIG from './config.js'
 
@@ -24,8 +25,22 @@ function setupSignals(id, height, x, brush) {
     .attr('class', 'brush')
     .call(brush)
 
+  function getEveryTime(date) {
+    const period = '30min'
+    if (period === '30min') {
+      return timeMinute.every(30).round(date)
+    } else if (period === 'Daily') {
+      return timeDay.every(1).round(date)
+    }
+    // default 5 mins
+    return timeMinute.every(5).round(date)
+  }
+
   function onMouseMove(date) {
-    const m = x(date)
+    // const m = x(date)
+    const rounded = getEveryTime(date)
+    console.log(rounded, x(rounded))
+    const m = x(rounded)
     select(`#${id} .${cursorLineClass}`).attr('d', () => {
       let d = 'M' + m + ',' + height
       d += ' ' + m + ',' + 0
@@ -44,7 +59,6 @@ function setupSignals(id, height, x, brush) {
   hoverLayer.on('touchmove mousemove', function(d) {
     const m = mouse(this)
     const date = x.invert(m[0])
-    console.log(date)
     EventBus.$emit('vis.mousemove', date)
   })
 

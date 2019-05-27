@@ -71,11 +71,13 @@ function transformData(data) {
     //     fuelTech === 'imports' ||
     //     fuelTech === 'exports') &&
     //   type === 'energy'
-    const shouldReverseValue =
-      fuelTech === 'pumps' ||
-      fuelTech === 'battery_charging' ||
-      fuelTech === 'imports' ||
-      fuelTech === 'exports'
+    // const shouldReverseValue =
+    //   fuelTech === 'pumps' ||
+    //   fuelTech === 'battery_charging' ||
+    //   fuelTech === 'imports' ||
+    //   fuelTech === 'exports'
+
+    const shouldReverseValue = false
 
     // const offsetHrs = moment().utcOffset()
     // let historyDate = moment(history.start).utcOffset(offsetHrs)

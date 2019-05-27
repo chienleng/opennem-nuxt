@@ -310,7 +310,7 @@ export default {
 
       const hoverLayer = select(`#${this.id} .${CONFIG.HOVER_LAYER_CLASS}`)
       // get the dates based on x value
-      console.log(s.map(this.x.invert, this.x))
+      console.log(s, s.map(this.x.invert, this.x))
       // this.x.domain(s.map(this.x.invert, this.x))
       this.x.domain([this.x.invert(s[0]), this.x.invert(s[1])])
       select('.brush').call(this.brush.move, null)
@@ -323,15 +323,15 @@ export default {
         .transition(transition)
         .attr('d', this.area)
 
-      const start = this.updatedData[100].date
-      const end = this.updatedData[200].date
-      this.guideGroup
-        .selectAll('.guide')
-        .attr('x', d => this.x(start))
-        .attr('y', 0)
-        .attr('width', this.x(end) - this.x(start))
-        .attr('height', this.height)
-        .attr('fill', '#ddd')
+      // const start = this.updatedData[100].date
+      // const end = this.updatedData[200].date
+      // this.guideGroup
+      //   .selectAll('.guide')
+      //   .attr('x', d => this.x(start))
+      //   .attr('y', 0)
+      //   .attr('width', this.x(end) - this.x(start))
+      //   .attr('height', this.height)
+      //   .attr('fill', '#ddd')
     },
 
     setup() {
