@@ -1,7 +1,9 @@
 <template>
   <nav>
     <nuxt-link to="/">Home</nuxt-link> |
+    <nuxt-link to="/energy/all">All Energy</nuxt-link> |
     <nuxt-link to="/datacheck">Data Check</nuxt-link> |
+    <nuxt-link to="/vis">Vis</nuxt-link> |
     <nuxt-link to="/allregions">All Regions</nuxt-link> |
     <nuxt-link to="/nsw">Region: NSW</nuxt-link> |
     <nuxt-link to="/qld">Region: QLD</nuxt-link> |
@@ -18,10 +20,6 @@ nav {
   text-align: left;
   padding: 0.3rem;
   color: #999;
-  // position: fixed;
-  // top: 0;
-  // left: 0;
-  // right: 0;
 
   a {
     color: #999;

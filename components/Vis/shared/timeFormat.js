@@ -13,13 +13,14 @@ import {
 const formatMillisecond = timeFormat('.%L'),
   formatSecond = timeFormat(':%S'),
   formatMinute = timeFormat('%I:%M'),
-  formatHour = timeFormat('%I %p'),
-  formatDay = timeFormat('%a\n%d'),
+  formatHour = timeFormat('%H:%M'),
+  formatDay = timeFormat('%a %d %b'),
   formatWeek = timeFormat('%b %d'),
   formatMonth = timeFormat('%B'),
   formatYear = timeFormat('%Y')
 
 export default function(d) {
+  // TODO: check if moment is needed here
   const date = moment(d)
     .utcOffset(600)
     .toDate()

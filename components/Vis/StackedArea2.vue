@@ -1,6 +1,6 @@
 <template>
-  <div class="vis">
-    <button @click="handleChartReset">reset</button>
+  <div class="vis stacked-area-vis">
+    <button @click="handleReset">reset</button>
     <svg
       :width="svgWidth"
       :height="svgHeight"
@@ -24,12 +24,29 @@
           :transform="xAxisTransform" 
           :class="xAxisClass" />
         <g :class="yAxisClass" />
+        
+        <g 
+          :transform="xAxisBrushTransform" 
+          class="x-axis-brush-group" />
       </g>
 
       <g 
-        :transform="gTransform"
-        class="stacked-area-group" />
+        :transform="gTransform">
+        <g :class="hoverLayerClass">
+          <rect
+            :width="width"
+            :height="height"/>
+        </g>
+        <g class="stacked-area-group" />
+      </g>
 
+      <!-- <g
+        :transform="gTransform"
+        :class="hoverLayerClass">
+        <rect
+          :width="width"
+          :height="height"/>
+      </g> -->
       <g 
         :transform="gTransform"
         class="axis-text-group">
@@ -40,39 +57,31 @@
         :transform="gTransform"
         class="cursor-group">
         <g :class="cursorLineGroupClass" />
-      </g>
-
-      <g
-        :transform="gTransform"
-        :class="hoverLayerClass">
-        <rect
-          :width="width"
-          :height="height"/>
-      </g>
+      </g>    
     </svg>
   </div>
 </template>
 
 <script>
-import { scaleOrdinal, scaleLinear, scaleTime, scaleUtc } from 'd3-scale'
+import { scaleOrdinal, scaleLinear, scaleTime } from 'd3-scale'
 import { axisBottom, axisRight } from 'd3-axis'
 import { area, stack, curveStep, curveLinear } from 'd3-shape'
 import { extent, min, max } from 'd3-array'
 import { format } from 'd3-format'
-import { timeFormat } from 'd3-time-format'
-import { select, mouse, event } from 'd3-selection'
+import { select, selectAll, mouse, event } from 'd3-selection'
 import { schemeCategory10 } from 'd3-scale-chromatic'
 import { brushX } from 'd3-brush'
 import { timeDay } from 'd3-time'
 import debounce from 'lodash.debounce'
-import moment from 'moment'
 
+import EventBus from '~/plugins/eventBus.js'
 import * as CONFIG from './shared/config.js'
 import { setupSignals, destroySignals } from './shared/signals.js'
 import axisTimeFormat from './shared/timeFormat.js'
 
 export default {
   props: {
+    // stacked area data, requires domains.colour, domain.id and data
     visData: {
       type: Object,
       default: () => {
@@ -82,6 +91,7 @@ export default {
         }
       }
     },
+    // TODO: guide data
     guideData: {
       type: Array,
       default: () => [
@@ -91,10 +101,12 @@ export default {
         }
       ]
     },
+    // OPTIONAL: height for the chart
     visHeight: {
       type: Number,
       default: () => CONFIG.DEFAULT_SVG_HEIGHT
     },
+    // OPTIONAL: whether it is a step curve
     step: {
       type: Boolean,
       default: () => false
@@ -121,6 +133,7 @@ export default {
       yAxisTickClass: CONFIG.Y_AXIS_TICK_CLASS,
       guideGroupClass: 'guide-group',
       xAxisGroup: null,
+      xAxisBrushGroup: null,
       yAxisGroup: null,
       yAxisTickGroup: null,
       guideGroup: null,
@@ -135,32 +148,14 @@ export default {
   },
 
   computed: {
-    // updatedData() {
-    //   const updated = this.data.slice(0)
-    //   this.data.forEach((d, i) => {
-    //     let total = 0
-    //     let min = 0
-    //     this.domainIds.forEach(k => {
-    //       if (d[k]) {
-    //         total += d[k].value || 0
-    //         if (d[k].value < 0) {
-    //           min += d[k].value || 0
-    //         }
-    //       }
-    //     })
-    //     updated[i]._totalFuelTech = total
-    //     updated[i]._min = min
-    //   })
-    //   return updated
-    // },
     domains() {
       return this.visData.domains
     },
     domainIds() {
-      return this.visData.domains.map(d => d.id).reverse()
+      return this.domains.map(d => d.id).reverse()
     },
     domainColours() {
-      return this.visData.domains.map(d => d.colour).reverse()
+      return this.domains.map(d => d.colour).reverse()
     },
     id() {
       return `${CONFIG.CHART_STACKED_AREA}-${this._uid}`
@@ -170,39 +165,14 @@ export default {
     },
     xAxisTransform() {
       return `translate(0, ${this.height})`
+    },
+    xAxisBrushTransform() {
+      return `translate(0, ${this.height})`
     }
   },
 
   watch: {
-    // data(newData) {
-    //   const updated = newData.slice(0)
-    //   newData.forEach((d, i) => {
-    //     let total = 0
-    //     let min = 0
-    //     this.domainIds.forEach(k => {
-    //       if (d[k]) {
-    //         total += d[k].value || 0
-    //         if (d[k].value < 0) {
-    //           min += d[k].value || 0
-    //         }
-    //       }
-    //     })
-    //     updated[i]._totalFuelTech = total
-    //     updated[i]._min = min
-    //   })
-    //   this.updatedData = updated
-
-    //   console.log(newData, updated)
-    //   this.update()
-    // },
-
-    // domains() {
-    //   this.update()
-    // },
-
     visData(updatedVisData) {
-      console.log(updatedVisData)
-
       const newData = updatedVisData.data
       const updated = newData.slice(0)
       newData.forEach((d, i) => {
@@ -216,7 +186,7 @@ export default {
             }
           }
         })
-        updated[i]._totalFuelTech = total
+        updated[i]._total = total
         updated[i]._min = min
       })
       this.updatedData = updated
@@ -250,7 +220,7 @@ export default {
           }
         }
       })
-      updated[i]._totalFuelTech = total
+      updated[i]._total = total
       updated[i]._min = min
     })
     this.updatedData = updated
@@ -280,7 +250,7 @@ export default {
       this.height = this.svgHeight - this.margin.top - this.margin.bottom
     },
 
-    handleChartReset() {
+    handleReset() {
       const g = select(`#${this.id} .${CONFIG.CHART_STACKED_AREA}-group`)
       const transition = g.transition().duration(250)
 
@@ -291,15 +261,15 @@ export default {
         .transition(transition)
         .attr('d', this.area)
 
-      const start = this.updatedData[100].date
-      const end = this.updatedData[200].date
-      this.guideGroup
-        .selectAll('.guide')
-        .attr('x', d => this.x(start))
-        .attr('y', 0)
-        .attr('width', this.x(end) - this.x(start))
-        .attr('height', this.height)
-        .attr('fill', '#ddd')
+      // const start = this.updatedData[100].date
+      // const end = this.updatedData[200].date
+      // this.guideGroup
+      //   .selectAll('.guide')
+      //   .attr('x', d => this.x(start))
+      //   .attr('y', 0)
+      //   .attr('width', this.x(end) - this.x(start))
+      //   .attr('height', this.height)
+      //   .attr('fill', '#ddd')
     },
 
     brushEnded(d) {
@@ -313,7 +283,7 @@ export default {
       console.log(s, s.map(this.x.invert, this.x))
       // this.x.domain(s.map(this.x.invert, this.x))
       this.x.domain([this.x.invert(s[0]), this.x.invert(s[1])])
-      select('.brush').call(this.brush.move, null)
+      selectAll('.brush').call(this.brush.move, null)
       // this.x.domain([s[0][0], s[1][0]].map(this.x.invert, this.x))
 
       const g = select(`#${this.id} .${CONFIG.CHART_STACKED_AREA}-group`)
@@ -340,30 +310,16 @@ export default {
       this.z = scaleOrdinal()
 
       this.xAxis = axisBottom(this.x)
-        .tickSize(-this.height)
+        .tickSize(-this.height + 10)
         .tickFormat(d => axisTimeFormat(d))
-      // this.xAxis = axisBottom(this.x)
-      //   .ticks(5)
-      //   .tickFormat(d => {
-      //     return moment(d)
-      //       .utcOffset(600)
-      //       .format('DD/MM/YY h:mma')
-      //   })
 
-      // this.xAxis = axisBottom(this.x)
-      //   .ticks(timeDay.every(1))
-      //   .tickFormat(d =>
-      //     moment
-      //       .utc(d)
-      //       .utcOffset(600)
-      //       .format('DD/MM/YY h:mma')
-      //   )
       this.yAxis = axisRight(this.y)
         .tickSize(this.width)
         .tickArguments([5])
         .tickFormat(d => format(CONFIG.Y_AXIS_FORMAT_STRING)(d))
 
       this.xAxisGroup = select(`#${this.id} .${this.xAxisClass}`)
+      this.xAxisBrushGroup = select(`#${this.id} .x-axis-brush-group`)
       this.yAxisGroup = select(`#${this.id} .${this.yAxisClass}`)
       this.yAxisTickGroup = select(`#${this.id} .${this.yAxisTickClass}`)
       this.guideGroup = select(`#${this.id} .${this.guideGroupClass}`)
@@ -379,7 +335,7 @@ export default {
         .y1(d => this.y(d[1]))
 
       // Hover signals
-      setupSignals(this.id, this.height, this.x, this.brush)
+      // setupSignals(this.id, this.height, this.x, this.brush)
     },
 
     update() {
@@ -396,7 +352,7 @@ export default {
       this.y
         .domain([
           min(this.updatedData, d => d._min),
-          max(this.updatedData, d => d._totalFuelTech)
+          max(this.updatedData, d => d._total)
         ])
         .nice()
       this.z.range(this.domainColours).domain(this.domainIds)
@@ -412,6 +368,10 @@ export default {
       }
 
       const xAxis = this.xAxis
+      // update ticks
+      // xAxis.ticks(timeDay.every(1))
+      xAxis.ticks(5)
+
       this.xAxisGroup.call(customXAxis)
       function customXAxis(g) {
         g.call(xAxis)
@@ -425,25 +385,6 @@ export default {
         this.area.curve(curveLinear)
       }
 
-      // const dd = this.updatedData[100] ? this.updatedData[100].date : null
-      // if (dd) {
-      //   console.log(this.x(this.updatedData[100].date))
-      //   const start = this.updatedData[100].date
-      //   const end = this.updatedData[200].date
-      //   this.guides = this.guideGroup
-      //     .selectAll('.guide')
-      //     .data(this.guideData)
-      //     .enter()
-      //     .append('rect')
-      //     .attr('class', 'guide')
-      //     .attr('clip-path', 'url(#clip)')
-      //     .attr('x', d => this.x(start))
-      //     .attr('y', 0)
-      //     .attr('width', this.x(end) - this.x(start))
-      //     .attr('height', this.height)
-      //     .attr('fill', '#ddd')
-      // }
-
       this.stack
         .keys(this.domainIds)
         .value((d, key) => (d[key] ? d[key].value : 0))
@@ -451,13 +392,52 @@ export default {
         .selectAll(`.${CONFIG.CHART_STACKED_AREA}`)
         .data(this.stack(this.updatedData))
 
+      // stacked area clip path is defined in CSS (for safari fix)
+      const x = this.x
       this.stackedArea
         .enter()
         .append('path')
-        // .attr('clip-path', 'url(#clip)')
+        .attr('id', d => d.key)
         .attr('class', `${CONFIG.CHART_STACKED_AREA}`)
-        .style('fill', d => this.z(d.key))
         .attr('d', this.area)
+        .style('fill', d => this.z(d.key))
+        .on('touchmove mousemove', function(d, index) {
+          console.log(d.key)
+          const m = mouse(this)
+          const date = x.invert(m[0])
+          EventBus.$emit('vis.techover', d.key)
+          EventBus.$emit('vis.mousemove', date)
+        })
+
+      this.xAxisBrushGroup
+        .append('g')
+        .attr('class', 'brush')
+        .on('touchmove mousemove', function() {
+          const m = mouse(this)
+          const date = x.invert(m[0])
+          EventBus.$emit('vis.mousemove', date)
+        })
+        .call(this.brush)
+
+      this.brush.on('brush', function(d) {
+        const m = mouse(this)
+        const date = x.invert(m[0])
+
+        EventBus.$emit('vis.mousemove', date)
+      })
+      // .attr('pointer-events', 'visibleStroke')
+      // .on('mouseover', function(d) {
+      //   select(this)
+      //     .style('fill', select(this).attr('stroke'))
+      //     .attr('fill-opacity', 0.3)
+      // })
+      // .on('mouseout', function(d) {
+      //   select(this)
+      //     .style('fill', 'none')
+      //     .attr('fill-opacity', 1)
+      // })
+
+      setupSignals(this.id, this.height, this.x, this.brush)
     }
   }
 }

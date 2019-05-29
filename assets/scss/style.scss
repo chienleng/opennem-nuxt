@@ -1,40 +1,33 @@
 @charset "utf-8";
 
-// Import a Google Font
+// Import Google Fonts
 @import url('https://fonts.googleapis.com/css?family=IBM+Plex+Serif:300,400,600');
 @import url('https://fonts.googleapis.com/css?family=Playfair+Display:400,700');
 
-// $font-stack: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
-$font-stack: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Helvetica', Arial, sans-serif;
-
 // Set your brand colors
-$purple: #8A4D76;
-$pink: #FA7C91;
-$brown: #757763;
 $beige-light: #D0D1CD;
 $beige-lighter: #ece9e6;
 $opennem-primary: #e34a33;
 
 // Update Bulma's global variables
-// $family-serif: 'IBM Plex Serif', Georgia, 'Times New Roman', Times, serif;
-// $header-font-family: 'Playfair Display', Georgia, 'Times New Roman', Times, serif;
+$font-stack: 'IBM Plex Serif', Georgia, 'Times New Roman', Times, serif;
+$font-stack-2: 'Playfair Display', Georgia, 'Times New Roman', Times, serif;
 $family-serif: $font-stack;
-$header-font-family: $font-stack;
 $family-primary: $family-serif;
-$grey-dark: $brown;
-$grey-light: $beige-light;
+$header-font-family: $font-stack-2;
+
+// $grey-dark: $brown;
+// $grey-light: $beige-light;
 $primary: $opennem-primary;
 $link: $opennem-primary;
 $widescreen-enabled: false;
 $fullhd-enabled: false;
-$body-size: 12px;
+$body-size: 14px;
 
 // Update some of Bulma's component variables
-// $body-background-color: $beige-lighter;
-$body-background-color: #F7F7F7;
+$body-background-color: $beige-lighter;
 $control-border-width: 1px;
 $input-shadow: none;
-
 $border-style: 1px dotted #cdcdcd;
 
 // Import only what you need from Bulma
