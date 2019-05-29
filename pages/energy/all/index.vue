@@ -1,8 +1,14 @@
 <template>
-  <section>    
-    <AppHeader />
+  <section>
 
-    <RangePeriodSelectors
+    <data-options-bar />
+
+    <div class="vis-table-container">
+      <div class="vis-container">1</div>
+      <div class="table-container">2</div>
+    </div>
+    
+    <!-- <RangePeriodSelectors
       @range="handleRangeChange"
       @period="handlePeriodChange"
     />
@@ -17,26 +23,22 @@
         :vis-data="visData"
         :step="false"
         :vis-height="350" />
-
-      <stacked-area-vis
-        v-if="hasData"
-        :vis-data="visData"
-        :step="false"
-        :vis-height="350" />
-    </div>
+    </div> -->
   </section>
 </template>
 
 <script>
-import AppHeader from '~/components/Header.vue'
 import RangePeriodSelectors from '~/components/RangePeriodSelectors.vue'
+import DataOptionsBar from '~/components/energy/DataOptionsBar'
 import Generation from '~/components/Generation.vue'
 import RegionPageMethods from '~/methods/regionPage.js'
 import StackedAreaVis from '~/components/Vis/StackedArea2.vue'
 
 export default {
+  layout: 'main',
+
   components: {
-    AppHeader,
+    DataOptionsBar,
     RangePeriodSelectors,
     Generation,
     StackedAreaVis
@@ -140,4 +142,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.vis-table-container {
+  display: flex;
+  align-items: stretch;
+
+  .vis-container {
+    width: 100%;
+    background: grey;
+  }
+  .table-container {
+    width: 400px;
+    height: 700px;
+    background: lightgrey;
+  }
+}
 </style>

@@ -1,19 +1,20 @@
 <template>
   <header>
     <div class="header-dropdowns">
-      <Logo class="header-logo" />
-      <h1>All Regions</h1>
-      <h2>Energy</h2>
+      <logo class="header-logo" />
+      <h1>Energy</h1>
+      <h2>All Regions</h2>
     </div>
 
-    <div class="header-buttons">
-      <a class="button">Share</a><a class="button">Get Data</a>
+    <div class="buttons has-addons">
+      <span class="button is-rounded">Image</span>
+      <span class="button is-rounded">Data</span>
     </div>
   </header>
 </template>
 
 <script>
-import Logo from '~/components/Logo.vue'
+import Logo from '~/components/ui/Logo'
 
 export default {
   components: {
@@ -23,12 +24,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$header-font-family: 'Playfair Display', Georgia, 'Times New Roman', Times,
-  serif;
-$right-pad: 1rem;
-$right-margin: 1rem;
-$border-style: 1px dotted #cdcdcd;
-$header-bg: hsla(30, 14%, 91%, 0.9);
+@import '~/assets/scss/variables.scss';
 
 header {
   color: #000;
@@ -36,31 +32,28 @@ header {
   align-items: center;
   justify-content: space-between;
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
-  background-color: $header-bg;
-  position: sticky;
-  top: 0;
-  z-index: 999;
+  padding: $app-padding / 2;
 
   h1 {
     font-family: $header-font-family;
     font-size: 1.6rem;
     font-weight: bold;
-    margin-right: $right-margin;
-    padding-right: $right-pad;
+    margin-right: $app-padding;
+    padding-right: $app-padding;
     border-right: $border-style;
   }
   h2 {
     font-family: $header-font-family;
     font-size: 1.6rem;
     font-weight: bold;
-    margin-right: $right-margin;
-    padding-right: $right-pad;
+    margin-right: $app-padding;
+    padding-right: $app-padding;
     border-right: $border-style;
   }
 
   .header-logo {
     width: 2.2rem;
-    margin: 0.2rem $right-margin;
+    margin: 0.2rem $app-padding / 2;
     position: relative;
     top: 3px;
   }

@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import Logo from '~/components/Logo.vue'
+import Logo from '~/components/ui/Logo'
 
 export default {
   layout: 'default',

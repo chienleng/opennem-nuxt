@@ -1,0 +1,23 @@
+@charset "utf-8";
+
+// Import Google Fonts
+@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Serif:300,400,600');
+@import url('https://fonts.googleapis.com/css?family=Playfair+Display:400,700');
+
+// Define app variables
+@import "./variables.scss";
+
+// Import only what you need from Bulma
+@import "../../node_modules/bulma/sass/utilities/_all.sass";
+@import "../../node_modules/bulma/sass/base/_all.sass";
+@import "../../node_modules/bulma/sass/elements/_all.sass";
+@import "../../node_modules/bulma/sass/components/navbar.sass";
+@import "../../node_modules/bulma/sass/components/panel.sass";
+@import "../../node_modules/bulma/sass/components/message.sass";
+@import "../../node_modules/bulma/sass/layout/hero.sass";
+@import "../../node_modules/bulma/sass/layout/section.sass";
+
+// Import application styles
+@import "./vue-transitions.scss";
+@import "./header.scss";
+@import "./buttons.scss";

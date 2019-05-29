@@ -28,7 +28,6 @@
 </template>
 
 <script>
-import AppHeader from '~/components/Header.vue'
 import RangePeriodSelectors from '~/components/RangePeriodSelectors.vue'
 import Generation from '~/components/Generation.vue'
 import RegionPageMethods from '~/methods/regionPage.js'
@@ -36,7 +35,6 @@ import StackedAreaVis from '~/components/Vis/StackedArea2.vue'
 
 export default {
   components: {
-    AppHeader,
     RangePeriodSelectors,
     Generation,
     StackedAreaVis

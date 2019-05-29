@@ -23,12 +23,12 @@ module.exports = {
   /*
   ** Customize the progress-bar color
   */
-  loading: { color: '#000' },
+  loading: { color: '#e34a33' },
 
   /*
   ** Global CSS
   */
-  css: ['@/assets/scss/style.scss'],
+  css: ['@/assets/scss/app.scss'],
 
   router: {
     base: '/'

@@ -1,0 +1,7 @@
+.buttons {
+  &:not(:last-child),
+  &:last-child,
+  .button {
+    margin-bottom: 0;
+  }
+}
