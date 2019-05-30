@@ -10,12 +10,13 @@
 
 footer {
   background: yellow;
-  width: 100%;
   padding: $app-padding / 4 $app-padding;
 
   @include tablet {
     position: fixed;
     bottom: 0;
+    left: 0;
+    right: 0;
   }
 }
 </style>

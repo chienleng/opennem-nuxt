@@ -7,7 +7,8 @@ $opennem-primary: #e34a33;
 $font-stack: 'IBM Plex Serif', Georgia, 'Times New Roman', Times, serif;
 $font-stack-2: 'Playfair Display', Georgia, 'Times New Roman', Times, serif;
 $family-serif: $font-stack;
-$family-primary: $family-serif;
+$family-primary: $font-stack;
+$family-secondary: $font-stack-2;
 $header-font-family: $font-stack-2;
 
 // $grey-dark: $brown;

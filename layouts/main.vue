@@ -21,9 +21,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss">
-.container-fluid {
-  margin-bottom: 2rem;
-}
-</style>

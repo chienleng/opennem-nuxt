@@ -1,0 +1,56 @@
+path.line {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1;
+}
+.cursor-line {
+  stroke: red;
+  stroke-width: 1px;
+}
+.hover-layer {
+  fill: transparent;
+}
+.stacked-area-path {
+  opacity: 0.9;
+  // where #clip is being defined
+  clip-path: url(#clip);
+}
+
+// axis
+.domain {
+  stroke: none;
+}
+.axis-line-group {
+  .x-axis .tick text {
+    text-anchor: start;
+  }
+  .x-axis .tick line {
+    stroke-dasharray: 3.8;
+    stroke: rgba(0, 0, 0, 0.2);
+  }
+  .y-axis .tick:not(:first-of-type) line {
+    stroke-dasharray: 3.8;
+    stroke: rgba(0, 0, 0, 0.2);
+  }
+}
+.x-axis-tick .tick line {
+  stroke: none;
+}
+.y-axis-tick .tick:not(:first-of-type) line {
+  stroke: none;
+}
+
+// disable text selection in axis tick marks
+.tick {
+  text {
+    cursor: default;
+    pointer-events: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    &::selection {
+      background: none;
+    }
+  }
+}

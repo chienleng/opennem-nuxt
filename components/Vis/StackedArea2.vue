@@ -1,6 +1,11 @@
 <template>
   <div class="vis stacked-area-vis">
-    <button @click="handleReset">reset</button>
+    <button
+      class="reset-btn"
+      @click="handleReset"
+    >
+      reset
+    </button>
     <svg
       :width="svgWidth"
       :height="svgHeight"
@@ -87,7 +92,7 @@ export default {
       default: () => {
         return {
           domains: [],
-          data: []
+          dataset: []
         }
       }
     },
@@ -115,7 +120,7 @@ export default {
 
   data() {
     return {
-      updatedData: [],
+      dataset: [],
       svgWidth: 0,
       svgHeight: 0,
       width: 0,
@@ -128,20 +133,22 @@ export default {
       guides: null,
       xAxis: null,
       yAxis: null,
-      xAxisClass: CONFIG.X_AXIS_CLASS,
-      yAxisClass: CONFIG.Y_AXIS_CLASS,
-      yAxisTickClass: CONFIG.Y_AXIS_TICK_CLASS,
-      guideGroupClass: 'guide-group',
-      xAxisGroup: null,
-      xAxisBrushGroup: null,
-      yAxisGroup: null,
-      yAxisTickGroup: null,
-      guideGroup: null,
       area: null,
-      stackedArea: null,
       colours: schemeCategory10,
       stack: null,
       brush: null,
+      $xAxisGroup: null,
+      $xAxisBrushGroup: null,
+      $yAxisGroup: null,
+      $yAxisTickGroup: null,
+      // guideGroup: null,
+      $stackedAreaGroup: null,
+      // guideGroupClass: 'guide-group',
+      xAxisClass: CONFIG.X_AXIS_CLASS,
+      yAxisClass: CONFIG.Y_AXIS_CLASS,
+      yAxisTickClass: CONFIG.Y_AXIS_TICK_CLASS,
+      stackedAreaPathClass: CONFIG.CHART_STACKED_AREA_PATH_CLASS,
+      stackedAreaGroupClass: CONFIG.CHART_STACKED_AREA_GROUP_CLASS,
       hoverLayerClass: CONFIG.HOVER_LAYER_CLASS,
       cursorLineGroupClass: CONFIG.CURSOR_LINE_GROUP_CLASS
     }
@@ -158,7 +165,7 @@ export default {
       return this.domains.map(d => d.colour).reverse()
     },
     id() {
-      return `${CONFIG.CHART_STACKED_AREA}-${this._uid}`
+      return `stacked-area-${this._uid}`
     },
     gTransform() {
       return `translate(${this.margin.left},${this.margin.top})`
@@ -172,24 +179,8 @@ export default {
   },
 
   watch: {
-    visData(updatedVisData) {
-      const newData = updatedVisData.data
-      const updated = newData.slice(0)
-      newData.forEach((d, i) => {
-        let total = 0
-        let min = 0
-        this.domainIds.forEach(k => {
-          if (d[k]) {
-            total += d[k].value || 0
-            if (d[k].value < 0) {
-              min += d[k].value || 0
-            }
-          }
-        })
-        updated[i]._total = total
-        updated[i]._min = min
-      })
-      this.updatedData = updated
+    visData(updated) {
+      this.dataset = this.calculateTotalMin(updated.dataset)
       this.update()
     }
   },
@@ -207,23 +198,7 @@ export default {
     this.setupWidthHeight()
     this.setup()
 
-    const newData = this.visData.data
-    const updated = newData.slice(0)
-    newData.forEach((d, i) => {
-      let total = 0
-      let min = 0
-      this.domainIds.forEach(k => {
-        if (d[k]) {
-          total += d[k].value || 0
-          if (d[k].value < 0) {
-            min += d[k].value || 0
-          }
-        }
-      })
-      updated[i]._total = total
-      updated[i]._min = min
-    })
-    this.updatedData = updated
+    this.dataset = this.calculateTotalMin(this.visData.dataset)
     this.update()
   },
 
@@ -233,16 +208,6 @@ export default {
   },
 
   methods: {
-    handleResize() {
-      this.redraw()
-    },
-
-    redraw() {
-      this.setupWidthHeight()
-      this.setup()
-      this.update()
-    },
-
     setupWidthHeight() {
       const chartWidth = this.$el.offsetWidth
       this.svgWidth = chartWidth
@@ -250,19 +215,163 @@ export default {
       this.height = this.svgHeight - this.margin.top - this.margin.bottom
     },
 
+    setup() {
+      // Define x, y, z scale types
+      this.x = scaleTime().range([0, this.width])
+      this.y = scaleLinear().range([this.height, 0])
+      this.z = scaleOrdinal()
+
+      // Set up where x, y axis appears
+      this.xAxis = axisBottom(this.x)
+        .tickSize(-this.height + 10)
+        .tickFormat(d => axisTimeFormat(d))
+      this.yAxis = axisRight(this.y)
+        .tickSize(this.width)
+        .tickArguments([5])
+        .tickFormat(d => format(CONFIG.Y_AXIS_FORMAT_STRING)(d))
+
+      // Select the svg groups for this vis instance
+      this.$xAxisGroup = select(`#${this.id} .${this.xAxisClass}`)
+      this.$xAxisBrushGroup = select(`#${this.id} .x-axis-brush-group`)
+      this.$yAxisGroup = select(`#${this.id} .${this.yAxisClass}`)
+      this.$yAxisTickGroup = select(`#${this.id} .${this.yAxisTickClass}`)
+      // this.guideGroup = select(`#${this.id} .${this.guideGroupClass}`)
+
+      // Setup the 'brush' area and event handler
+      this.brush = brushX()
+        .extent([[0, 0], [this.width, 40]])
+        .on('end', this.brushEnded)
+
+      // This is a stacked area
+      this.stack = stack()
+
+      // Define the area's x value and y0,y1 values
+      this.area = area()
+        .x(d => this.x(d.data.date))
+        .y0(d => this.y(d[0]))
+        .y1(d => this.y(d[1]))
+
+      // Signals
+      setupSignals(this.id, this.height, this.x, this.brush)
+    },
+
+    update() {
+      const self = this
+      this.$stackedAreaGroup = select(
+        `#${this.id} .${this.stackedAreaGroupClass}`
+      )
+
+      // Remove previous stacked area
+      this.$stackedAreaGroup.selectAll(`.${this.stackedAreaPathClass}`).remove()
+      this.$stackedAreaGroup.selectAll('.guide').remove()
+
+      this.x.domain(extent(this.dataset, d => d.date))
+      this.y
+        .domain([
+          min(this.dataset, d => d._min),
+          max(this.dataset, d => d._total)
+        ])
+        .nice()
+      this.z.range(this.domainColours).domain(this.domainIds)
+
+      // Update ticks
+      // define the ticks by time gaps -> xAxis.ticks(timeDay.every(1))
+      this.xAxis.ticks(5)
+      this.$xAxisGroup.call(this.customXAxis)
+      this.$yAxisGroup.call(this.customYAxis)
+      this.$yAxisTickGroup.call(this.customYAxis)
+
+      if (this.step) {
+        this.area.curve(curveStep)
+      } else {
+        this.area.curve(curveLinear)
+      }
+
+      this.stack
+        .keys(this.domainIds)
+        .value((d, key) => (d[key] ? d[key].value : 0))
+
+      const stackArea = this.$stackedAreaGroup
+        .selectAll(`.${this.stackedAreaPathClass}`)
+        .data(this.stack(this.dataset))
+
+      // stacked area #clip path is defined in CSS (safari workaround)
+      // - look in /assets/scss/vis.scss
+      stackArea
+        .enter()
+        .append('path')
+        .attr('id', d => d.key)
+        .attr('class', `${this.stackedAreaPathClass}`)
+        .attr('d', this.area)
+        .style('fill', d => this.z(d.key))
+        .on('touchmove mousemove', function(d) {
+          console.log('$stackedArea touchmove mousemove')
+          const m = mouse(this)
+          const date = self.x.invert(m[0])
+          EventBus.$emit('vis.techover', d.key)
+          EventBus.$emit('vis.mousemove', date)
+        })
+
+      this.$xAxisBrushGroup
+        .append('g')
+        .attr('class', 'brush')
+        .on('touchmove mousemove', function() {
+          console.log('$xAxisBrushGroup touchmove mousemove')
+          const m = mouse(this)
+          const date = self.x.invert(m[0])
+          EventBus.$emit('vis.mousemove', date)
+          console.log('$xAxisBrushGroup done')
+        })
+        .call(this.brush)
+
+      this.brush.on('brush', function(d) {
+        console.log('brush')
+        const m = mouse(this)
+        const date = self.x.invert(m[0])
+
+        EventBus.$emit('vis.mousemove', date)
+      })
+    },
+
+    redraw() {
+      this.x.range([0, this.width])
+      this.y.range([this.height, 0])
+
+      this.xAxis.tickSize(-this.height + 10)
+      this.yAxis.tickSize(this.width)
+
+      // update axes
+      this.$xAxisGroup.call(this.customXAxis)
+      this.$yAxisGroup.call(this.customYAxis)
+      this.$yAxisTickGroup.call(this.customYAxis)
+
+      this.brush.extent([[0, 0], [this.width, 40]])
+      this.$xAxisBrushGroup.selectAll('.brush').call(this.brush)
+
+      this.$stackedAreaGroup
+        .selectAll(`.${this.stackedAreaPathClass}`)
+        .data(this.stack(this.dataset))
+        .attr('d', this.area)
+    },
+
+    handleResize() {
+      this.setupWidthHeight()
+      this.redraw()
+    },
+
     handleReset() {
-      const g = select(`#${this.id} .${CONFIG.CHART_STACKED_AREA}-group`)
-      const transition = g.transition().duration(250)
+      const transition = this.$stackedAreaGroup.transition().duration(250)
 
-      this.x.domain(extent(this.updatedData, d => d.date))
-      this.xAxisGroup.transition(transition).call(this.xAxis)
+      this.x.domain(extent(this.dataset, d => d.date))
+      this.$xAxisGroup.transition(transition).call(this.xAxis)
 
-      g.selectAll('path')
+      this.$stackedAreaGroup
+        .selectAll('path')
         .transition(transition)
         .attr('d', this.area)
 
-      // const start = this.updatedData[100].date
-      // const end = this.updatedData[200].date
+      // const start = this.dataset[100].date
+      // const end = this.dataset[200].date
       // this.guideGroup
       //   .selectAll('.guide')
       //   .attr('x', d => this.x(start))
@@ -278,7 +387,7 @@ export default {
       if (!event.selection) return
       const s = event.selection
 
-      const hoverLayer = select(`#${this.id} .${CONFIG.HOVER_LAYER_CLASS}`)
+      const hoverLayer = select(`#${this.id} .${this.hoverLayerClass}`)
       // get the dates based on x value
       console.log(s, s.map(this.x.invert, this.x))
       // this.x.domain(s.map(this.x.invert, this.x))
@@ -286,15 +395,15 @@ export default {
       selectAll('.brush').call(this.brush.move, null)
       // this.x.domain([s[0][0], s[1][0]].map(this.x.invert, this.x))
 
-      const g = select(`#${this.id} .${CONFIG.CHART_STACKED_AREA}-group`)
-      const transition = g.transition().duration(250)
-      this.xAxisGroup.transition(transition).call(this.xAxis)
-      g.selectAll('path')
+      const transition = this.$stackedAreaGroup.transition().duration(250)
+      this.$xAxisGroup.transition(transition).call(this.xAxis)
+      this.$stackedAreaGroup
+        .selectAll('path')
         .transition(transition)
         .attr('d', this.area)
 
-      // const start = this.updatedData[100].date
-      // const end = this.updatedData[200].date
+      // const start = this.dataset[100].date
+      // const end = this.dataset[200].date
       // this.guideGroup
       //   .selectAll('.guide')
       //   .attr('x', d => this.x(start))
@@ -304,186 +413,49 @@ export default {
       //   .attr('fill', '#ddd')
     },
 
-    setup() {
-      this.x = scaleTime().range([0, this.width])
-      this.y = scaleLinear().range([this.height, 0])
-      this.z = scaleOrdinal()
-
-      this.xAxis = axisBottom(this.x)
-        .tickSize(-this.height + 10)
-        .tickFormat(d => axisTimeFormat(d))
-
-      this.yAxis = axisRight(this.y)
-        .tickSize(this.width)
-        .tickArguments([5])
-        .tickFormat(d => format(CONFIG.Y_AXIS_FORMAT_STRING)(d))
-
-      this.xAxisGroup = select(`#${this.id} .${this.xAxisClass}`)
-      this.xAxisBrushGroup = select(`#${this.id} .x-axis-brush-group`)
-      this.yAxisGroup = select(`#${this.id} .${this.yAxisClass}`)
-      this.yAxisTickGroup = select(`#${this.id} .${this.yAxisTickClass}`)
-      this.guideGroup = select(`#${this.id} .${this.guideGroupClass}`)
-
-      this.stack = stack()
-      this.brush = brushX()
-        .extent([[0, 0], [this.width, this.height]])
-        .on('end', this.brushEnded)
-
-      this.area = area()
-        .x(d => this.x(d.data.date))
-        .y0(d => this.y(d[0]))
-        .y1(d => this.y(d[1]))
-
-      // Hover signals
-      // setupSignals(this.id, this.height, this.x, this.brush)
+    customXAxis(g) {
+      g.call(this.xAxis)
+      // break x axis tick label here
+      g.selectAll('.tick text').attr('dx', 2)
+      g.selectAll('.tick line').attr('y1', 20)
     },
 
-    update() {
-      console.log('vis update', this.step)
-      const g = select(`#${this.id} .${CONFIG.CHART_STACKED_AREA}-group`)
+    customYAxis(g) {
+      g.call(this.yAxis)
+      g.selectAll('.tick text')
+        .attr('x', 4)
+        .attr('dy', -4)
+    },
 
-      // Remove previous stacked area
-      g.selectAll(`.${CONFIG.CHART_STACKED_AREA}`).remove()
-      g.selectAll('.guide').remove()
-
-      g.on('dblclick', this.handleChartDoubleClicked)
-
-      this.x.domain(extent(this.updatedData, d => d.date))
-      this.y
-        .domain([
-          min(this.updatedData, d => d._min),
-          max(this.updatedData, d => d._total)
-        ])
-        .nice()
-      this.z.range(this.domainColours).domain(this.domainIds)
-
-      const yAxis = this.yAxis
-      this.yAxisGroup.call(customYAxis)
-      this.yAxisTickGroup.call(customYAxis)
-      function customYAxis(g) {
-        g.call(yAxis)
-        g.selectAll('.tick text')
-          .attr('x', 4)
-          .attr('dy', -4)
-      }
-
-      const xAxis = this.xAxis
-      // update ticks
-      // xAxis.ticks(timeDay.every(1))
-      xAxis.ticks(5)
-
-      this.xAxisGroup.call(customXAxis)
-      function customXAxis(g) {
-        g.call(xAxis)
-        g.selectAll('.tick text').attr('dx', 2)
-        g.selectAll('.tick line').attr('y1', 20)
-      }
-
-      if (this.step) {
-        this.area.curve(curveStep)
-      } else {
-        this.area.curve(curveLinear)
-      }
-
-      this.stack
-        .keys(this.domainIds)
-        .value((d, key) => (d[key] ? d[key].value : 0))
-      this.stackedArea = g
-        .selectAll(`.${CONFIG.CHART_STACKED_AREA}`)
-        .data(this.stack(this.updatedData))
-
-      // stacked area clip path is defined in CSS (for safari fix)
-      const x = this.x
-      this.stackedArea
-        .enter()
-        .append('path')
-        .attr('id', d => d.key)
-        .attr('class', `${CONFIG.CHART_STACKED_AREA}`)
-        .attr('d', this.area)
-        .style('fill', d => this.z(d.key))
-        .on('touchmove mousemove', function(d, index) {
-          console.log(d.key)
-          const m = mouse(this)
-          const date = x.invert(m[0])
-          EventBus.$emit('vis.techover', d.key)
-          EventBus.$emit('vis.mousemove', date)
+    calculateTotalMin(dataset) {
+      const updated = dataset.slice(0)
+      dataset.forEach((d, i) => {
+        let total = 0
+        let min = 0
+        this.domainIds.forEach(k => {
+          if (d[k]) {
+            total += d[k].value || 0
+            if (d[k].value < 0) {
+              min += d[k].value || 0
+            }
+          }
         })
-
-      this.xAxisBrushGroup
-        .append('g')
-        .attr('class', 'brush')
-        .on('touchmove mousemove', function() {
-          const m = mouse(this)
-          const date = x.invert(m[0])
-          EventBus.$emit('vis.mousemove', date)
-        })
-        .call(this.brush)
-
-      this.brush.on('brush', function(d) {
-        const m = mouse(this)
-        const date = x.invert(m[0])
-
-        EventBus.$emit('vis.mousemove', date)
+        updated[i]._total = total
+        updated[i]._min = min
       })
-      // .attr('pointer-events', 'visibleStroke')
-      // .on('mouseover', function(d) {
-      //   select(this)
-      //     .style('fill', select(this).attr('stroke'))
-      //     .attr('fill-opacity', 0.3)
-      // })
-      // .on('mouseout', function(d) {
-      //   select(this)
-      //     .style('fill', 'none')
-      //     .attr('fill-opacity', 1)
-      // })
-
-      setupSignals(this.id, this.height, this.x, this.brush)
+      return updated
     }
   }
 }
 </script>
 
-<style lang="scss">
-path.line {
-  fill: none;
-  stroke: #000;
-  stroke-width: 1;
+<style lang="scss" scoped>
+.stacked-area-vis {
+  position: relative;
 }
-.cursor-line {
-  stroke: red;
-  stroke-width: 1px;
-}
-.hover-layer {
-  fill: transparent;
-}
-.stacked-area {
-  opacity: 0.9;
-  clip-path: url(#clip);
-}
-
-// axis
-.domain {
-  stroke: none;
-}
-.axis-line-group {
-  .x-axis .tick text {
-    text-anchor: start;
-  }
-  .x-axis .tick line {
-    stroke-dasharray: 3.8;
-    stroke: rgba(0, 0, 0, 0.2);
-  }
-  .y-axis .tick:not(:first-of-type) line {
-    stroke-dasharray: 3.8;
-    stroke: rgba(0, 0, 0, 0.2);
-  }
-}
-.axis-text-group {
-  .x-axis-tick .tick line {
-    stroke: none;
-  }
-  .y-axis-tick .tick:not(:first-of-type) line {
-    stroke: none;
-  }
+.reset-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 </style>

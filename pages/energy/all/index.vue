@@ -1,10 +1,15 @@
 <template>
   <section>
-
     <data-options-bar />
 
     <div class="vis-table-container">
-      <div class="vis-container">1</div>
+      <div class="vis-container">
+        <stacked-area-vis
+          v-if="hasData"
+          :vis-data="visData"
+          :step="false"
+          :vis-height="550" />
+      </div>
       <div class="table-container">2</div>
     </div>
     
@@ -17,12 +22,6 @@
       v-if="mounted"
       style="width: 100%;"
     >
-
-      <stacked-area-vis
-        v-if="hasData"
-        :vis-data="visData"
-        :step="false"
-        :vis-height="350" />
     </div> -->
   </section>
 </template>
@@ -61,8 +60,11 @@ export default {
   },
 
   computed: {
+    dataset() {
+      return this.visData.dataset
+    },
     hasData() {
-      return this.visData.data && this.visData.data.length > 0
+      return this.dataset && this.dataset.length > 0
     },
     fuelTechNames() {
       return this.$store.getters.fuelTechNames
@@ -123,7 +125,7 @@ export default {
     setFlattenData(newData) {
       this.visData = {
         domains: this.fuelTechs,
-        data: newData
+        dataset: newData
       }
       this.flattenData = newData
     },
@@ -142,18 +144,28 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '~/assets/scss/responsive-mixins.scss';
+
 .vis-table-container {
   display: flex;
+  flex-wrap: wrap;
   align-items: stretch;
 
   .vis-container {
     width: 100%;
-    background: grey;
+
+    @include tablet {
+      width: 70%;
+    }
   }
   .table-container {
-    width: 400px;
+    width: 100%;
     height: 700px;
     background: lightgrey;
+
+    @include tablet {
+      width: 30%;
+    }
   }
 }
 </style>

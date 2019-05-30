@@ -81,7 +81,7 @@ function setupSignals(id, height, x, brush) {
   }
 
   function onMouseOut() {
-    // select(`#${id} .${cursorLineGroupClass}`).attr('opacity', 0)
+    select(`#${id} .${cursorLineGroupClass}`).attr('opacity', 0)
   }
 
   // brush.on('brush', function(d) {
@@ -95,14 +95,6 @@ function setupSignals(id, height, x, brush) {
     console.log('move')
     const m = mouse(this)
     const date = x.invert(m[0])
-    // const el = this
-    // select(el).style('pointer-events', 'none')
-    // // select(el).style('visibility', 'hidden')
-    // setTimeout(() => {
-    //   select(el).style('pointer-events', 'all')
-    //   // select(el).style('visibility', 'visible')
-    //   EventBus.$emit('vis.mousemove', date)
-    // }, 10)
     EventBus.$emit('vis.mousemove', date)
   })
 

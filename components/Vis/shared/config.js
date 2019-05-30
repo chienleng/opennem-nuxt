@@ -1,7 +1,7 @@
-export const DEFAULT_SVG_HEIGHT = 150
-export const DEFAULT_MARGINS = { left: 40, right: 20, top: 10, bottom: 40 }
+export const DEFAULT_SVG_HEIGHT = 250
+export const DEFAULT_MARGINS = { left: 10, right: 10, top: 10, bottom: 40 }
 
-export const DEBOUNCE_MILLISECONDS = 200
+export const DEBOUNCE_MILLISECONDS = 10
 
 export const HOVER_LAYER_CLASS = 'hover-layer'
 export const CURSOR_LINE_GROUP_CLASS = 'cursor-line-group'
@@ -16,4 +16,8 @@ export const Y_AXIS_TICK_CLASS = 'y-axis-tick'
 export const Y_AXIS_FORMAT_STRING = '~s'
 
 export const CHART_LINE = 'line'
-export const CHART_STACKED_AREA = 'stacked-area'
+
+const stackedArea = 'stacked-area'
+export const CHART_STACKED_AREA = stackedArea
+export const CHART_STACKED_AREA_GROUP_CLASS = `${stackedArea}-group`
+export const CHART_STACKED_AREA_PATH_CLASS = `${stackedArea}-path`
