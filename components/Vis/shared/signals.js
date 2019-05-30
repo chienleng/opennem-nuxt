@@ -77,11 +77,11 @@ function setupSignals(id, height, x, brush) {
   }
 
   function onMouseOver() {
-    select(`#${id} .${cursorLineGroupClass}`).attr('opacity', 1)
+    // select(`#${id} .${cursorLineGroupClass}`).attr('opacity', 1)
   }
 
   function onMouseOut() {
-    select(`#${id} .${cursorLineGroupClass}`).attr('opacity', 0)
+    // select(`#${id} .${cursorLineGroupClass}`).attr('opacity', 0)
   }
 
   // brush.on('brush', function(d) {

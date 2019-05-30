@@ -237,6 +237,14 @@ export default {
       this.$yAxisTickGroup = select(`#${this.id} .${this.yAxisTickClass}`)
       // this.guideGroup = select(`#${this.id} .${this.guideGroupClass}`)
 
+      select(`#${this.id}`).on('mouseleave', () => {
+        select(`#${this.id} .${this.cursorLineGroupClass}`).attr('opacity', 0)
+      })
+
+      select(`#${this.id}`).on('mouseenter', () => {
+        select(`#${this.id} .${this.cursorLineGroupClass}`).attr('opacity', 1)
+      })
+
       // Setup the 'brush' area and event handler
       this.brush = brushX()
         .extent([[0, 0], [this.width, 40]])
@@ -340,18 +348,13 @@ export default {
       this.xAxis.tickSize(-this.height + 10)
       this.yAxis.tickSize(this.width)
 
-      // update axes
       this.$xAxisGroup.call(this.customXAxis)
       this.$yAxisGroup.call(this.customYAxis)
       this.$yAxisTickGroup.call(this.customYAxis)
 
       this.brush.extent([[0, 0], [this.width, 40]])
       this.$xAxisBrushGroup.selectAll('.brush').call(this.brush)
-
-      this.$stackedAreaGroup
-        .selectAll(`.${this.stackedAreaPathClass}`)
-        .data(this.stack(this.dataset))
-        .attr('d', this.area)
+      this.$stackedAreaGroup.selectAll('path').attr('d', this.area)
     },
 
     handleResize() {
