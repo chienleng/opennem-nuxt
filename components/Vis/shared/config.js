@@ -1,8 +1,9 @@
 export const DEFAULT_SVG_HEIGHT = 250
-export const DEFAULT_MARGINS = { left: 10, right: 10, top: 10, bottom: 40 }
+export const DEFAULT_MARGINS = { left: 10, right: 10, top: 25, bottom: 40 }
 
 export const DEBOUNCE_MILLISECONDS = 10
 
+//TODO: clean up naming
 export const HOVER_LAYER_CLASS = 'hover-layer'
 export const CURSOR_LINE_GROUP_CLASS = 'cursor-line-group'
 export const CURSOR_LINE_CLASS = 'cursor-line'
@@ -11,6 +12,8 @@ export const CURSOR_LINE_TEXT_CLASS = 'cursor-line-text'
 export const BRUSH_CLASS = 'brush'
 
 export const X_AXIS_CLASS = 'x-axis'
+export const X_AXIS_BRUSH_GROUP_CLASS = 'x-axis-brush-group'
+
 export const Y_AXIS_CLASS = 'y-axis'
 export const Y_AXIS_TICK_CLASS = 'y-axis-tick'
 export const Y_AXIS_FORMAT_STRING = '~s'

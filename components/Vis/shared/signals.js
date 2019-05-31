@@ -1,42 +1,39 @@
-import { select, mouse } from 'd3-selection'
+import { select } from 'd3-selection'
+import { timeFormat } from 'd3-time-format'
 import { timeMinute, timeDay } from 'd3-time'
 import EventBus from '~/plugins/eventBus.js'
 import * as CONFIG from './config.js'
 
-function setupSignals(id, height, x, brush) {
-  const hoverLayerClass = CONFIG.HOVER_LAYER_CLASS
-  const cursorLineGroupClass = CONFIG.CURSOR_LINE_GROUP_CLASS
+function setupSignals(id, height, x, dataset) {
+  const timeRectWidth = 65
+  const format = timeFormat('%H:%M')
+
   const cursorLineClass = CONFIG.CURSOR_LINE_CLASS
   const cursorLineRectClass = CONFIG.CURSOR_LINE_RECT_CLASS
   const cursorLineTextClass = CONFIG.CURSOR_LINE_TEXT_CLASS
 
-  const hoverLayer = select(`#${id} .${hoverLayerClass}`)
-  const cursorLineGroup = select(`#${id} .${cursorLineGroupClass}`)
+  const $svg = select(`#${id}`)
+  const $cursorLine = $svg.select(`.${cursorLineClass}`)
+  const $cursorLineRect = $svg
+    .select(`.${cursorLineRectClass}`)
+    .attr('width', timeRectWidth)
+    .attr('height', 20)
+    .attr('rx', 2)
+    .attr('ry', 2)
+    .attr('y', -20)
+    .style('fill', 'red')
+  const $cursorLineText = $svg
+    .select(`.${cursorLineTextClass}`)
+    .attr('text-anchor', 'middle')
+    .attr('y', -5)
+    .style('fill', 'white')
 
-  let currentTech = ''
+  let currentKey = ''
 
-  hoverLayer.selectAll(`.${CONFIG.BRUSH_CLASS}`).remove()
-  cursorLineGroup.selectAll(`.${cursorLineClass}`).remove()
-
-  EventBus.$on('vis.techover', onTechOver)
   EventBus.$on('vis.mousemove', onMouseMove)
   EventBus.$on('vis.mouseover', onMouseOver)
   EventBus.$on('vis.mouseout', onMouseOut)
-
-  // Create hover line and date
-  cursorLineGroup.append('path').attr('class', cursorLineClass)
-  cursorLineGroup
-    .append('rect')
-    .attr('class', cursorLineRectClass)
-    .attr('width', 40)
-    .attr('height', 15)
-    .style('fill', 'red')
-  cursorLineGroup.append('text').attr('class', cursorLineTextClass)
-
-  // hoverLayer
-  //   .append('g')
-  //   .attr('class', 'brush')
-  //   .call(brush)
+  EventBus.$on('vis.areaover', onAreaOver)
 
   function getEveryTime(date) {
     // TODO: Period should be passed in.
@@ -50,26 +47,30 @@ function setupSignals(id, height, x, brush) {
     return timeMinute.every(5).round(date)
   }
 
-  function onTechOver(tech) {
-    console.log(tech)
-    currentTech = tech
+  function onAreaOver(key) {
+    console.log(key)
+    currentKey = key
   }
 
   function onMouseMove(date) {
     // Use this to snap to closest time period
     const rounded = getEveryTime(date)
     const m = x(rounded)
+    const time = format(rounded)
 
+    const millisecs = new Date(rounded).getTime()
+    const find = dataset.find(d => d.date === millisecs)
+
+    console.log(find, date)
     // rect to follow mouse
-    select(`#${id} .${cursorLineRectClass}`).attr('x', m)
+    // TODO: detect if near the left or right edge
+    $cursorLineRect.attr('x', m - timeRectWidth / 2)
 
     // text to show date and follow mouse
-    select(`#${id} .${cursorLineTextClass}`)
-      .text(currentTech)
-      .attr('x', m)
+    $cursorLineText.text(time).attr('x', m)
 
     // line to follow mouse
-    select(`#${id} .${cursorLineClass}`).attr('d', () => {
+    $cursorLine.attr('d', () => {
       let d = 'M' + m + ',' + height
       d += ' ' + m + ',' + 0
       return d
@@ -83,36 +84,13 @@ function setupSignals(id, height, x, brush) {
   function onMouseOut() {
     // select(`#${id} .${cursorLineGroupClass}`).attr('opacity', 0)
   }
-
-  // brush.on('brush', function(d) {
-  //   const m = mouse(this)
-  //   const date = x.invert(m[0])
-
-  //   EventBus.$emit('vis.mousemove', date)
-  // })
-
-  hoverLayer.on('touchmove mousemove', function(d) {
-    console.log('move')
-    const m = mouse(this)
-    const date = x.invert(m[0])
-    EventBus.$emit('vis.mousemove', date)
-  })
-
-  hoverLayer.on('touchover mouseover', d => {
-    console.log('over')
-    EventBus.$emit('vis.mouseover')
-  })
-
-  hoverLayer.on('mouseout', d => {
-    console.log('out')
-    EventBus.$emit('vis.mouseout')
-  })
 }
 
 function destroySignals() {
   EventBus.$off('vis.mousemove')
   EventBus.$off('vis.mouseover')
   EventBus.$off('vis.mouseout')
+  EventBus.$off('vis.areaover')
 }
 
 export { setupSignals, destroySignals }

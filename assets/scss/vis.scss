@@ -11,7 +11,6 @@ path.line {
   fill: transparent;
 }
 .stacked-area-path {
-  opacity: 0.9;
   // where #clip is being defined
   clip-path: url(#clip);
 }
@@ -43,6 +42,7 @@ path.line {
 // disable text selection in axis tick marks
 .tick {
   text {
+    font-family: $family-primary;
     cursor: default;
     pointer-events: none;
     -webkit-user-select: none;
