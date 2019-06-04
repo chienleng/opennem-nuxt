@@ -8,7 +8,7 @@
           v-if="hasData"
           :vis-data="visData"
           :step="false"
-          :vis-height="450" />
+          :vis-height="550" />
       </div>
       <div class="table-container">
         <summary-table

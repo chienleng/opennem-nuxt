@@ -108,6 +108,7 @@
 
 <script>
 import moment from 'moment'
+import _isEmpty from 'lodash.isempty'
 import find from 'lodash.find'
 import EventBus from '~/plugins/eventBus.js'
 import Items from './Items'
@@ -291,22 +292,23 @@ export default {
       this.pointSummarySources = {}
       this.pointSummaryLoads = {}
 
-      this.domains.forEach(ft => {
-        const category = ft.category
-        const value = data[ft.id].value
+      if (!_isEmpty(this.pointSummary)) {
+        this.domains.forEach(ft => {
+          const category = ft.category
+          const value = this.pointSummary[ft.id].value
 
-        if (category === 'source') {
-          this.pointSummarySources[ft.id] = value
-          totalSources += value
-        } else if (category === 'load') {
-          this.pointSummaryLoads[ft.id] = value
-          totalLoads += value
-        }
-      })
+          if (category === 'source') {
+            this.pointSummarySources[ft.id] = value
+            totalSources += value
+          } else if (category === 'load') {
+            this.pointSummaryLoads[ft.id] = value
+            totalLoads += value
+          }
+        })
+      }
 
       this.pointSummarySources._total = totalSources
       this.pointSummaryLoads._total = totalLoads
-      console.log(this.pointSummary)
     },
 
     handleVisCursor(date) {
@@ -383,7 +385,7 @@ export default {
 ::v-deep .summary-column-headers {
   .summary-row {
     font-family: $header-font-family;
-    font-weight: 600;
+    font-weight: 700;
   }
 }
 

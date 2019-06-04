@@ -1,10 +1,10 @@
 <template>
   <div class="vis stacked-area-vis">
     <button
-      class="reset-btn"
+      class="button is-rounded is-small reset-btn"
       @click="handleReset"
     >
-      reset
+      Zoom Out
     </button>
     <svg
       :width="svgWidth"
@@ -479,7 +479,7 @@ export default {
 }
 .reset-btn {
   position: absolute;
-  right: 0;
-  top: 0;
+  right: 1rem;
+  top: 2.5rem;
 }
 </style>

@@ -3,7 +3,7 @@
     <div class="buttons has-addons">
       <span class="button is-rounded">1D</span>
       <span class="button is-rounded">3D</span>
-      <span class="button is-rounded is-primary is-selected">7D</span>
+      <span class="button is-rounded is-selected">7D</span>
       <span class="button is-rounded">30D</span>
       <span class="button is-rounded">1Y</span>
       <span class="button is-rounded">ALL</span>
@@ -11,7 +11,7 @@
 
     <div class="buttons has-addons">
       <span class="button is-rounded">5m</span>
-      <span class="button is-rounded is-primary is-selected">30m</span>
+      <span class="button is-rounded is-selected">30m</span>
     </div>
   </div>
 </template>

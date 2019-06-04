@@ -37,7 +37,7 @@ header {
   h1 {
     font-family: $header-font-family;
     font-size: 1.6rem;
-    font-weight: bold;
+    font-weight: 700;
     margin-right: $app-padding;
     padding-right: $app-padding;
     border-right: $border-style;
@@ -45,14 +45,14 @@ header {
   h2 {
     font-family: $header-font-family;
     font-size: 1.6rem;
-    font-weight: bold;
+    font-weight: 700;
     margin-right: $app-padding;
     padding-right: $app-padding;
     border-right: $border-style;
   }
 
   .header-logo {
-    width: 2.2rem;
+    width: 3rem;
     margin: 0.2rem $app-padding / 2;
     position: relative;
     top: 3px;
