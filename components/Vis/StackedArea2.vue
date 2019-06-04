@@ -78,7 +78,7 @@ import { format } from 'd3-format'
 import { select, selectAll, mouse, event } from 'd3-selection'
 import { schemeCategory10 } from 'd3-scale-chromatic'
 import { brushX } from 'd3-brush'
-import { timeDay } from 'd3-time'
+import { timeMinute, timeDay } from 'd3-time'
 import debounce from 'lodash.debounce'
 
 import EventBus from '~/plugins/eventBus.js'
@@ -246,7 +246,7 @@ export default {
         .tickFormat(d => axisTimeFormat(d))
       this.yAxis = axisRight(this.y)
         .tickSize(this.width)
-        .tickArguments([5])
+        // .tickArguments([5])
         .tickFormat(d => format(CONFIG.Y_AXIS_FORMAT_STRING)(d))
 
       // Setup the 'brush' area and event handler
@@ -273,12 +273,15 @@ export default {
         .attr('class', this.cursorLineTextClass)
 
       // Event handling
-      $svg.on('mouseleave', () => {
-        this.$cursorLineGroup.attr('opacity', 0)
-      })
       $svg.on('mouseenter', () => {
         this.$cursorLineGroup.attr('opacity', 1)
+        EventBus.$emit('vis.mouseenter')
       })
+      $svg.on('mouseleave', () => {
+        this.$cursorLineGroup.attr('opacity', 0)
+        EventBus.$emit('vis.mouseleave')
+      })
+
       this.$hoverLayer.on('touchmove mousemove', function() {
         EventBus.$emit('vis.mousemove', self.getXAxisDateByMouse(this))
         EventBus.$emit('vis.areaover', null)
@@ -429,28 +432,30 @@ export default {
     },
 
     calculateTotalMin(dataset) {
-      const updated = dataset.slice(0)
-      dataset.forEach((d, i) => {
-        let total = 0
-        let min = 0
-        this.domainIds.forEach(k => {
-          if (d[k]) {
-            total += d[k].value || 0
-            if (d[k].value < 0) {
-              min += d[k].value || 0
-            }
-          }
-        })
-        updated[i]._total = total
-        updated[i]._min = min
-      })
-      return updated
+      // const updated = dataset.slice(0)
+      // dataset.forEach((d, i) => {
+      //   let total = 0
+      //   let min = 0
+      //   this.domainIds.forEach(k => {
+      //     if (d[k]) {
+      //       total += d[k].value || 0
+      //       if (d[k].value < 0) {
+      //         min += d[k].value || 0
+      //       }
+      //     }
+      //   })
+      //   updated[i]._total = total
+      //   updated[i]._min = min
+      // })
+      // return updated
+
+      return dataset.slice(0)
     },
 
     getXAxisDateByMouse(evt) {
       const m = mouse(evt)
       const date = this.x.invert(m[0])
-      return date
+      return this.getEveryTime(date)
     },
 
     getEveryTime(date) {

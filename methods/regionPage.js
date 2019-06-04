@@ -30,15 +30,36 @@ const methods = {
 
   getFlattenData(data, period, fuelTechs, cb) {
     DataTransformService.flattenAndInterpolate(data, period).then(res => {
-      res.forEach(d => {
+      // Calculate total, min, reverse value for imports and load types
+      res.forEach((d, i) => {
+        let total = 0
+        let min = 0
+
         fuelTechs.forEach(ft => {
           if (ft.category === 'load' || ft.fuelTech === 'imports') {
             const negValue = -d[ft.id].value
             d[ft.id].value = negValue
           }
+
+          total += d[ft.id].value || 0
+          if (d[ft.id].value < 0) {
+            min += d[ft.id].value || 0
+          }
         })
+
+        res[i]._total = total
+        res[i]._min = min
       })
-      cb(cloneDeep(res))
+
+      let updated = res
+      // filter to no later than current date
+      if (period === '30min') {
+        const start = res[0].date
+        const now = new Date()
+        updated = DataTransformService.filter(res, start, now.getTime())
+      }
+
+      cb(cloneDeep(updated))
     })
   },
 

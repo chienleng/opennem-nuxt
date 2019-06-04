@@ -1,6 +1,5 @@
 import { select } from 'd3-selection'
 import { timeFormat } from 'd3-time-format'
-import { timeMinute, timeDay } from 'd3-time'
 import EventBus from '~/plugins/eventBus.js'
 import * as CONFIG from './config.js'
 
@@ -35,30 +34,16 @@ function setupSignals(id, height, x, dataset) {
   EventBus.$on('vis.mouseout', onMouseOut)
   EventBus.$on('vis.areaover', onAreaOver)
 
-  function getEveryTime(date) {
-    // TODO: Period should be passed in.
-    const period = '30min'
-    if (period === '30min') {
-      return timeMinute.every(30).round(date)
-    } else if (period === 'Daily') {
-      return timeDay.every(1).round(date)
-    }
-    // default 5 mins
-    return timeMinute.every(5).round(date)
-  }
-
   function onAreaOver(key) {
     console.log(key)
     currentKey = key
   }
 
   function onMouseMove(date) {
-    // Use this to snap to closest time period
-    const rounded = getEveryTime(date)
-    const m = x(rounded)
-    const time = format(rounded)
+    const m = x(date)
+    const time = format(date)
 
-    const millisecs = new Date(rounded).getTime()
+    const millisecs = new Date(date).getTime()
     const find = dataset.find(d => d.date === millisecs)
 
     console.log(find, date)

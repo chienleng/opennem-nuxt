@@ -28,7 +28,7 @@ import moment from 'moment'
 import { timeMinute, timeDay } from 'd3-time'
 import find from 'lodash.find'
 import EventBus from '~/plugins/eventBus.js'
-import Items from './Items.vue'
+import Items from './Items'
 
 export default {
   components: {

@@ -64,21 +64,6 @@ function transformData(data) {
    */
   function parseHistory(id, fuelTech, type, history) {
     const historyData = history.data
-    console.log(type)
-    // const shouldReverseValue =
-    //   (fuelTech === 'pumps' ||
-    //     fuelTech === 'battery_charging' ||
-    //     fuelTech === 'imports' ||
-    //     fuelTech === 'exports') &&
-    //   type === 'energy'
-    // const shouldReverseValue =
-    //   fuelTech === 'pumps' ||
-    //   fuelTech === 'battery_charging' ||
-    //   fuelTech === 'imports' ||
-    //   fuelTech === 'exports'
-
-    const shouldReverseValue = false
-
     // const offsetHrs = moment().utcOffset()
     // let historyDate = moment(history.start).utcOffset(offsetHrs)
     // const year = historyDate.year()
@@ -97,7 +82,7 @@ function transformData(data) {
       return hData.map(h => {
         const newObj = {
           date: currentDate.valueOf(),
-          value: shouldReverseValue ? -h : h
+          value: h
         }
         currentDate.add(interval.value, interval.key)
         return newObj
@@ -128,7 +113,6 @@ function transformData(data) {
 function rollupTo30Mins(ids, data) {
   const coeff = 1000 * 60 * 30
   const entries = nest()
-    // .key(d => new Date(Math.round(d.date / coeff) * coeff))
     .key(d => Math.round(d.date / coeff) * coeff)
     .rollup(a => {
       let obj = {}
@@ -144,11 +128,8 @@ function rollupTo30Mins(ids, data) {
     })
     .entries(data)
 
-  // return entries
-
   return entries.map(e => {
     const object = {
-      // date: moment(parseInt(e.key)).valueOf()
       date: parseInt(e.key)
     }
 
@@ -165,7 +146,6 @@ function rollupTo30Mins(ids, data) {
 }
 
 function findInterpolateSeriesTypes(data) {
-  // TODO: refactor this
   const temperatureItem = data.find(d => d.type === 'temperature')
   const priceItem = data.find(d => d.type === 'price')
   const rooftopSolarItem = data.find(d => d['fuel_tech'] === 'rooftop_solar')
@@ -229,9 +209,7 @@ function mutateDataForInterpolation(data, interpolateSeriesTypes) {
 export default {
   flatten(data) {
     const promise = new Promise(resolve => {
-      const ids = data.map(d => d.id)
       let flatData = transformData(data)
-
       resolve(flatData)
     })
 
@@ -268,6 +246,7 @@ export default {
   },
 
   filter(data, startDate, lastDate) {
-    return data
+    // TODO: return data filtered by start and end date
+    return data.filter(d => d.date >= startDate && d.date <= lastDate)
   }
 }

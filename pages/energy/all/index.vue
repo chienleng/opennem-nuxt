@@ -10,7 +10,14 @@
           :step="false"
           :vis-height="450" />
       </div>
-      <div class="table-container">2</div>
+      <div class="table-container">
+        <summary-table
+          v-if="hasData"
+          :domains="domains"
+          :dataset="dataset"
+          :period="period"
+        />
+      </div>
     </div>
     
     <!-- <RangePeriodSelectors
@@ -32,6 +39,7 @@ import DataOptionsBar from '~/components/energy/DataOptionsBar'
 import Generation from '~/components/Generation.vue'
 import RegionPageMethods from '~/methods/regionPage.js'
 import StackedAreaVis from '~/components/Vis/StackedArea2.vue'
+import SummaryTable from '~/components/SummaryTable'
 
 export default {
   layout: 'main',
@@ -40,7 +48,8 @@ export default {
     DataOptionsBar,
     RangePeriodSelectors,
     Generation,
-    StackedAreaVis
+    StackedAreaVis,
+    SummaryTable
   },
 
   data() {
@@ -51,18 +60,15 @@ export default {
       range: '',
       period: '',
       visData: {},
+      dataset: [],
+      domains: [],
       data: [],
-      flattenData: [],
       url: '',
-      fuelTechs: [],
       selectedId: ''
     }
   },
 
   computed: {
-    dataset() {
-      return this.visData.dataset
-    },
     hasData() {
       return this.dataset && this.dataset.length > 0
     },
@@ -81,8 +87,8 @@ export default {
   },
 
   watch: {
-    availableKeys() {
-      this.fuelTechs = this.getFuelTechObjs(this.type, this.region)
+    availableKeys(keys) {
+      this.domains = this.getFuelTechObjs(this.type, this.region)
     }
   },
 
@@ -108,7 +114,7 @@ export default {
       this.type = type
       this.data = data
       this.url = url
-      this.fuelTechs = this.getFuelTechObjs(this.type, this.region)
+      this.domains = this.getFuelTechObjs(this.type, this.region)
 
       this.getFlattenData(data)
     },
@@ -117,17 +123,18 @@ export default {
       RegionPageMethods.getFlattenData(
         data,
         this.period,
-        this.fuelTechs,
+        this.domains,
         this.setFlattenData
       )
     },
 
     setFlattenData(newData) {
       this.visData = {
-        domains: this.fuelTechs,
+        domains: this.domains,
         dataset: newData
       }
       this.flattenData = newData
+      this.dataset = newData
     },
 
     handleRangeChange(range) {
@@ -161,7 +168,6 @@ export default {
   .table-container {
     width: 100%;
     height: 700px;
-    background: lightgrey;
 
     @include tablet {
       width: 30%;
