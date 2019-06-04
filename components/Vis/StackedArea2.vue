@@ -1,6 +1,7 @@
 <template>
   <div class="vis stacked-area-vis">
     <button
+      v-show="zoomed"
       class="button is-rounded is-small reset-btn"
       @click="handleReset"
     >
@@ -78,13 +79,16 @@ import { format } from 'd3-format'
 import { select, selectAll, mouse, event } from 'd3-selection'
 import { schemeCategory10 } from 'd3-scale-chromatic'
 import { brushX } from 'd3-brush'
-import { timeMinute, timeDay } from 'd3-time'
+import { timeMinute, timeDay, timeWeek } from 'd3-time'
+import { timeFormat } from 'd3-time-format'
 import debounce from 'lodash.debounce'
 
 import EventBus from '~/plugins/eventBus.js'
 import * as CONFIG from './shared/config.js'
 import { setupSignals, destroySignals } from './shared/signals.js'
 import axisTimeFormat from './shared/timeFormat.js'
+import axisSecondaryTimeFormat from './shared/secondaryTimeFormat.js'
+import axisTimeTicks from './shared/timeTicks.js'
 
 export default {
   props: {
@@ -134,11 +138,13 @@ export default {
       g: null,
       guides: null,
       xAxis: null,
+      xDomainExtent: null,
       yAxis: null,
       area: null,
       colours: schemeCategory10,
       stack: null,
       brushX: null,
+      zoomed: false,
       $xAxisGroup: null,
       $xAxisBrushGroup: null,
       $yAxisGroup: null,
@@ -188,7 +194,7 @@ export default {
 
   watch: {
     visData(updated) {
-      this.dataset = this.calculateTotalMin(updated.dataset)
+      this.dataset = updated.dataset
       this.update()
     }
   },
@@ -205,7 +211,7 @@ export default {
 
     this.setupWidthHeight()
     this.setup()
-    this.dataset = this.calculateTotalMin(this.visData.dataset)
+    this.dataset = this.visData.dataset
     setupSignals(this.id, this.height, this.x, this.dataset) // Eventbus signals
     this.update()
   },
@@ -242,11 +248,11 @@ export default {
 
       // Set up where x, y axis appears
       this.xAxis = axisBottom(this.x)
-        .tickSize(-this.height + 10)
+        .tickSize(-this.height)
         .tickFormat(d => axisTimeFormat(d))
       this.yAxis = axisRight(this.y)
         .tickSize(this.width)
-        // .tickArguments([5])
+        // .ticks(10)
         .tickFormat(d => format(CONFIG.Y_AXIS_FORMAT_STRING)(d))
 
       // Setup the 'brush' area and event handler
@@ -303,7 +309,8 @@ export default {
       this.$stackedAreaGroup.selectAll(`.${this.stackedAreaPathClass}`).remove()
       this.$stackedAreaGroup.selectAll('.guide').remove()
 
-      this.x.domain(extent(this.dataset, d => d.date))
+      this.xDomainExtent = extent(this.dataset, d => d.date)
+      this.x.domain(this.xDomainExtent)
       this.y
         .domain([
           min(this.dataset, d => d._min),
@@ -312,9 +319,6 @@ export default {
         .nice()
       this.z.range(this.domainColours).domain(this.domainIds)
 
-      // Update ticks
-      // TODO: define the ticks by time gaps -> xAxis.ticks(timeDay.every(1))
-      this.xAxis.ticks(5)
       this.$xAxisGroup.call(this.customXAxis)
       this.$yAxisGroup.call(this.customYAxis)
       this.$yAxisTickGroup.call(this.customYAxis)
@@ -383,8 +387,8 @@ export default {
 
     zoomRedraw() {
       // Animate to the selected area by updating the x axis and area path
-      const transition = 250
-      this.$xAxisGroup.transition(transition).call(this.xAxis)
+      const transition = 100
+      this.$xAxisGroup.call(this.customXAxis)
       this.$stackedAreaGroup
         .selectAll('path')
         .transition(transition)
@@ -397,7 +401,9 @@ export default {
     },
 
     handleReset() {
-      this.x.domain(extent(this.dataset, d => d.date))
+      this.zoomed = false
+      this.xDomainExtent = extent(this.dataset, d => d.date)
+      this.x.domain(this.xDomainExtent)
       this.zoomRedraw()
       EventBus.$emit('dataset.filter', null)
     },
@@ -416,19 +422,39 @@ export default {
 
       // Get the brush selection (start/end) points -> dates
       // Set it to the current X domain
+      this.xDomainExtent = dataRange
       this.x.domain(dataRange)
 
       // Turn off the brush selection
       selectAll('.brush').call(this.brushX.move, null)
 
+      this.zoomed = true
       this.zoomRedraw()
       EventBus.$emit('dataset.filter', dataRange)
     },
 
     customXAxis(g) {
+      const ticks = axisTimeTicks(this.xDomainExtent[1] - this.xDomainExtent[0])
+      this.xAxis.ticks(ticks)
+
+      // add secondary x axis tick label here
+      const insertSecondaryAxisTick = function(d) {
+        const el = select(this)
+        const tFormat = timeFormat('%d %b')
+        const secondaryText = axisSecondaryTimeFormat(d)
+        if (secondaryText !== '') {
+          el.append('tspan')
+            .text(secondaryText)
+            .attr('x', 2)
+            .attr('dy', 12)
+        }
+      }
+
       g.call(this.xAxis)
-      // break x axis tick label here
-      g.selectAll('.tick text').attr('dx', 2)
+      g.selectAll('.tick text').each(insertSecondaryAxisTick)
+      g.selectAll('.tick text')
+        .attr('x', 2)
+        .attr('y', 5)
       g.selectAll('.tick line').attr('y1', 20)
     },
 
@@ -437,27 +463,6 @@ export default {
       g.selectAll('.tick text')
         .attr('x', 4)
         .attr('dy', -4)
-    },
-
-    calculateTotalMin(dataset) {
-      // const updated = dataset.slice(0)
-      // dataset.forEach((d, i) => {
-      //   let total = 0
-      //   let min = 0
-      //   this.domainIds.forEach(k => {
-      //     if (d[k]) {
-      //       total += d[k].value || 0
-      //       if (d[k].value < 0) {
-      //         min += d[k].value || 0
-      //       }
-      //     }
-      //   })
-      //   updated[i]._total = total
-      //   updated[i]._min = min
-      // })
-      // return updated
-
-      return dataset.slice(0)
     },
 
     getXAxisDateByMouse(evt) {

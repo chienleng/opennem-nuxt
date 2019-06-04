@@ -417,7 +417,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 path.line {
   fill: none;
   stroke: #000;

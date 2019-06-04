@@ -1,4 +1,3 @@
-import moment from 'moment'
 import { timeFormat } from 'd3-time-format'
 import {
   timeSecond,
@@ -14,29 +13,26 @@ const formatMillisecond = timeFormat('.%L'),
   formatSecond = timeFormat(':%S'),
   formatMinute = timeFormat('%I:%M'),
   formatHour = timeFormat('%H:%M'),
-  formatDay = timeFormat('%a'),
-  formatWeek = timeFormat('%a'),
+  formatDay = timeFormat('%d %b'),
+  formatWeek = timeFormat('%d %b'),
   formatMonth = timeFormat('%B %Y'),
-  formatYear = timeFormat('%Y')
+  formatYear = timeFormat('%Y'),
+  emptyTime = () => ''
 
-export default function(d) {
-  // TODO: check if moment is needed here
-  const date = moment(d)
-    .utcOffset(600)
-    .toDate()
+export default function(date) {
   return (timeSecond(date) < date
-    ? formatMillisecond
+    ? emptyTime
     : timeMinute(date) < date
-      ? formatSecond
+      ? emptyTime
       : timeHour(date) < date
-        ? formatMinute
+        ? emptyTime
         : timeDay(date) < date
-          ? formatHour
+          ? emptyTime
           : timeMonth(date) < date
             ? timeWeek(date) < date
               ? formatDay
               : formatWeek
             : timeYear(date) < date
-              ? formatMonth
+              ? emptyTime
               : formatYear)(date)
 }
