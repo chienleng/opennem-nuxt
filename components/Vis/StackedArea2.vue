@@ -373,7 +373,7 @@ export default {
       this.x.range([0, this.width])
       this.y.range([this.height, 0])
 
-      this.xAxis.tickSize(-this.height + 10)
+      this.xAxis.tickSize(-this.height)
       this.yAxis.tickSize(this.width)
 
       this.$xAxisGroup.call(this.customXAxis)
