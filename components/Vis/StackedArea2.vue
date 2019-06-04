@@ -212,7 +212,7 @@ export default {
     this.setupWidthHeight()
     this.setup()
     this.dataset = this.visData.dataset
-    setupSignals(this.id, this.height, this.x, this.dataset) // Eventbus signals
+    setupSignals(this.id, this.width, this.height, this.x, this.dataset) // Eventbus signals
     this.update()
   },
 
@@ -284,16 +284,16 @@ export default {
         EventBus.$emit('vis.mouseenter')
       })
       $svg.on('mouseleave', () => {
-        this.$cursorLineGroup.attr('opacity', 0)
-        EventBus.$emit('vis.mouseleave')
+        // this.$cursorLineGroup.attr('opacity', 0)
+        // EventBus.$emit('vis.mouseleave')
       })
 
       this.$hoverLayer.on('touchmove mousemove', function() {
-        EventBus.$emit('vis.mousemove', self.getXAxisDateByMouse(this))
+        EventBus.$emit('vis.mousemove', this, self.getXAxisDateByMouse(this))
         EventBus.$emit('vis.areaover', null)
       })
       this.brushX.on('brush', function() {
-        EventBus.$emit('vis.mousemove', self.getXAxisDateByMouse(this))
+        EventBus.$emit('vis.mousemove', this, self.getXAxisDateByMouse(this))
         EventBus.$emit('vis.areaover', null)
       })
     },
@@ -358,13 +358,13 @@ export default {
       this.$stackedAreaGroup
         .selectAll('path')
         .on('touchmove mousemove', function(d) {
-          EventBus.$emit('vis.mousemove', self.getXAxisDateByMouse(this))
+          EventBus.$emit('vis.mousemove', this, self.getXAxisDateByMouse(this))
           EventBus.$emit('vis.areaover', d.key)
         })
       this.$xAxisBrushGroup
         .selectAll('.brush')
         .on('touchmove mousemove', function() {
-          EventBus.$emit('vis.mousemove', self.getXAxisDateByMouse(this))
+          EventBus.$emit('vis.mousemove', this, self.getXAxisDateByMouse(this))
           EventBus.$emit('vis.areaover', null)
         })
     },

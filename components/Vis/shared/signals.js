@@ -1,10 +1,10 @@
-import { select } from 'd3-selection'
+import { select, mouse } from 'd3-selection'
 import { timeFormat } from 'd3-time-format'
 import EventBus from '~/plugins/eventBus.js'
 import * as CONFIG from './config.js'
 
-function setupSignals(id, height, x, dataset) {
-  const timeRectWidth = 65
+function setupSignals(id, width, height, x, dataset) {
+  const timeRectWidth = 70
   const format = timeFormat('%H:%M')
 
   const cursorLineGroupClass = CONFIG.CURSOR_LINE_GROUP_CLASS
@@ -23,11 +23,9 @@ function setupSignals(id, height, x, dataset) {
     .attr('height', 20)
     .attr('rx', 2)
     .attr('ry', 2)
-    .attr('y', -20)
   const $cursorLineText = $svg
     .select(`.${cursorLineTextClass}`)
     .attr('text-anchor', 'middle')
-    .attr('y', -5)
     .style('fill', 'white')
 
   const $tooltipRect = $cursorLineGroup
@@ -37,12 +35,10 @@ function setupSignals(id, height, x, dataset) {
     .attr('height', 20)
     .attr('rx', 2)
     .attr('ry', 2)
-    .attr('y', 0)
   const $tooltipText = $cursorLineGroup
     .append('text')
     .attr('class', tooltipTextClass)
     .attr('text-anchor', 'middle')
-    .attr('y', 15)
     .style('fill', 'white')
 
   let currentKey = '',
@@ -57,35 +53,59 @@ function setupSignals(id, height, x, dataset) {
     currentKey = key
   }
 
-  function onMouseMove(date) {
-    const m = x(date)
+  function onMouseMove(evt, date) {
+    const layer = select(evt).attr('class')
+    const mouseEvt = mouse(evt)
+    const xMouse = mouseEvt[0]
+    const yMouse = mouseEvt[1]
+    const yCutoff = (20 / 100) * height
+    const leftCutoff = timeRectWidth
+    const rightCutoff = width - timeRectWidth - 2
+    const xDate = x(date)
     const time = format(date)
-
     const millisecs = new Date(date).getTime()
     const find = dataset.find(d => d.date === millisecs)
     let value = ''
+
+    // console.log(label, value, date)
     if (find && currentKey) {
       label = find[currentKey].fuelTech
       value = find[currentKey].value
     }
 
-    $tooltipRect.attr('x', m - 300 / 2)
-    // text to show date and follow mouse
-    $tooltipText.text(`${label}: ${value}`).attr('x', m)
+    // Tooltip text/rect to follow mouse
+    $tooltipRect.attr('x', xDate - 300 / 2).attr('y', 0)
+    $tooltipText
+      .text(`${label}: ${value}`)
+      .attr('x', xDate)
+      .attr('y', 15)
 
-    console.log(label, value, date)
-    // rect to follow mouse
     // TODO: detect if near the left or right edge
-    $cursorLineRect.attr('x', m - timeRectWidth / 2)
-    // text to show date and follow mouse
-    $cursorLineText.text(time).attr('x', m)
-
-    // line to follow mouse
+    // Cursor line/rect/text to follow mouse
+    $cursorLineRect.attr('x', xDate - timeRectWidth / 2).attr('y', -20)
+    $cursorLineText
+      .text(time)
+      .attr('x', xDate)
+      .attr('y', -5)
     $cursorLine.attr('d', () => {
-      let d = 'M' + m + ',' + height
-      d += ' ' + m + ',' + 0
+      let d = 'M' + xDate + ',' + height
+      d += ' ' + xDate + ',' + 0
       return d
     })
+
+    if (yMouse <= yCutoff && layer !== 'brush') {
+      $tooltipRect.attr('y', height - 20)
+      $tooltipText.attr('y', height - 10)
+      $cursorLineRect.attr('y', height)
+      $cursorLineText.attr('y', height + 15)
+    }
+    if (xMouse >= rightCutoff) {
+      $cursorLineRect.attr('x', rightCutoff)
+      $cursorLineText.attr('x', rightCutoff + timeRectWidth / 2)
+    } else if (xMouse <= leftCutoff) {
+      $cursorLineRect.attr('x', 0)
+      $cursorLineText.attr('x', timeRectWidth / 2)
+    }
   }
 
   function onMouseOver() {

@@ -311,7 +311,7 @@ export default {
       this.pointSummaryLoads._total = totalLoads
     },
 
-    handleVisCursor(date) {
+    handleVisCursor(evt, date) {
       const dataFound = this.dataset.find(d => {
         const fDate = moment(d.date)
         const rDate = moment(date)
