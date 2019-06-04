@@ -35,7 +35,6 @@ function setupSignals(id, height, x, dataset) {
   EventBus.$on('vis.areaover', onAreaOver)
 
   function onAreaOver(key) {
-    console.log(key)
     currentKey = key
   }
 
@@ -46,7 +45,7 @@ function setupSignals(id, height, x, dataset) {
     const millisecs = new Date(date).getTime()
     const find = dataset.find(d => d.date === millisecs)
 
-    console.log(find, date)
+    // console.log(find, date)
     // rect to follow mouse
     // TODO: detect if near the left or right edge
     $cursorLineRect.attr('x', m - timeRectWidth / 2)

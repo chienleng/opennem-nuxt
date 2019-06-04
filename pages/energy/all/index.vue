@@ -14,7 +14,7 @@
         <summary-table
           v-if="hasData"
           :domains="domains"
-          :dataset="dataset"
+          :dataset="filteredDataset"
           :period="period"
         />
       </div>
@@ -34,6 +34,7 @@
 </template>
 
 <script>
+import EventBus from '~/plugins/eventBus.js'
 import RangePeriodSelectors from '~/components/RangePeriodSelectors.vue'
 import DataOptionsBar from '~/components/energy/DataOptionsBar'
 import Generation from '~/components/Generation.vue'
@@ -64,7 +65,9 @@ export default {
       domains: [],
       data: [],
       url: '',
-      selectedId: ''
+      selectedId: '',
+      dateFilter: null,
+      filteredDataset: []
     }
   },
 
@@ -93,12 +96,18 @@ export default {
   },
 
   mounted() {
+    EventBus.$on('dataset.filter', this.handleDatasetFilter)
+
     this.mounted = true
     this.range = this.$route.query.range || '7D'
     this.period = this.$route.query.period || '30min'
     console.log(this.fuelTechNames, this.fuelTechGroup)
 
     this.fetchData(this.region, this.range)
+  },
+
+  beforeDestroy() {
+    EventBus.$off('dataset.filter')
   },
 
   methods: {
@@ -119,6 +128,17 @@ export default {
       this.getFlattenData(data)
     },
 
+    updateFilteredData(startDate, endDate) {
+      const startDateTime = new Date(startDate).getTime()
+      const endDateTime = new Date(endDate).getTime()
+
+      const filtered = this.dataset.filter(
+        d => d.date >= startDateTime && d.date <= endDateTime
+      )
+      console.log(filtered)
+      this.filteredDataset = filtered
+    },
+
     getFlattenData(data) {
       RegionPageMethods.getFlattenData(
         data,
@@ -135,6 +155,12 @@ export default {
       }
       this.flattenData = newData
       this.dataset = newData
+
+      if (this.dateFilter) {
+        this.updateFilteredData(this.dateFilter[0], this.dateFilter[1])
+      } else {
+        this.filteredDataset = newData
+      }
     },
 
     handleRangeChange(range) {
@@ -145,6 +171,15 @@ export default {
     handlePeriodChange(period) {
       this.period = period
       this.getFlattenData(this.data)
+    },
+
+    handleDatasetFilter(dateRange) {
+      if (dateRange && dateRange.length > 0) {
+        this.dateFilter = dateRange
+        this.updateFilteredData(dateRange[0], dateRange[1])
+      } else {
+        this.filteredDataset = this.dataset
+      }
     }
   }
 }

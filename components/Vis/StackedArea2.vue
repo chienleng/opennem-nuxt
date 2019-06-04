@@ -399,6 +399,7 @@ export default {
     handleReset() {
       this.x.domain(extent(this.dataset, d => d.date))
       this.zoomRedraw()
+      EventBus.$emit('dataset.filter', null)
     },
 
     brushEnded(d) {
@@ -406,15 +407,22 @@ export default {
       if (!event.selection) return
 
       const s = event.selection
+      const startDate = this.x.invert(s[0])
+      const endDate = this.x.invert(s[1])
+      const dataRange = [
+        this.getEveryTime(startDate),
+        this.getEveryTime(endDate)
+      ]
 
       // Get the brush selection (start/end) points -> dates
       // Set it to the current X domain
-      this.x.domain([this.x.invert(s[0]), this.x.invert(s[1])])
+      this.x.domain(dataRange)
 
       // Turn off the brush selection
       selectAll('.brush').call(this.brushX.move, null)
 
       this.zoomRedraw()
+      EventBus.$emit('dataset.filter', dataRange)
     },
 
     customXAxis(g) {
