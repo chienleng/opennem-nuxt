@@ -10,6 +10,15 @@ path.line {
 .cursor-line-rect {
   fill: $opennem-link-color;
 }
+.tooltip-rect {
+  fill: white;
+  stroke-width: 1px;
+  stroke: #ddd;
+}
+.tooltip-text {
+  fill: #333;
+  font-size: 12px;
+}
 .hover-layer {
   fill: transparent;
 }

@@ -43,12 +43,10 @@ function setupSignals(id, width, height, x) {
     .append('text')
     .attr('class', tooltipTextClass)
     .attr('text-anchor', 'middle')
-    .style('fill', 'white')
   const $tooltipText2 = $cursorLineGroup
     .append('text')
     .attr('class', tooltipTextClass)
     .attr('text-anchor', 'middle')
-    .style('fill', 'white')
 
   let currentKey = '',
     label = ''
