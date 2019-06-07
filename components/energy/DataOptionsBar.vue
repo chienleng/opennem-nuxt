@@ -75,14 +75,27 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '~/assets/scss/responsive-mixins.scss';
 @import '~/assets/scss/variables.scss';
 
 .data-options-bar {
-  display: flex;
-  align-items: center;
   padding: $app-padding;
+
+  .button {
+    font-size: 11px;
+  }
+
+  @include tablet {
+    display: flex;
+    align-items: center;
+  }
 }
 .range-buttons {
   margin-right: $app-padding;
+  margin-bottom: $app-padding / 2;
+
+  @include tablet {
+    margin-bottom: 0;
+  }
 }
 </style>

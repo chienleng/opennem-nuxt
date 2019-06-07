@@ -197,6 +197,10 @@ export default {
     dataset() {
       this.zoomed = false
       this.update()
+    },
+    visHeight(newValue) {
+      this.svgHeight = newValue
+      this.handleResize()
     }
   },
 

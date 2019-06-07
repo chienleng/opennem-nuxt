@@ -15,7 +15,7 @@
           :dataset="dataset"
           :interval="interval"
           :step="step"
-          :vis-height="578" />
+          :vis-height="visHeight" />
       </div>
       <div class="table-container">
         <summary-table
@@ -66,7 +66,8 @@ export default {
       domainIds: [],
       responses: [],
       dateFilter: null,
-      filteredDataset: []
+      filteredDataset: [],
+      visHeight: 0
     }
   },
 
@@ -87,9 +88,16 @@ export default {
   },
 
   mounted() {
-    this.mounted = true
+    this.visHeight = window.innerWidth > 768 ? 578 : 350
     EventBus.$on('dataset.filter', this.handleDatasetFilter)
+    this.$nextTick(() => {
+      window.addEventListener('resize', () => {
+        this.visHeight = window.innerWidth > 768 ? 578 : 350
+      })
+    })
+
     this.fetchData(this.region, this.range)
+    this.mounted = true
   },
 
   beforeDestroy() {
