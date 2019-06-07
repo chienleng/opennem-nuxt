@@ -15,7 +15,7 @@
           :dataset="dataset"
           :interval="interval"
           :step="step"
-          :vis-height="350" />
+          :vis-height="578" />
       </div>
       <div class="table-container">
         <summary-table

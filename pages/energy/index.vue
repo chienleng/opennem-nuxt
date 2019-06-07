@@ -109,37 +109,19 @@ export default {
           break
         case '30D':
           this.type = 'energy'
-          urls.push(`/energy/history/daily/${region}.json`)
-          break
-        case '1Y':
-          this.type = 'energy'
-          const now = new Date().getTime()
-          const aYearAgo = now - 31557600000
-          const thisFullYear = new Date().getFullYear()
-          const lastFullYear = new Date(aYearAgo).getFullYear()
-          urls.push(`/testing/${region}/energy/daily/${lastFullYear}.json`)
-          urls.push(`/testing/${region}/energy/daily/${thisFullYear}.json`)
-          // TODO: FILTER to a year
-          break
-        case 'ALL':
-          this.type = 'energy'
-          urls.push(`/testing/${region}/energy/monthly/all.json`)
-          break
+          urls.push(`/testing/${region}/energy/daily/2018.json`)
+          urls.push(`/testing/${region}/energy/daily/2019.json`)
         default:
           this.type = 'energy'
       }
 
-      if (urls.length > 0) {
-        http(urls)
-          .then(responses => {
-            this.handleResponses(responses)
-          })
-          .catch(e => {
-            console.error(e)
-          })
-      } else {
-        console.warn('fetchData', 'No urls provided')
-      }
+      http(urls)
+        .then(responses => {
+          this.handleResponses(responses)
+        })
+        .catch(e => {
+          console.error(e)
+        })
     },
 
     handleResponses(responses) {
@@ -154,7 +136,7 @@ export default {
 
       // flatten data for vis and summary
       res.forEach(r => {
-        promises.push(this.flatten(r.data, domains, range, interval))
+        promises.push(this.flatten(r.data, interval, domains))
       })
 
       // return flatten data and merge
@@ -178,14 +160,8 @@ export default {
           )
         }
 
-        // Roll up based on interval
-        DataTransformService.rollUp(data, domains, range, interval).then(
-          rolledUpData => {
-            // Then calculate min and total for each point for the chart
-            this.dataset = this.calculateMinTotal(rolledUpData, domains)
-            this.updatedFilteredDataset(this.dataset)
-          }
-        )
+        this.dataset = data
+        this.updatedFilteredDataset(data)
       })
     },
 
@@ -235,11 +211,7 @@ export default {
           this.dateFilter = null
           break
         case '1Y':
-          this.interval = 'Week'
-          this.dateFilter = null
-          break
-        case 'ALL':
-          this.interval = 'Month'
+          this.interval = 'Day'
           this.dateFilter = null
           break
         default:
@@ -272,14 +244,28 @@ export default {
       }
     },
 
-    flatten(data, domains, range, interval) {
+    flatten(data, interval, domains) {
       return new Promise(resolve => {
-        DataTransformService.flattenAndInterpolate(
-          data,
-          domains,
-          range,
-          interval
-        ).then(res => {
+        DataTransformService.flattenAndInterpolate(data, interval).then(res => {
+          // Calculate total, min, reverse value for imports and load types
+          res.forEach((d, i) => {
+            let total = 0
+            let min = 0
+            domains.forEach(domain => {
+              const id = domain.id
+
+              if (domain.category === 'load' || domain.fuelTech === 'imports') {
+                const negValue = -d[id].value
+                d[id].value = negValue
+              }
+              total += d[id].value || 0
+              if (d[id].value < 0) {
+                min += d[id].value || 0
+              }
+            })
+            res[i]._total = total
+            res[i]._min = min
+          })
           if (interval === '5m' || interval === '30m') {
             const start = res[0].date
             const now = new Date().getTime()
@@ -288,29 +274,6 @@ export default {
           resolve(res)
         })
       })
-    },
-
-    calculateMinTotal(dataset, domains) {
-      // Calculate total, min, reverse value for imports and load types
-      dataset.forEach((d, i) => {
-        let total = 0
-        let min = 0
-        domains.forEach(domain => {
-          const id = domain.id
-
-          if (domain.category === 'load' || domain.fuelTech === 'imports') {
-            const negValue = -d[id].value
-            d[id].value = negValue
-          }
-          total += d[id].value || 0
-          if (d[id].value < 0) {
-            min += d[id].value || 0
-          }
-        })
-        dataset[i]._total = total
-        dataset[i]._min = min
-      })
-      return dataset
     },
 
     getFuelTechObjs() {

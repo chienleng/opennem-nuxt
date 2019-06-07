@@ -330,7 +330,12 @@ export default {
       const summary = {}
       const marketValues = {}
 
-      DataTransformService.flattenAndInterpolate(data, '5min').then(res => {
+      DataTransformService.flattenAndInterpolate(
+        data,
+        this.keys,
+        '7D',
+        '5m'
+      ).then(res => {
         console.log(res, this.keys)
 
         this.keys.forEach(key => {

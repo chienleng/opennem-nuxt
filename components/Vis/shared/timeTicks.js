@@ -5,6 +5,7 @@ import {
   timeDay,
   timeWeek,
   timeMonth,
+  timeMonday,
   timeYear
 } from 'd3-time'
 
@@ -29,4 +30,5 @@ export default function(time) {
     // less than 7 days
     return timeDay.every(1)
   }
+  // return timeMonday.every(1)
 }

@@ -9,12 +9,11 @@
 @import '~/assets/scss/variables.scss';
 
 footer {
-  background: yellow;
+  background: lightgrey;
   padding: $app-padding / 4 $app-padding;
 
   @include tablet {
-    position: fixed;
-    bottom: 0;
+    position: absolute;
     left: 0;
     right: 0;
   }

@@ -1,16 +1,20 @@
 import moment from 'moment'
 import sortBy from 'lodash.sortby'
-import { nest } from 'd3-collection'
-import { mean } from 'd3-array'
 import parseInterval from '~/plugins/intervalParser.js'
 import * as FUEL_TECHS from '~/constants/fuelTech.js'
 
+import rollUp30m from './rollUpModules/ru-30m.js'
+import rollUp1YWeek from './rollUpModules/ru-1y-week.js'
+import rollUp1YMonth from './rollUpModules/ru-1y-month.js'
+import rollUpAllSeason from './rollUpModules/ru-all-season.js'
+import rollUpAllQuarter from './rollUpModules/ru-all-quarter.js'
+import rollUpAllFinYear from './rollUpModules/ru-all-financial-year.js'
+import rollUpAllYear from './rollUpModules/ru-all-year.js'
 /**
  *
  * @param {*} data: response data from API
  */
-function transformData(data) {
-  const dataKeys = data.map(d => d.id)
+function transformData(data, domains) {
   const flatData = []
 
   /**
@@ -28,28 +32,20 @@ function transformData(data) {
       if (!findDate) {
         const newObj = { date: r.date }
 
-        dataKeys.forEach(key => {
-          newObj[key] = {
-            fuelTech: null,
-            type: null,
+        domains.forEach(domain => {
+          newObj[domain.id] = {
+            fuelTech: domain.fuelTech,
+            type: domain.type,
             value: null,
-            category: null
+            category: domain.category
           }
         })
 
-        newObj[id] = {
-          fuelTech,
-          type,
-          value: r.value,
-          category: FUEL_TECHS.FUEL_TECH_CATEGORY[fuelTech]
-        }
+        newObj[id].value = r.value
         flatData.push(newObj)
       } else {
-        findDate[id] = {
-          fuelTech,
-          type,
-          value: r.value,
-          category: FUEL_TECHS.FUEL_TECH_CATEGORY[fuelTech]
+        if (type === 'power' || type === 'energy') {
+          findDate[id].value = r.value
         }
       }
     })
@@ -108,41 +104,6 @@ function transformData(data) {
   })
 
   return sortBy(flatData, ['date'])
-}
-
-function rollupTo30Mins(ids, data) {
-  const coeff = 1000 * 60 * 30
-  const entries = nest()
-    .key(d => Math.round(d.date / coeff) * coeff)
-    .rollup(a => {
-      let obj = {}
-      ids.forEach(id => {
-        obj[id] = {
-          fuelTech: a[0][id].fuelTech,
-          type: a[0][id].type,
-          value: mean(a, d => d[id].value || 0),
-          category: a[0][id].category
-        }
-      })
-      return obj
-    })
-    .entries(data)
-
-  return entries.map(e => {
-    const object = {
-      date: parseInt(e.key)
-    }
-
-    Object.keys(e.value).forEach(k => {
-      object[k] = {
-        fuelTech: e.value[k].fuelTech,
-        type: e.value[k].type,
-        value: e.value[k].value,
-        category: e.value[k].category
-      }
-    })
-    return object
-  })
 }
 
 function findInterpolateSeriesTypes(data) {
@@ -216,19 +177,39 @@ export default {
     return promise
   },
 
-  flattenAndInterpolate(data, period) {
+  flattenAndInterpolate(data, domains, range, interval) {
     const promise = new Promise(resolve => {
       const ids = data.map(d => d.id)
       const interpolateSeriesTypes = findInterpolateSeriesTypes(data)
-      let flatData = transformData(data)
+      let flatData = transformData(data, domains)
       mutateDataForInterpolation(flatData, interpolateSeriesTypes)
-      if (period === '30min') {
-        resolve(rollupTo30Mins(ids, flatData))
-      } else {
-        resolve(flatData)
-      }
+
+      resolve(flatData)
     })
 
+    return promise
+  },
+
+  rollUp(data, domains, range, interval) {
+    const domainIds = domains.map(d => d.id)
+    const promise = new Promise(resolve => {
+      if (interval === '30m') {
+        resolve(rollUp30m(domainIds, data))
+      } else if (range === '1Y' && interval === 'Week') {
+        resolve(rollUp1YWeek(domainIds, data))
+      } else if (range === '1Y' && interval === 'Month') {
+        resolve(rollUp1YMonth(domainIds, data))
+      } else if (range === 'ALL' && interval === 'Season') {
+        resolve(rollUpAllSeason(domainIds, data))
+      } else if (range === 'ALL' && interval === 'Quarter') {
+        resolve(rollUpAllQuarter(domainIds, data))
+      } else if (range === 'ALL' && interval === 'Fin Year') {
+        resolve(rollUpAllFinYear(domainIds, data))
+      } else if (range === 'ALL' && interval === 'Year') {
+        resolve(rollUpAllYear(domainIds, data))
+      }
+      resolve(data)
+    })
     return promise
   },
 
@@ -245,8 +226,10 @@ export default {
     return columns
   },
 
-  filter(data, startDate, lastDate) {
-    // TODO: return data filtered by start and end date
-    return data.filter(d => d.date >= startDate && d.date <= lastDate)
+  filterDataByStartEndDates(data, startDate, endDate) {
+    const startDateTime = new Date(startDate).getTime()
+    const endDateTime = new Date(endDate).getTime()
+
+    return data.filter(d => d.date >= startDateTime && d.date <= endDateTime)
   }
 }

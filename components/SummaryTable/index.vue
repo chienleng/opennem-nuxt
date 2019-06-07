@@ -22,12 +22,12 @@
       <div class="summary-row">
         <div class="summary-col-label">{GROUP}</div>
         <div
-          v-if="!visEntered"
+          v-if="!visEntered || isEnergy"
           class="summary-col-energy">
           Energy <small>GWh</small>
         </div>
         <div
-          v-if="visEntered"
+          v-if="visEntered && !isEnergy"
           class="summary-col-energy">
           Power <small>MW</small>
         </div>
@@ -141,9 +141,13 @@ export default {
       type: String,
       default: () => ''
     },
-    period: {
+    interval: {
       type: String,
       default: () => ''
+    },
+    isEnergy: {
+      type: Boolean,
+      default: () => false
     }
   },
 
@@ -181,10 +185,10 @@ export default {
     },
 
     intervalMins() {
-      const period = this.period
-      if (period === '30min') {
+      const interval = this.interval
+      if (interval === '30m') {
         return 30
-      } else if (period === 'Daily') {
+      } else if (interval === 'Day') {
         return 60 * 24
       }
       // default 5 mins
@@ -260,8 +264,14 @@ export default {
         const category = ft.category
         const dataEnergy = data.map(d => {
           const energy = {}
-          // calculate energy (GWh) += power * 5mins/60/100
-          energy[ft.id] = (d[ft.id].value * 5) / 60 / 1000
+
+          if (this.isEnergy) {
+            energy[ft.id] = d[ft.id].value
+          } else {
+            // calculate energy (GWh) += power * 5mins/60/100
+            energy[ft.id] = (d[ft.id].value * 5) / 60 / 1000
+          }
+
           return energy
         })
         const dataEnergySum = dataEnergy.reduce(
@@ -306,16 +316,15 @@ export default {
           }
         })
       }
-
       this.pointSummarySources._total = totalSources
       this.pointSummaryLoads._total = totalLoads
     },
 
-    handleVisCursor(evt, date) {
-      const dataFound = this.dataset.find(d => {
+    handleVisCursor(evt, dataset, date) {
+      const dataFound = dataset.find(d => {
         const fDate = moment(d.date)
         const rDate = moment(date)
-        if (this.period === 'Daily') {
+        if (this.interval === 'Day') {
           fDate.hour(0)
           fDate.minute(0)
           fDate.second(0)
@@ -330,7 +339,6 @@ export default {
         dataFound && dataFound[this.temperatureId]
           ? dataFound[this.temperatureId].value
           : ''
-
       this.calculatePointSummary(dataFound)
     },
 

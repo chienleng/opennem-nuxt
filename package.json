@@ -33,6 +33,8 @@
     "lodash.isempty": "^4.4.0",
     "lodash.mapvalues": "^4.6.0",
     "lodash.sortby": "^4.7.0",
+    "lodash.uniq": "^4.5.0",
+    "lodash.uniqby": "^4.7.0",
     "moment": "^2.23.0",
     "nuxt": "^2.0.0",
     "vue-scrolling-table": "^0.2.2",
