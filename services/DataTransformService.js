@@ -1,5 +1,5 @@
 import moment from 'moment'
-import sortBy from 'lodash.sortby'
+import _sortBy from 'lodash.sortby'
 import parseInterval from '~/plugins/intervalParser.js'
 import * as FUEL_TECHS from '~/constants/fuelTech.js'
 
@@ -103,7 +103,7 @@ function transformData(data, domains) {
     }
   })
 
-  return sortBy(flatData, ['date'])
+  return _sortBy(flatData, ['date'])
 }
 
 function findInterpolateSeriesTypes(data) {

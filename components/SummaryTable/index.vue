@@ -109,7 +109,6 @@
 <script>
 import moment from 'moment'
 import _isEmpty from 'lodash.isempty'
-import find from 'lodash.find'
 import EventBus from '~/plugins/eventBus.js'
 import Items from './Items'
 

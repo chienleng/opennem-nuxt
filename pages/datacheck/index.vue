@@ -124,7 +124,6 @@
 <script>
 // import moment from 'moment'
 // import { timeMinute, timeDay } from 'd3-time'
-// import uniq from 'lodash.uniq'
 // import includes from 'lodash.includes'
 // import axios from 'axios'
 // import EventBus from '~/plugins/eventBus.js'

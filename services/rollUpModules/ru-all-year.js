@@ -1,4 +1,4 @@
-import * as moment from 'moment'
+import moment from 'moment'
 import { nest as d3Nest } from 'd3-collection'
 import { sum as d3Sum } from 'd3-array'
 
