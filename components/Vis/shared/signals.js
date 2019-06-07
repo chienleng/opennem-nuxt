@@ -27,6 +27,7 @@ function setupSignals(id, width, height, x) {
     .attr('height', 20)
     .attr('rx', 2)
     .attr('ry', 2)
+    .attr('opacity', 0)
   const $cursorLineText = $svg
     .select(`.${cursorLineTextClass}`)
     .attr('text-anchor', 'middle')
@@ -39,6 +40,7 @@ function setupSignals(id, width, height, x) {
     .attr('height', valueRectHeight)
     .attr('rx', 2)
     .attr('ry', 2)
+    .attr('opacity', 0)
   const $tooltipText = $cursorLineGroup
     .append('text')
     .attr('class', tooltipTextClass)
@@ -89,7 +91,10 @@ function setupSignals(id, width, height, x) {
     }
 
     // Tooltip text/rect to follow mouse
-    $tooltipRect.attr('x', xDate - valueRectWidth / 2).attr('y', 0)
+    $tooltipRect
+      .attr('x', xDate - valueRectWidth / 2)
+      .attr('y', 0)
+      .attr('opacity', 1)
     $tooltipText
       .attr('x', xDate)
       .attr('y', 15)
@@ -101,7 +106,10 @@ function setupSignals(id, width, height, x) {
 
     // TODO: detect if near the left or right edge
     // Cursor line/rect/text to follow mouse
-    $cursorLineRect.attr('x', xDate - timeRectWidth / 2).attr('y', -20)
+    $cursorLineRect
+      .attr('x', xDate - timeRectWidth / 2)
+      .attr('y', -20)
+      .attr('opacity', 1)
     $cursorLineText
       .attr('x', xDate)
       .attr('y', -5)
