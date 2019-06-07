@@ -1,4 +1,4 @@
-import includes from 'lodash.includes'
+import _includes from 'lodash.includes'
 
 /**
  * Parse interval:
@@ -21,7 +21,7 @@ function parse(string) {
   const key = string.charAt(length - 1)
   const value = length === 1 ? 1 : parseInt(string.substring(0, length - 1), 10)
 
-  if (!includes(durationKeys, key)) {
+  if (!_includes(durationKeys, key)) {
     throw new Error(`Invalid duration key: ${key}`)
   }
 

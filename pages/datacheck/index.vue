@@ -1,6 +1,6 @@
 <template>
   <section>
-    <header>
+    <!-- <header>
       <div class="select">
         <select v-model="type">
           <option value="energy">energy</option>
@@ -116,261 +116,237 @@
           :columns="columns"
           style="min-width: 400px;"
         />
-
-      <!-- <LineVis 
-        :data="flattenData"
-        :keys="[selectedId]"/>
-      
-      <DataTable 
-        :data="flattenData"
-        :columns="columns" /> -->
-
       </div>
-    </div>    
+    </div>     -->
   </section>
 </template>
 
 <script>
-import moment from 'moment'
-import { timeMinute, timeDay } from 'd3-time'
-import uniq from 'lodash.uniq'
-import includes from 'lodash.includes'
-import axios from 'axios'
-import EventBus from '~/plugins/eventBus.js'
-import * as FUEL_TECHS from '~/constants/fuelTech.js'
-import DataService from '~/services/DataService.js'
-import DataTransformService from '~/services/DataTransformService.js'
-import RegionPageMethods from '~/methods/regionPage.js'
-import DataList from '~/components/DataList.vue'
-import DataTable from '~/components/DataTable.vue'
-import DataTable2 from '~/components/DataTable2.vue'
-import LineVis from '~/components/Vis/Line.vue'
+// import moment from 'moment'
+// import { timeMinute, timeDay } from 'd3-time'
+// import uniq from 'lodash.uniq'
+// import includes from 'lodash.includes'
+// import axios from 'axios'
+// import EventBus from '~/plugins/eventBus.js'
+// import * as FUEL_TECHS from '~/constants/fuelTech.js'
+// import DataService from '~/services/DataService.js'
+// import DataTransformService from '~/services/DataTransformService.js'
+// import RegionPageMethods from '~/methods/regionPage.js'
+// import DataList from '~/components/DataList.vue'
+// import DataTable from '~/components/DataTable.vue'
+// import DataTable2 from '~/components/DataTable2.vue'
+// import LineVis from '~/components/Vis/Line.vue'
 
-export default {
-  components: {
-    DataList,
-    DataTable,
-    DataTable2,
-    LineVis
-  },
+// export default {
+//   components: {
+//     DataList,
+//     DataTable,
+//     DataTable2,
+//     LineVis
+//   },
 
-  data() {
-    return {
-      mounted: false,
-      type: 'energy',
-      region: 'sa1',
-      year: '2018',
-      data: [],
-      flattenData: [],
-      columns: {},
-      url: '',
-      selectedId: '',
-      summary: {},
-      marketValues: {}
-    }
-  },
+//   data() {
+//     return {
+//       mounted: false,
+//       type: 'energy',
+//       region: 'sa1',
+//       year: '2018',
+//       data: [],
+//       flattenData: [],
+//       columns: {},
+//       url: '',
+//       selectedId: '',
+//       summary: {},
+//       marketValues: {}
+//     }
+//   },
 
-  // asyncData({ params }) {
-  //   return DataService.getEnergyByRegionYear('nem', 2017).then(res => {
-  //     return {
-  //       data: res.data,
-  //       flattenData: DataTransformService.flatten(res.data),
-  //       columns: DataTransformService.getColumns(res.data),
-  //       url: res.config.url
-  //     }
-  //   })
-  // },
+//   computed: {
+//     nemLength() {
+//       return this.data.length
+//     },
 
-  computed: {
-    nemLength() {
-      return this.data.length
-    },
+//     availableKeys() {
+//       return RegionPageMethods.computedAvailableKeys(
+//         this.$store.getters.fuelTechOrder,
+//         this.data
+//       ).reverse()
+//     },
 
-    // availableKeys() {
-    //   return uniq(this.data.map(d => d.fuel_tech).filter(d => d))
-    // },
+//     keys() {
+//       const type = this.type
+//       const region = this.region
+//       return this.availableKeys.map(ft => {
+//         return {
+//           tech: ft,
+//           id: `${region}.fuel_tech.${ft}.${type}`,
+//           marketValue: `${region}.fuel_tech.${ft}.market_value`
+//         }
+//       })
+//     },
 
-    availableKeys() {
-      return RegionPageMethods.computedAvailableKeys(
-        this.$store.getters.fuelTechOrder,
-        this.data
-      ).reverse()
-    },
+//     selectedItem() {
+//       return this.data.find(d => d.id === this.selectedId)
+//     },
 
-    keys() {
-      const type = this.type
-      const region = this.region
-      return this.availableKeys.map(ft => {
-        return {
-          tech: ft,
-          id: `${region}.fuel_tech.${ft}.${type}`,
-          marketValue: `${region}.fuel_tech.${ft}.market_value`
-        }
-      })
-    },
+//     summaryTotal() {
+//       let total = 0
+//       Object.keys(this.summary).forEach(key => {
+//         total += this.summary[key]
+//       })
+//       return total
+//     },
 
-    selectedItem() {
-      return this.data.find(d => d.id === this.selectedId)
-    },
+//     grossTotal() {
+//       let total = 0
+//       Object.keys(this.summary).forEach(key => {
+//         const isLoad =
+//           includes(key, 'pumps') ||
+//           includes(key, 'battery_charging') ||
+//           includes(key, 'exports')
 
-    summaryTotal() {
-      let total = 0
-      Object.keys(this.summary).forEach(key => {
-        total += this.summary[key]
-      })
-      return total
-    },
+//         if (!isLoad) {
+//           total += this.summary[key]
+//         }
+//       })
+//       return total
+//     },
 
-    grossTotal() {
-      let total = 0
-      Object.keys(this.summary).forEach(key => {
-        const isLoad =
-          includes(key, 'pumps') ||
-          includes(key, 'battery_charging') ||
-          includes(key, 'exports')
+//     marketValueNetTotal() {
+//       let total = 0
+//       Object.keys(this.marketValues).forEach(key => {
+//         total += this.marketValues[key]
+//       })
+//       return total
+//     },
 
-        if (!isLoad) {
-          total += this.summary[key]
-        }
-      })
-      return total
-    },
+//     marketValueGrossTotal() {
+//       let total = 0
+//       Object.keys(this.marketValues).forEach(key => {
+//         const isLoad =
+//           includes(key, 'pumps') ||
+//           includes(key, 'battery_charging') ||
+//           includes(key, 'exports')
 
-    marketValueNetTotal() {
-      let total = 0
-      Object.keys(this.marketValues).forEach(key => {
-        total += this.marketValues[key]
-      })
-      return total
-    },
+//         total += isLoad ? -this.marketValues[key] : this.marketValues[key]
+//       })
+//       return total
+//     }
+//   },
 
-    marketValueGrossTotal() {
-      let total = 0
-      Object.keys(this.marketValues).forEach(key => {
-        const isLoad =
-          includes(key, 'pumps') ||
-          includes(key, 'battery_charging') ||
-          includes(key, 'exports')
+//   watch: {
+//     selectedId(id) {
+//       const find = this.data.find(d => d.id === id)
+//       if (find) {
+//         this.columns = DataTransformService.getColumns([find])
+//         DataTransformService.flattenAndInterpolate([find], '5min').then(res => {
+//           this.flattenData = res
+//         })
+//       }
+//     },
 
-        total += isLoad ? -this.marketValues[key] : this.marketValues[key]
-      })
-      return total
-    }
-  },
+//     type(selected) {
+//       this.selectedId = ''
+//       this.fetchData(selected, this.region, this.year)
+//     },
 
-  watch: {
-    selectedId(id) {
-      const find = this.data.find(d => d.id === id)
-      if (find) {
-        this.columns = DataTransformService.getColumns([find])
-        DataTransformService.flattenAndInterpolate([find], '5min').then(res => {
-          this.flattenData = res
-        })
-      }
-    },
+//     region(selected) {
+//       this.selectedId = ''
+//       this.fetchData(this.type, selected, this.year)
+//     },
 
-    type(selected) {
-      this.selectedId = ''
-      this.fetchData(selected, this.region, this.year)
-    },
+//     year(selected) {
+//       this.selectedId = ''
+//       this.fetchData(this.type, this.region, selected)
+//     }
+//   },
 
-    region(selected) {
-      this.selectedId = ''
-      this.fetchData(this.type, selected, this.year)
-    },
+//   mounted() {
+//     this.mounted = true
+//     this.fetchData(this.type, this.region, this.year)
+//     // this.$store.commit('nem', this.data)
+//     EventBus.$on('vis.mousemove', this.handleVisCursor)
+//   },
 
-    year(selected) {
-      this.selectedId = ''
-      this.fetchData(this.type, this.region, selected)
-    }
-  },
+//   beforeDestroy() {
+//     EventBus.$off('vis.mousemove')
+//   },
 
-  mounted() {
-    this.mounted = true
-    this.fetchData(this.type, this.region, this.year)
-    // this.$store.commit('nem', this.data)
-    EventBus.$on('vis.mousemove', this.handleVisCursor)
-  },
+//   methods: {
+//     fetchData(type, region, year) {
+//       if (type === 'power') {
+//         this.getPowerByRegion(region)
+//       } else {
+//         if (year === 'all') {
+//           this.getEnergyByRegion(region)
+//         } else {
+//           this.getEnergyByRegionYear(region, year)
+//         }
+//       }
+//     },
+//     getEnergyByRegion(region) {
+//       DataService.getEnergyByRegionAll(region).then(res =>
+//         this.updateData(res.config.url, res.data)
+//       )
+//     },
+//     getEnergyByRegionYear(region, year) {
+//       DataService.getEnergyByRegionYear(region, year).then(res =>
+//         this.updateData(res.config.url, res.data)
+//       )
+//     },
+//     getPowerByRegion(region) {
+//       DataService.getPowerByRegion(region).then(res =>
+//         this.updateData(res.config.url, res.data)
+//       )
+//     },
+//     updateData(url, data) {
+//       this.data = data
+//       this.url = url
 
-  beforeDestroy() {
-    EventBus.$off('vis.mousemove')
-  },
+//       const summary = {}
+//       const marketValues = {}
 
-  methods: {
-    fetchData(type, region, year) {
-      if (type === 'power') {
-        this.getPowerByRegion(region)
-      } else {
-        if (year === 'all') {
-          this.getEnergyByRegion(region)
-        } else {
-          this.getEnergyByRegionYear(region, year)
-        }
-      }
-    },
-    getEnergyByRegion(region) {
-      DataService.getEnergyByRegionAll(region).then(res =>
-        this.updateData(res.config.url, res.data)
-      )
-    },
-    getEnergyByRegionYear(region, year) {
-      DataService.getEnergyByRegionYear(region, year).then(res =>
-        this.updateData(res.config.url, res.data)
-      )
-    },
-    getPowerByRegion(region) {
-      DataService.getPowerByRegion(region).then(res =>
-        this.updateData(res.config.url, res.data)
-      )
-    },
-    updateData(url, data) {
-      this.data = data
-      this.url = url
+//       DataTransformService.flattenAndInterpolate(
+//         data,
+//         this.keys,
+//         '7D',
+//         '5m'
+//       ).then(res => {
+//         console.log(res, this.keys)
 
-      const summary = {}
-      const marketValues = {}
+//         this.keys.forEach(key => {
+//           const sum = res.reduce(function(accumulator, currentValue) {
+//             return currentValue[key.id]
+//               ? accumulator + currentValue[key.id].value
+//               : 0
+//           }, 0)
+//           const sumMarketValue = res.reduce(function(
+//             accumulator,
+//             currentValue
+//           ) {
+//             return currentValue[key.marketValue]
+//               ? accumulator + currentValue[key.marketValue].value
+//               : 0
+//           },
+//           0)
+//           summary[key.id] = sum
+//           marketValues[key.marketValue] = sumMarketValue
+//         })
 
-      DataTransformService.flattenAndInterpolate(
-        data,
-        this.keys,
-        '7D',
-        '5m'
-      ).then(res => {
-        console.log(res, this.keys)
+//         this.summary = summary
+//         this.marketValues = marketValues
+//       })
+//     },
+//     itemSelected(id) {
+//       this.selectedId = id
+//     },
 
-        this.keys.forEach(key => {
-          const sum = res.reduce(function(accumulator, currentValue) {
-            return currentValue[key.id]
-              ? accumulator + currentValue[key.id].value
-              : 0
-          }, 0)
-          const sumMarketValue = res.reduce(function(
-            accumulator,
-            currentValue
-          ) {
-            return currentValue[key.marketValue]
-              ? accumulator + currentValue[key.marketValue].value
-              : 0
-          },
-          0)
-          summary[key.id] = sum
-          marketValues[key.marketValue] = sumMarketValue
-        })
-
-        this.summary = summary
-        this.marketValues = marketValues
-      })
-    },
-    itemSelected(id) {
-      this.selectedId = id
-    },
-
-    handleVisCursor(date) {
-      const rounded = timeMinute.every(5).round(date)
-      console.log(rounded)
-    }
-  }
-}
+//     handleVisCursor(date) {
+//       const rounded = timeMinute.every(5).round(date)
+//       console.log(rounded)
+//     }
+//   }
+// }
 </script>
 
 <style lang="scss" scoped>

@@ -10,7 +10,7 @@
     <div class="vis-table-container">
       <div class="vis-container">
         <stacked-area-vis
-          v-if="mounted"
+          v-if="ready"
           :domains="domains"
           :dataset="dataset"
           :interval="interval"
@@ -42,7 +42,7 @@ import http from '~/services/HttpService.js'
 import DataTransformService from '~/services/DataTransformService.js'
 
 import DataOptionsBar from '~/components/energy/DataOptionsBar'
-import StackedAreaVis from '~/components/Vis/StackedArea2.vue'
+import StackedAreaVis from '~/components/Vis/StackedArea.vue'
 import SummaryTable from '~/components/SummaryTable'
 
 export default {
@@ -57,6 +57,7 @@ export default {
   data() {
     return {
       mounted: false,
+      ready: false,
       region: 'nem',
       type: 'power', // power, energy
       range: '7D',
@@ -107,7 +108,6 @@ export default {
   methods: {
     fetchData(region, range) {
       const urls = []
-      console.log(range)
       switch (range) {
         case '1D':
         case '3D':
@@ -192,6 +192,7 @@ export default {
             // Then calculate min and total for each point for the chart
             this.dataset = this.calculateMinTotal(rolledUpData, domains)
             this.updatedFilteredDataset(this.dataset)
+            this.ready = true
           }
         )
       })
