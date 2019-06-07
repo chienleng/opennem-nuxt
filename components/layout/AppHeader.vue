@@ -1,6 +1,6 @@
 <template>
   <header>
-    <div class="header-dropdowns">
+    <!-- <div class="header-dropdowns">
       <logo class="header-logo" />
       <h1>Energy</h1>
       <h2>All Regions</h2>
@@ -9,7 +9,7 @@
     <div class="buttons has-addons">
       <span class="button is-rounded">Image</span>
       <span class="button is-rounded">Data</span>
-    </div>
+    </div> -->
   </header>
 </template>
 
