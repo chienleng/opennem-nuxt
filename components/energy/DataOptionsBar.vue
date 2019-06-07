@@ -79,23 +79,25 @@ export default {
 @import '~/assets/scss/variables.scss';
 
 .data-options-bar {
-  padding: $app-padding;
-
-  .button {
-    font-size: 11px;
-  }
-
   @include tablet {
+    padding: $app-padding;
     display: flex;
     align-items: center;
   }
 }
+.button {
+  font-size: 11px;
+
+  @include mobile {
+    border-radius: 0 !important;
+  }
+}
 .range-buttons {
-  margin-right: $app-padding;
   margin-bottom: $app-padding / 2;
 
   @include tablet {
     margin-bottom: 0;
+    margin-right: $app-padding;
   }
 }
 </style>
