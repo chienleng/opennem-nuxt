@@ -14,8 +14,13 @@
           :domains="domains"
           :dataset="dataset"
           :interval="interval"
+          :start-year="2005"
           :step="step"
-          :vis-height="visHeight" />
+          :vis-height="500" />
+      <!-- <vis-data-brush
+        v-if="ready"
+        :start-year="2005"
+      /> -->
       </div>
       <div class="table-container">
         <summary-table
@@ -31,7 +36,13 @@
 </template>
 
 <script>
-import { timeMinute as d3TimeMinute } from 'd3-time'
+import {
+  timeMinute as d3TimeMinute,
+  timeDay as d3TimeDay,
+  timeMonday as d3TimeMonday,
+  timeMonth as d3TimeMonth,
+  timeYear as d3TimeYear
+} from 'd3-time'
 import _uniqBy from 'lodash.uniqby'
 import _includes from 'lodash.includes'
 import _cloneDeep from 'lodash.clonedeep'
@@ -42,7 +53,8 @@ import http from '~/services/HttpService.js'
 import DataTransformService from '~/services/DataTransformService.js'
 
 import DataOptionsBar from '~/components/energy/DataOptionsBar'
-import StackedAreaVis from '~/components/Vis/StackedArea.vue'
+import StackedAreaVis from '~/components/Vis/StackedAreaPanZoom.vue'
+import VisDataBrush from '~/components/Vis/DataBrush.vue'
 import SummaryTable from '~/components/SummaryTable'
 
 export default {
@@ -51,6 +63,7 @@ export default {
   components: {
     DataOptionsBar,
     StackedAreaVis,
+    VisDataBrush,
     SummaryTable
   },
 
@@ -60,8 +73,8 @@ export default {
       ready: false,
       region: 'nem',
       type: 'power', // power, energy
-      range: '7D',
-      interval: '30m',
+      range: 'ALL',
+      interval: 'Month',
       dataset: [],
       domains: [],
       domainIds: [],
@@ -153,48 +166,57 @@ export default {
     handleResponses(responses) {
       this.responses = responses
       this.updateDomains(responses)
-      this.updateDataset(responses, this.domains, this.range, this.interval)
+      this.mergeResponses(
+        responses,
+        this.domains,
+        this.range,
+        this.interval
+      ).then(dataset => {
+        this.dataset = dataset
+        this.updatedFilteredDataset(dataset)
+        this.ready = true
+      })
     },
 
-    updateDataset(res, domains, range, interval) {
-      let data = []
-      const promises = []
+    mergeResponses(res, domains, range, interval) {
+      return new Promise(resolve => {
+        let data = []
+        const promises = []
 
-      // flatten data for vis and summary
-      res.forEach(r => {
-        promises.push(this.flatten(r.data, domains, range, interval))
-      })
-
-      // return flatten data and merge
-      Promise.all(promises).then(values => {
-        values.forEach(v => {
-          data = [...data, ...v]
+        // flatten data for vis and summary
+        res.forEach(r => {
+          promises.push(this.flatten(r.data, domains, range, interval))
         })
 
-        // If 1D or 3D, use 7D data and filter the data here, so the chart takes doesn't zoom
-        if (range === '1D' || range === '3D') {
-          const now = new Date().getTime()
-          const roundedEndDate =
-            interval === '5m'
-              ? d3TimeMinute.every(5).round(now)
-              : d3TimeMinute.every(30).round(now)
-          const diff = range === '1D' ? 86400000 : 259200000
-          data = DataTransformService.filterDataByStartEndDates(
-            data,
-            roundedEndDate - diff,
-            roundedEndDate
-          )
-        }
+        // return flatten data and merge
+        Promise.all(promises).then(values => {
+          values.forEach(v => {
+            data = [...data, ...v]
+          })
 
-        // Roll up based on interval
-        DataTransformService.rollUp(data, domains, range, interval).then(
-          rolledUpData => {
-            // Then calculate min and total for each point for the chart
-            this.dataset = this.calculateMinTotal(rolledUpData, domains)
-            this.updatedFilteredDataset(this.dataset)
-            this.ready = true
+          // If 1D or 3D, use 7D data and filter the data here, so the chart takes doesn't zoom
+          if (range === '1D' || range === '3D') {
+            const now = new Date().getTime()
+            const roundedEndDate =
+              interval === '5m'
+                ? d3TimeMinute.every(5).round(now)
+                : d3TimeMinute.every(30).round(now)
+            const diff = range === '1D' ? 86400000 : 259200000
+            data = DataTransformService.filterDataByStartEndDates(
+              data,
+              roundedEndDate - diff,
+              roundedEndDate
+            )
           }
-        )
+
+          // Roll up based on interval
+          DataTransformService.rollUp(data, domains, range, interval).then(
+            rolledUpData => {
+              // Then calculate min and total for each point for the chart
+              resolve(this.calculateMinTotal(rolledUpData, domains))
+            }
+          )
+        })
       })
     },
 
@@ -260,12 +282,16 @@ export default {
 
     handleIntervalChange(interval) {
       this.interval = interval
-      this.updateDataset(
+      this.mergeResponses(
         this.responses,
         this.domains,
         this.range,
         this.interval
-      )
+      ).then(dataset => {
+        this.dataset = dataset
+        this.updatedFilteredDataset(dataset)
+        this.ready = true
+      })
     },
 
     handleDatasetFilter(dateRange) {
@@ -273,8 +299,8 @@ export default {
         this.dateFilter = dateRange
         this.filteredDataset = DataTransformService.filterDataByStartEndDates(
           this.dataset,
-          dateRange[0],
-          dateRange[1]
+          this.snapToClosestInterval(dateRange[0]),
+          this.snapToClosestInterval(dateRange[1])
         )
       } else {
         this.filteredDataset = this.dataset
@@ -355,6 +381,33 @@ export default {
         }
       })
       this.domainIds = domainIds
+    },
+
+    snapToClosestInterval(date) {
+      switch (this.interval) {
+        case '5m':
+          return d3TimeMinute.every(5).round(date)
+        case '30m':
+          return d3TimeMinute.every(30).round(date)
+        case 'Day':
+          return d3TimeDay.every(1).round(date)
+        case 'Week':
+          return d3TimeMonday.every(1).round(date)
+        case 'Month':
+          return d3TimeMonth.every(1).round(date)
+        case 'Season':
+          const quarter = d3TimeMonth.every(3).round(date)
+          return d3TimeMonth.offset(quarter, -1)
+        case 'Quarter':
+          return d3TimeMonth.every(3).round(date)
+        case 'Fin Year':
+          const year = d3TimeYear.every(1).round(date)
+          return d3TimeMonth.offset(year, -6)
+        case 'Year':
+          return d3TimeYear.every(1).round(date)
+        default:
+          return date
+      }
     }
   }
 }
