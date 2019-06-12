@@ -13,14 +13,11 @@
           v-if="ready"
           :domains="domains"
           :dataset="dataset"
-          :interval="interval"
-          :start-year="2005"
           :step="step"
-          :vis-height="500" />
-      <!-- <vis-data-brush
-        v-if="ready"
-        :start-year="2005"
-      /> -->
+          :vis-height="400"
+          @dateOver="handleDateOver"
+          @domainOver="handleDomainOver"
+        />
       </div>
       <div class="table-container">
         <summary-table
@@ -53,8 +50,7 @@ import http from '~/services/HttpService.js'
 import DataTransformService from '~/services/DataTransformService.js'
 
 import DataOptionsBar from '~/components/energy/DataOptionsBar'
-import StackedAreaVis from '~/components/Vis/StackedAreaPanZoom.vue'
-import VisDataBrush from '~/components/Vis/DataBrush.vue'
+import StackedAreaVis from '~/components/Vis/StackedArea.vue'
 import SummaryTable from '~/components/SummaryTable'
 
 export default {
@@ -63,7 +59,6 @@ export default {
   components: {
     DataOptionsBar,
     StackedAreaVis,
-    VisDataBrush,
     SummaryTable
   },
 
@@ -71,7 +66,6 @@ export default {
     return {
       mounted: false,
       ready: false,
-      region: 'nem',
       type: 'power', // power, energy
       range: '7D',
       interval: '30m',
@@ -86,6 +80,9 @@ export default {
   },
 
   computed: {
+    regionId() {
+      return this.$route.params.region
+    },
     fuelTechOrder() {
       return this.$store.getters.fuelTechOrder
     },
@@ -110,7 +107,7 @@ export default {
       })
     })
 
-    this.fetchData(this.region, this.range)
+    this.fetchData(this.regionId, this.range)
     this.mounted = true
   },
 
@@ -138,9 +135,10 @@ export default {
           const aYearAgo = now - 31557600000
           const thisFullYear = new Date().getFullYear()
           const lastFullYear = new Date(aYearAgo).getFullYear()
-          urls.push(`/testing/${region}/energy/daily/${lastFullYear}.json`)
+          if (thisFullYear !== lastFullYear) {
+            urls.push(`/testing/${region}/energy/daily/${lastFullYear}.json`)
+          }
           urls.push(`/testing/${region}/energy/daily/${thisFullYear}.json`)
-          // TODO: FILTER to a year
           break
         case 'ALL':
           this.type = 'energy'
@@ -227,7 +225,7 @@ export default {
         const energyObjs = r.data
           .filter(d => d.type === 'power' || d.type === 'energy')
           .map(d => {
-            return { id: d.id, fuelTech: d.fuel_tech }
+            return { id: d.id, fuelTech: d.fuel_tech, type: d.type }
           })
         fuelTechEnergy = [...fuelTechEnergy, ...energyObjs]
       })
@@ -277,7 +275,7 @@ export default {
           console.log('nothing yet')
       }
 
-      this.fetchData(this.region, this.range)
+      this.fetchData(this.regionId, this.range)
     },
 
     handleIntervalChange(interval) {
@@ -307,6 +305,19 @@ export default {
       }
     },
 
+    handleDateOver(evt, date) {
+      EventBus.$emit(
+        'vis.mousemove',
+        evt,
+        this.dataset,
+        this.snapToClosestInterval(date)
+      )
+    },
+
+    handleDomainOver(domain) {
+      EventBus.$emit('vis.areaover', domain)
+    },
+
     flatten(data, domains, range, interval) {
       return new Promise(resolve => {
         DataTransformService.flattenAndInterpolate(
@@ -319,6 +330,11 @@ export default {
             const start = res[0].date
             const now = new Date().getTime()
             resolve(res.filter(d => d.date >= start && d.date <= now))
+          }
+          if (range === '1Y') {
+            const now = new Date().getTime()
+            const aYearAgo = now - 31557600000
+            resolve(res.filter(d => d.date >= aYearAgo && d.date <= now))
           }
           resolve(res)
         })
@@ -351,7 +367,7 @@ export default {
     getFuelTechObjs() {
       // create ft Objects that has the right id and meta data
       const type = this.type
-      const region = this.region
+      const region = this.regionId
       const domainIds = this.domainIds
       // clone so the original doesn't get reverse.
       return _cloneDeep(domainIds)

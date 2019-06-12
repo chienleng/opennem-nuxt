@@ -79,7 +79,6 @@ import { format } from 'd3-format'
 import { select, selectAll, mouse, event } from 'd3-selection'
 import { schemeCategory10 } from 'd3-scale-chromatic'
 import { brushX } from 'd3-brush'
-import { timeMinute, timeDay, timeMonday, timeMonth, timeYear } from 'd3-time'
 import { timeFormat } from 'd3-time-format'
 import debounce from 'lodash.debounce'
 
@@ -110,11 +109,6 @@ export default {
           end: '2019-01-21T06:00Z'
         }
       ]
-    },
-    // interval to be used for brushing snap
-    interval: {
-      type: String,
-      default: () => '30m'
     },
     // OPTIONAL: height for the chart
     visHeight: {
@@ -265,6 +259,12 @@ export default {
         .extent([[0, 0], [this.width, 40]])
         .on('end', this.brushEnded)
 
+      // X Axis Brush (zoom in/out interaction)
+      this.$xAxisBrushGroup
+        .append('g')
+        .attr('class', 'brush')
+        .call(this.brushX)
+
       // This is a stacked area
       this.stack = stack()
 
@@ -294,23 +294,20 @@ export default {
       })
 
       this.$hoverLayer.on('touchmove mousemove', function() {
-        EventBus.$emit(
-          'vis.mousemove',
-          this,
-          self.dataset,
-          self.getXAxisDateByMouse(this)
-        )
-        EventBus.$emit('vis.areaover', null)
+        self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
+        self.$emit('domainOver', null)
       })
+
       this.brushX.on('brush', function() {
-        EventBus.$emit(
-          'vis.mousemove',
-          this,
-          self.dataset,
-          self.getXAxisDateByMouse(this)
-        )
-        EventBus.$emit('vis.areaover', null)
+        self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
+        self.$emit('domainOver', null)
       })
+      this.$xAxisBrushGroup
+        .selectAll('.brush')
+        .on('touchmove mousemove', function() {
+          self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
+          self.$emit('domainOver', null)
+        })
     },
 
     update() {
@@ -361,34 +358,12 @@ export default {
 
       stackArea.exit().remove()
 
-      // X Axis Brush (zoom in/out interaction)
-      this.$xAxisBrushGroup
-        .append('g')
-        .attr('class', 'brush')
-        .call(this.brushX)
-
       // Event handling
       this.$stackedAreaGroup
         .selectAll('path')
         .on('touchmove mousemove', function(d) {
-          EventBus.$emit(
-            'vis.mousemove',
-            this,
-            self.dataset,
-            self.getXAxisDateByMouse(this)
-          )
-          EventBus.$emit('vis.areaover', d.key)
-        })
-      this.$xAxisBrushGroup
-        .selectAll('.brush')
-        .on('touchmove mousemove', function() {
-          EventBus.$emit(
-            'vis.mousemove',
-            this,
-            self.dataset,
-            self.getXAxisDateByMouse(this)
-          )
-          EventBus.$emit('vis.areaover', null)
+          self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
+          self.$emit('domainOver', d.key)
         })
     },
 
@@ -438,10 +413,7 @@ export default {
       const s = event.selection
       const startDate = this.x.invert(s[0])
       const endDate = this.x.invert(s[1])
-      const dataRange = [
-        this.snapToClosestInterval(startDate),
-        this.snapToClosestInterval(endDate)
-      ]
+      const dataRange = [startDate, endDate]
 
       // Get the brush selection (start/end) points -> dates
       // Set it to the current X domain
@@ -491,34 +463,7 @@ export default {
     getXAxisDateByMouse(evt) {
       const m = mouse(evt)
       const date = this.x.invert(m[0])
-      return this.snapToClosestInterval(date)
-    },
-
-    snapToClosestInterval(date) {
-      switch (this.interval) {
-        case '5m':
-          return timeMinute.every(5).round(date)
-        case '30m':
-          return timeMinute.every(30).round(date)
-        case 'Day':
-          return timeDay.every(1).round(date)
-        case 'Week':
-          return timeMonday.every(1).round(date)
-        case 'Month':
-          return timeMonth.every(1).round(date)
-        case 'Season':
-          const quarter = timeMonth.every(3).round(date)
-          return timeMonth.offset(quarter, -1)
-        case 'Quarter':
-          return timeMonth.every(3).round(date)
-        case 'Fin Year':
-          const year = timeYear.every(1).round(date)
-          return timeMonth.offset(year, -6)
-        case 'Year':
-          return timeYear.every(1).round(date)
-        default:
-          return date
-      }
+      return date
     }
   }
 }

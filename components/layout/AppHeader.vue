@@ -1,12 +1,12 @@
 <template>
   <header>
-    <!-- <div class="header-dropdowns">
+    <div class="header-dropdowns">
       <logo class="header-logo" />
       <h1>Energy</h1>
-      <h2>All Regions</h2>
+      <region-dropdown />
     </div>
 
-    <div class="buttons has-addons">
+    <!-- <div class="buttons has-addons">
       <span class="button is-rounded">Image</span>
       <span class="button is-rounded">Data</span>
     </div> -->
@@ -15,10 +15,12 @@
 
 <script>
 import Logo from '~/components/ui/Logo'
+import RegionDropdown from '~/components/ui/RegionDropdown'
 
 export default {
   components: {
-    Logo
+    Logo,
+    RegionDropdown
   }
 }
 </script>
@@ -35,14 +37,6 @@ header {
   padding: $app-padding / 2;
 
   h1 {
-    font-family: $header-font-family;
-    font-size: 1.6rem;
-    font-weight: 700;
-    margin-right: $app-padding;
-    padding-right: $app-padding;
-    border-right: $border-style;
-  }
-  h2 {
     font-family: $header-font-family;
     font-size: 1.6rem;
     font-weight: 700;

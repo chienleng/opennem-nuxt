@@ -41,6 +41,11 @@ function transformData(data, domains) {
           }
         })
 
+        if (!newObj[id]) {
+          newObj[id] = {
+            value: null
+          }
+        }
         newObj[id].value = r.value
         flatData.push(newObj)
       } else {
@@ -107,19 +112,10 @@ function transformData(data, domains) {
 }
 
 function findInterpolateSeriesTypes(data) {
-  const temperatureItem = data.find(d => d.type === 'temperature')
-  const priceItem = data.find(d => d.type === 'price')
   const rooftopSolarItem = data.find(d => d['fuel_tech'] === 'rooftop_solar')
+  // const temperatureItem = data.find(d => d.type === 'temperature')
+  // const priceItem = data.find(d => d.type === 'price')
   const interpolateSeriesTypes = []
-
-  if (temperatureItem) {
-    interpolateSeriesTypes.push({
-      key: temperatureItem.id,
-      interpolation: 'linear',
-      startIndex: -1,
-      currentValue: null
-    })
-  }
   if (rooftopSolarItem) {
     interpolateSeriesTypes.push({
       key: rooftopSolarItem.id,
@@ -128,14 +124,22 @@ function findInterpolateSeriesTypes(data) {
       currentValue: null
     })
   }
-  if (priceItem) {
-    interpolateSeriesTypes.push({
-      key: priceItem.id,
-      interpolation: 'step',
-      startIndex: -1,
-      currentValue: null
-    })
-  }
+  // if (temperatureItem) {
+  //   interpolateSeriesTypes.push({
+  //     key: temperatureItem.id,
+  //     interpolation: 'linear',
+  //     startIndex: -1,
+  //     currentValue: null
+  //   })
+  // }
+  // if (priceItem) {
+  //   interpolateSeriesTypes.push({
+  //     key: priceItem.id,
+  //     interpolation: 'step',
+  //     startIndex: -1,
+  //     currentValue: null
+  //   })
+  // }
 
   return interpolateSeriesTypes
 }
@@ -177,11 +181,13 @@ export default {
     return promise
   },
 
-  flattenAndInterpolate(data, domains, range, interval) {
+  flattenAndInterpolate(data, domains) {
     const promise = new Promise(resolve => {
       const ids = data.map(d => d.id)
+      console.log(ids)
       const interpolateSeriesTypes = findInterpolateSeriesTypes(data)
       let flatData = transformData(data, domains)
+      console.log(flatData)
       mutateDataForInterpolation(flatData, interpolateSeriesTypes)
 
       resolve(flatData)

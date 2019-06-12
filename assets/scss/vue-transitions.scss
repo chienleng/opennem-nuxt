@@ -7,3 +7,20 @@
 .page-enter, .page-leave-to {
   opacity: 0;
 }
+
+/* slide down fade */
+.slide-down-fade-enter-active {
+  transition: all .1s linear;
+}
+.slide-down-fade-leave-active {
+  transition: all .1s linear;
+}
+.slide-down-fade-enter
+{
+  transform: translateY(-10px);
+  opacity: 0;
+}
+.slide-down-fade-leave-to
+{
+  transform: translateY(10px);
+}
