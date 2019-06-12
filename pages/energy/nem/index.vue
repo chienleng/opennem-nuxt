@@ -73,8 +73,8 @@ export default {
       ready: false,
       region: 'nem',
       type: 'power', // power, energy
-      range: 'ALL',
-      interval: 'Month',
+      range: '7D',
+      interval: '30m',
       dataset: [],
       domains: [],
       domainIds: [],
