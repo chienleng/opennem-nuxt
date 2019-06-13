@@ -258,6 +258,7 @@ export default {
       this.summary = {}
       this.summarySources = {}
       this.summaryLoads = {}
+      console.log(this.interval)
 
       this.domains.forEach(ft => {
         const category = ft.category
@@ -268,7 +269,8 @@ export default {
             energy[ft.id] = d[ft.id].value
           } else {
             // calculate energy (GWh) += power * 5mins/60/100
-            energy[ft.id] = (d[ft.id].value * 5) / 60 / 1000
+            const mins = this.interval === '30m' ? 30 : 5
+            energy[ft.id] = (d[ft.id].value * mins) / 60 / 1000
           }
 
           return energy

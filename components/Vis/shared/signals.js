@@ -1,4 +1,4 @@
-import { select, mouse } from 'd3-selection'
+import { select, selectAll, mouse } from 'd3-selection'
 import { format as d3Format } from 'd3-format'
 import { timeFormat as d3TimeFormat } from 'd3-time-format'
 import EventBus from '~/plugins/eventBus.js'
@@ -19,7 +19,7 @@ const tooltipRectClass = CONFIG.TOOLTIP_RECT_CLASS
 const tooltipTextClass = CONFIG.TOOLTIP_TEXT_CLASS
 
 function setupSignals(id, width, height, x) {
-  const $svg = select(`#${id}`)
+  const $svg = selectAll(`.vis`)
   const $cursorLineGroup = $svg.select(`.${cursorLineGroupClass}`)
   const $cursorLine = $svg.select(`.${cursorLineClass}`)
   const $cursorLineRect = $svg

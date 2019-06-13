@@ -1,4 +1,4 @@
-path.line {
+path.line-path {
   fill: none;
   stroke: #000;
   stroke-width: 1;
@@ -23,6 +23,10 @@ path.line {
   fill: transparent;
 }
 .stacked-area-path {
+  // where #clip is being defined
+  clip-path: url(#clip);
+}
+.line-path {
   // where #clip is being defined
   clip-path: url(#clip);
 }

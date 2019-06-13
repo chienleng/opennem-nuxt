@@ -18,6 +18,17 @@
           @dateOver="handleDateOver"
           @domainOver="handleDomainOver"
         />
+        <line-vis
+          v-if="ready"
+          :domains="domains"
+          :dataset="dataset"
+          :start-time="dateFilter[0]"
+          :end-time="dateFilter[1]"
+          :step="step"
+          :vis-height="200"
+          @dateOver="handleDateOver"
+          @domainOver="handleDomainOver"
+        />
       </div>
       <div class="table-container">
         <summary-table
@@ -40,6 +51,7 @@ import {
   timeMonth as d3TimeMonth,
   timeYear as d3TimeYear
 } from 'd3-time'
+import { extent as d3Extent } from 'd3-array'
 import _uniqBy from 'lodash.uniqby'
 import _includes from 'lodash.includes'
 import _cloneDeep from 'lodash.clonedeep'
@@ -51,6 +63,7 @@ import DataTransformService from '~/services/DataTransformService.js'
 
 import DataOptionsBar from '~/components/energy/DataOptionsBar'
 import StackedAreaVis from '~/components/Vis/StackedArea.vue'
+import LineVis from '~/components/Vis/Line.vue'
 import SummaryTable from '~/components/SummaryTable'
 
 export default {
@@ -59,6 +72,7 @@ export default {
   components: {
     DataOptionsBar,
     StackedAreaVis,
+    LineVis,
     SummaryTable
   },
 
@@ -172,6 +186,7 @@ export default {
       ).then(dataset => {
         this.dataset = dataset
         this.updatedFilteredDataset(dataset)
+        this.dateFilter = d3Extent(this.dataset, d => d.date)
         this.ready = true
       })
     },
@@ -294,12 +309,18 @@ export default {
 
     handleDatasetFilter(dateRange) {
       if (dateRange && dateRange.length > 0) {
-        this.dateFilter = dateRange
+        const startTime = new Date(
+          this.snapToClosestInterval(dateRange[0])
+        ).getTime()
+        const endTime = new Date(
+          this.snapToClosestInterval(dateRange[1])
+        ).getTime()
         this.filteredDataset = DataTransformService.filterDataByStartEndDates(
           this.dataset,
-          this.snapToClosestInterval(dateRange[0]),
-          this.snapToClosestInterval(dateRange[1])
+          startTime,
+          endTime
         )
+        this.dateFilter = [startTime, endTime]
       } else {
         this.filteredDataset = this.dataset
       }

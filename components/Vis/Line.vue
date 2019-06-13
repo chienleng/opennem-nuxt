@@ -1,88 +1,188 @@
 <template>
-  <div class="vis">
+  <div class="vis line-vis">
+    <button
+      class="button is-rounded is-small reset-btn"
+      @click="handleReset"
+    >
+      Zoom Out
+    </button>
     <svg
       :width="svgWidth"
       :height="svgHeight"
       :id="id"
       class="line-chart">
+      <defs>
+        <!-- where to clip -->
+        <clipPath id="clip">
+          <rect
+            :width="width"
+            :height="height"/>
+        </clipPath>
+      </defs>
+      <!-- for the guides -->
       <g 
         :transform="gTransform"
-        class="line-group" />
+        class="guide-group" />
+
       <g 
         :transform="gTransform"
-        class="axis-group">
+        class="axis-line-group">
+        <!-- x and y axis ticks/lines/text -->
         <g 
           :transform="xAxisTransform" 
           :class="xAxisClass" />
         <g :class="yAxisClass" />
+
+        <!-- x axis layer to allow zoom in (brush) -->
+        <g 
+          :transform="xAxisBrushTransform" 
+          class="x-axis-brush-group" />
       </g>
+
+      <g 
+        :transform="gTransform">
+        <!-- hover layer to read interaction movements -->
+        <g :class="hoverLayerClass">
+          <rect
+            :width="width"
+            :height="height"/>
+        </g>
+
+        <!-- where the line path will show -->
+        <g class="line-group" />
+      </g>
+
+      <!-- yAxis tick text here to show above the area -->
+      <g 
+        :transform="gTransform"
+        class="axis-text-group">
+        <g :class="yAxisTickClass" />
+      </g>
+
+      <!-- cursor line and tooltip -->
       <g
         :transform="gTransform"
         class="cursor-group">
         <g :class="cursorLineGroupClass" />
-      </g>
-      <g
-        :transform="gTransform"
-        :class="hoverLayerClass">
-        <rect
-          :width="width"
-          :height="height" />
-      </g>
+      </g>    
     </svg>
   </div>
 </template>
 
 <script>
-import { scaleBand, scaleLinear, scaleTime } from 'd3-scale'
-import { axisBottom, axisLeft } from 'd3-axis'
-import { line } from 'd3-shape'
-import { extent } from 'd3-array'
+import { scaleOrdinal, scaleLinear, scaleTime } from 'd3-scale'
+import { axisBottom, axisRight } from 'd3-axis'
+import { line, curveStep, curveLinear, curveStepBefore } from 'd3-shape'
+import { extent, min, max } from 'd3-array'
 import { format } from 'd3-format'
-import { select, mouse } from 'd3-selection'
+import { select, selectAll, mouse, event } from 'd3-selection'
+import { schemeCategory10 } from 'd3-scale-chromatic'
 import { brushX } from 'd3-brush'
+import { timeFormat } from 'd3-time-format'
 import debounce from 'lodash.debounce'
 
+import EventBus from '~/plugins/eventBus.js'
 import * as CONFIG from './shared/config.js'
 import { setupSignals, destroySignals } from './shared/signals.js'
+import axisTimeFormat from './shared/timeFormat.js'
+import axisSecondaryTimeFormat from './shared/secondaryTimeFormat.js'
+import axisTimeTicks from './shared/timeTicks.js'
 
 export default {
   props: {
-    data: {
+    dataset: {
       type: Array,
       default: () => []
     },
-    keys: {
+    // domains.colour, domain.id
+    domains: {
       type: Array,
       default: () => []
+    },
+    dynamicExtent: {
+      type: Array,
+      default: () => []
+    },
+    startTime: {
+      type: Number,
+      default: () => new Date().getTime() - 86400000
+    },
+    endTime: {
+      type: Number,
+      default: () => new Date().getTime()
+    },
+    // TODO: guide data
+    guideData: {
+      type: Array,
+      default: () => [
+        {
+          start: '2019-01-20T22:00Z',
+          end: '2019-01-21T06:00Z'
+        }
+      ]
+    },
+    // OPTIONAL: height for the chart
+    visHeight: {
+      type: Number,
+      default: () => CONFIG.DEFAULT_SVG_HEIGHT
+    },
+    // OPTIONAL: whether it is a step curve
+    step: {
+      type: Boolean,
+      default: () => false
     }
   },
 
   data() {
     return {
+      dIds: [],
       svgWidth: 0,
-      svgHeight: CONFIG.DEFAULT_SVG_HEIGHT,
+      svgHeight: 0,
       width: 0,
       height: 0,
       margin: CONFIG.DEFAULT_MARGINS,
       x: null,
       y: null,
+      z: null,
       g: null,
+      guides: null,
       xAxis: null,
+      xDomainExtent: null,
       yAxis: null,
-      xAxisClass: CONFIG.X_AXIS_CLASS,
-      yAxisClass: CONFIG.Y_AXIS_CLASS,
-      xAxisGroup: null,
-      yAxisGroup: null,
       line: null,
-      brush: null,
+      colours: schemeCategory10,
+      brushX: null,
+      zoomed: false,
+      $xAxisGroup: null,
+      $xAxisBrushGroup: null,
+      $yAxisGroup: null,
+      $yAxisTickGroup: null,
+      $hoverLayer: null,
+      $cursorLineGroup: null,
+      $lineGroup: null,
+      xAxisClass: CONFIG.X_AXIS_CLASS,
+      xAxisBrushGroupClass: CONFIG.X_AXIS_BRUSH_GROUP_CLASS,
+      yAxisClass: CONFIG.Y_AXIS_CLASS,
+      yAxisTickClass: CONFIG.Y_AXIS_TICK_CLASS,
+      linePathClass: 'line-path',
+      lineGroupClass: 'line-group',
       hoverLayerClass: CONFIG.HOVER_LAYER_CLASS,
-      cursorLineGroupClass: CONFIG.CURSOR_LINE_GROUP_CLASS
+      cursorLineGroupClass: CONFIG.CURSOR_LINE_GROUP_CLASS,
+      cursorLineClass: CONFIG.CURSOR_LINE_CLASS,
+      cursorLineTextClass: CONFIG.CURSOR_LINE_TEXT_CLASS,
+      cursorLineRectClass: CONFIG.CURSOR_LINE_RECT_CLASS
     }
   },
 
   computed: {
+    domainIds() {
+      return this.domains.map(d => d.id).reverse()
+    },
+    domainColours() {
+      return this.domains.map(d => d.colour).reverse()
+    },
     id() {
-      return `${CONFIG.CHART_LINE}-${this._uid}`
+      return `line-${this._uid}`
     },
     gTransform() {
       return `translate(${this.margin.left},${this.margin.top})`
@@ -90,15 +190,28 @@ export default {
     xAxisTransform() {
       return `translate(0, ${this.height})`
     },
-    testKey() {
-      return this.keys[0]
+    xAxisBrushTransform() {
+      return `translate(0, ${this.height})`
     }
   },
 
   watch: {
-    data() {
+    dataset() {
+      this.zoomed = false
       this.update()
+      this.resizeRedraw()
+    },
+    visHeight(newValue) {
+      this.svgHeight = newValue
+      this.handleResize()
+    },
+    dynamicExtent(newExtent) {
+      console.log(newExtent)
     }
+  },
+
+  created() {
+    this.svgHeight = this.visHeight
   },
 
   mounted() {
@@ -109,6 +222,8 @@ export default {
 
     this.setupWidthHeight()
     this.setup()
+    setupSignals(this.id, this.width, this.height, this.x, this.dataset) // Eventbus signals
+    this.update()
   },
 
   beforeDestroy() {
@@ -117,16 +232,6 @@ export default {
   },
 
   methods: {
-    handleResize() {
-      this.redraw()
-    },
-
-    redraw() {
-      this.setupWidthHeight()
-      this.setup()
-      this.update()
-    },
-
     setupWidthHeight() {
       const chartWidth = this.$el.offsetWidth
       this.svgWidth = chartWidth
@@ -135,62 +240,245 @@ export default {
     },
 
     setup() {
+      // Select the svg groups for this vis instance
+      const self = this
+      const $svg = select(`#${this.id}`)
+      this.$hoverLayer = $svg.select(`.${this.hoverLayerClass}`)
+      this.$cursorLineGroup = $svg.select(`.${this.cursorLineGroupClass}`)
+      this.$xAxisGroup = $svg.select(`.${this.xAxisClass}`)
+      this.$xAxisBrushGroup = $svg.select(`.${this.xAxisBrushGroupClass}`)
+      this.$yAxisGroup = $svg.select(`.${this.yAxisClass}`)
+      this.$yAxisTickGroup = $svg.select(`.${this.yAxisTickClass}`)
+      // this.guideGroup = select(`#${this.id} .${this.guideGroupClass}`)
+
+      // Define x, y, z scale types
       this.x = scaleTime().range([0, this.width])
-      this.y = scaleLinear()
-        .range([this.height, 0])
-        .nice()
+      this.y = scaleLinear().range([this.height, 0])
+      this.z = scaleOrdinal()
 
+      // Set up where x, y axis appears
       this.xAxis = axisBottom(this.x)
-      this.yAxis = axisLeft(this.y)
+        .tickSize(-this.height)
+        .tickFormat(d => axisTimeFormat(d))
+      this.yAxis = axisRight(this.y)
+        .tickSize(this.width)
+        // .ticks(10)
         .tickFormat(d => format(CONFIG.Y_AXIS_FORMAT_STRING)(d))
-        .tickSize(-this.width)
 
-      this.xAxisGroup = select(`#${this.id} .${this.xAxisClass}`)
-      this.yAxisGroup = select(`#${this.id} .${this.yAxisClass}`)
+      // Setup the 'brush' area and event handler
+      this.brushX = brushX()
+        .extent([[0, 0], [this.width, 40]])
+        .on('end', this.brushEnded)
 
-      this.brush = brushX().extent([[0, 0], [this.width, this.height]])
+      // X Axis Brush (zoom in/out interaction)
+      this.$xAxisBrushGroup
+        .append('g')
+        .attr('class', 'brush')
+        .call(this.brushX)
 
       this.line = line()
         .x(d => this.x(d.date))
-        .y(d => this.y(d[this.testKey].value))
+        .y(d => this.y(d._total))
 
-      // Hover signals
-      setupSignals(this.id, this.height, this.x, this.brush)
+      // Create hover line and date
+      this.$cursorLineGroup.append('path').attr('class', this.cursorLineClass)
+      this.$cursorLineGroup
+        .append('rect')
+        .attr('class', this.cursorLineRectClass)
+      this.$cursorLineGroup
+        .append('text')
+        .attr('class', this.cursorLineTextClass)
+
+      // Event handling
+      $svg.on('mouseenter', () => {
+        this.$cursorLineGroup.attr('opacity', 1)
+        EventBus.$emit('vis.mouseenter')
+      })
+      $svg.on('mouseleave', () => {
+        this.$cursorLineGroup.attr('opacity', 0)
+        EventBus.$emit('vis.mouseleave')
+      })
+
+      this.$hoverLayer.on('touchmove mousemove', function() {
+        self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
+        self.$emit('domainOver', null)
+      })
+
+      this.brushX.on('brush', function() {
+        self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
+        self.$emit('domainOver', null)
+      })
+      this.$xAxisBrushGroup
+        .selectAll('.brush')
+        .on('touchmove mousemove', function() {
+          self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
+          self.$emit('domainOver', null)
+        })
     },
 
     update() {
-      console.log('vis update')
-      const g = select(`#${this.id} .${CONFIG.CHART_LINE}-group`)
+      const self = this
+      this.$lineGroup = select(`#${this.id} .${this.lineGroupClass}`)
 
-      // Remove previous path
-      g.select(`.${CONFIG.CHART_LINE}`).remove()
+      this.xDomainExtent = extent(this.dataset, d => d.date)
+      // const start = new Date().getTime() - 86400000
+      // this.x.domain([start, this.xDomainExtent[1]])
+      this.x.domain([this.startTime, this.endTime])
+      this.y
+        .domain([
+          min(this.dataset, d => d._min),
+          max(this.dataset, d => d._total)
+        ])
+        .nice()
+      this.z.range(this.domainColours).domain(this.domainIds)
 
-      this.x.domain(extent(this.data, d => d.date))
-      this.y.domain(extent(this.data, d => d[this.testKey].value))
+      this.$xAxisGroup.call(this.customXAxis)
+      this.$yAxisGroup.call(this.customYAxis)
+      this.$yAxisTickGroup.call(this.customYAxis)
 
-      this.xAxisGroup.call(this.xAxis)
-      this.yAxisGroup.call(this.yAxis)
+      // To step or not to step
+      // if (this.step) {
+      //   this.area.curve(curveStep)
+      // } else {
+      //   this.area.curve(curveLinear)
+      // }
 
-      g.append('path')
-        .datum(this.data)
-        .attr('class', CONFIG.CHART_LINE)
+      // Generate Line
+      // Note: line #clip path is defined in CSS (safari workaround)
+      // - look in /assets/scss/vis.scss
+      // const line = this.$lineGroup
+      //   .selectAll(`.${this.linePathClass}`)
+      //   .datum(this.dataset)
+      // line
+      //   .enter()
+      //   .append('path')
+      //   // .attr('id', d => d.key)
+      //   .attr('class', `${this.linePathClass}`)
+      //   .attr('d', this.line)
+
+      this.$lineGroup
+        .append('path')
+        .datum(this.dataset)
+        .attr('class', `${this.linePathClass}`)
         .attr('d', this.line)
+
+      // Event handling
+      this.$lineGroup.selectAll('path').on('touchmove mousemove', function(d) {
+        self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
+        self.$emit('domainOver', d.key)
+      })
+    },
+
+    resizeRedraw() {
+      this.x.range([0, this.width])
+      this.y.range([this.height, 0])
+
+      this.xAxis.tickSize(-this.height)
+      this.yAxis.tickSize(this.width)
+
+      this.$xAxisGroup.call(this.customXAxis)
+      this.$yAxisGroup.call(this.customYAxis)
+      this.$yAxisTickGroup.call(this.customYAxis)
+
+      this.brushX.extent([[0, 0], [this.width, 40]])
+      this.$xAxisBrushGroup.selectAll('.brush').call(this.brushX)
+      this.$lineGroup.selectAll('path').attr('d', this.line)
+    },
+
+    zoomRedraw() {
+      console.log(this.brushX.extent)
+      // Animate to the selected area by updating the x axis and area path
+      const transition = 100
+      this.$xAxisGroup.call(this.customXAxis)
+      this.$lineGroup
+        .selectAll('path')
+        .transition(transition)
+        .attr('d', this.line)
+    },
+
+    handleResize() {
+      this.setupWidthHeight()
+      this.resizeRedraw()
+    },
+
+    handleReset() {
+      this.zoomed = false
+      this.xDomainExtent = extent(this.dataset, d => d.date)
+      this.x.domain(this.xDomainExtent)
+      this.zoomRedraw()
+      EventBus.$emit('dataset.filter', null)
+    },
+
+    brushEnded(d) {
+      // prevent an infinite loop by not moving the brush in response to you moving the brush
+      if (!event.selection) return
+
+      const s = event.selection
+      const startDate = this.x.invert(s[0])
+      const endDate = this.x.invert(s[1])
+      const dataRange = [startDate, endDate]
+
+      // Get the brush selection (start/end) points -> dates
+      // Set it to the current X domain
+      this.xDomainExtent = dataRange
+      this.x.domain(dataRange)
+
+      // Turn off the brush selection
+      selectAll('.brush').call(this.brushX.move, null)
+
+      this.zoomed = true
+      this.zoomRedraw()
+      EventBus.$emit('dataset.filter', dataRange)
+    },
+
+    customXAxis(g) {
+      const ticks = axisTimeTicks(this.xDomainExtent[1] - this.xDomainExtent[0])
+      this.xAxis.ticks(ticks)
+
+      // add secondary x axis tick label here
+      const insertSecondaryAxisTick = function(d) {
+        const el = select(this)
+        const tFormat = timeFormat('%d %b')
+        const secondaryText = axisSecondaryTimeFormat(d)
+        if (secondaryText !== '') {
+          el.append('tspan')
+            .text(secondaryText)
+            .attr('x', 2)
+            .attr('dy', 12)
+        }
+      }
+
+      g.call(this.xAxis)
+      g.selectAll('.tick text').each(insertSecondaryAxisTick)
+      g.selectAll('.tick text')
+        .attr('x', 2)
+        .attr('y', 5)
+      g.selectAll('.tick line').attr('y1', 20)
+    },
+
+    customYAxis(g) {
+      g.call(this.yAxis)
+      g.selectAll('.tick text')
+        .attr('x', 4)
+        .attr('dy', -4)
+    },
+
+    getXAxisDateByMouse(evt) {
+      const m = mouse(evt)
+      const date = this.x.invert(m[0])
+      return date
     }
   }
 }
 </script>
 
-<style lang="scss">
-path.line {
-  fill: none;
-  stroke: #000;
-  stroke-width: 1;
+<style lang="scss" scoped>
+.line-vis {
+  position: relative;
 }
-.cursor-line {
-  stroke: red;
-  stroke-width: 1px;
-}
-.hover-layer {
-  fill: transparent;
+.reset-btn {
+  position: absolute;
+  right: 1rem;
+  top: 2.5rem;
 }
 </style>
