@@ -13,6 +13,7 @@
           v-if="ready"
           :domains="domains"
           :dataset="dataset"
+          :dynamic-extent="dateFilter"
           :step="step"
           :vis-height="400"
           @dateOver="handleDateOver"
@@ -22,8 +23,7 @@
           v-if="ready"
           :domains="domains"
           :dataset="dataset"
-          :start-time="dateFilter[0]"
-          :end-time="dateFilter[1]"
+          :dynamic-extent="dateFilter"
           :step="step"
           :vis-height="200"
           @dateOver="handleDateOver"
@@ -309,12 +309,8 @@ export default {
 
     handleDatasetFilter(dateRange) {
       if (dateRange && dateRange.length > 0) {
-        const startTime = new Date(
-          this.snapToClosestInterval(dateRange[0])
-        ).getTime()
-        const endTime = new Date(
-          this.snapToClosestInterval(dateRange[1])
-        ).getTime()
+        const startTime = this.snapToClosestInterval(dateRange[0])
+        const endTime = this.snapToClosestInterval(dateRange[1])
         this.filteredDataset = DataTransformService.filterDataByStartEndDates(
           this.dataset,
           startTime,

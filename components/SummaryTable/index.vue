@@ -258,7 +258,6 @@ export default {
       this.summary = {}
       this.summarySources = {}
       this.summaryLoads = {}
-      console.log(this.interval)
 
       this.domains.forEach(ft => {
         const category = ft.category

@@ -34,6 +34,17 @@ module.exports = {
   */
   css: ['@/assets/scss/app.scss'],
 
+  generate: {
+    routes: [
+      '/energy/nem',
+      '/energy/nsw1',
+      '/energy/qld1',
+      '/energy/sa1',
+      '/energy/tas1',
+      '/energy/vic1'
+    ]
+  },
+
   router: {
     base: '/'
   },

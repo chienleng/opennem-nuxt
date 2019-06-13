@@ -76,6 +76,10 @@ path.line-path {
 
 // brush styles
 .brush {
+  fill: #999;
+  fill-opacity: 0.2;
+  stroke: #000;
+
   .selection {
     fill: $opennem-link-color;
     fill-opacity: 0.3;
