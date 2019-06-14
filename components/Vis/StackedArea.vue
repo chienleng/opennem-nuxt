@@ -75,7 +75,7 @@ import { format as d3Format } from 'd3-format'
 import { select, selectAll, mouse, event } from 'd3-selection'
 import { schemeCategory10 } from 'd3-scale-chromatic'
 import { brushX } from 'd3-brush'
-import { timeFormat } from 'd3-time-format'
+import { timeFormat as d3Timeformat } from 'd3-time-format'
 import debounce from 'lodash.debounce'
 
 import EventBus from '~/plugins/eventBus.js'
@@ -99,6 +99,14 @@ export default {
     dynamicExtent: {
       type: Array,
       default: () => []
+    },
+    coordinates: {
+      type: Array,
+      default: () => null
+    },
+    hoverDate: {
+      type: Date,
+      default: () => null
     },
     // OPTIONAL: height for the chart
     visHeight: {
@@ -131,6 +139,7 @@ export default {
       stack: null,
       brushX: null,
       zoomed: false,
+      mouseEvt: null,
       $xAxisGroup: null,
       $xAxisBrushGroup: null,
       $yAxisGroup: null,
@@ -138,7 +147,7 @@ export default {
       $hoverLayer: null,
       $cursorLineGroup: null,
       $stackedAreaGroup: null,
-      // Stacked Area CSS classes
+      // Stacked Area
       stackedAreaPathClass: CONFIG.CHART_STACKED_AREA_PATH_CLASS,
       stackedAreaGroupClass: CONFIG.CHART_STACKED_AREA_GROUP_CLASS,
       xAxisClass: CONFIG.X_AXIS_CLASS,
@@ -146,7 +155,9 @@ export default {
       yAxisClass: CONFIG.Y_AXIS_CLASS,
       yAxisTickClass: CONFIG.Y_AXIS_TICK_CLASS,
       hoverLayerClass: CONFIG.HOVER_LAYER_CLASS,
-      // Tooltip CSS classes
+      // Tooltip
+      timeRectWidth: 70,
+      timeRectHeight: 20,
       cursorLineGroupClass: CONFIG.CURSOR_LINE_GROUP_CLASS,
       cursorLineClass: CONFIG.CURSOR_LINE_CLASS,
       cursorLineTextClass: CONFIG.CURSOR_LINE_TEXT_CLASS,
@@ -194,6 +205,9 @@ export default {
         this.zoomed = true
         this.zoomRedraw()
       }
+    },
+    hoverDate(date) {
+      this.updateTooltip(date)
     }
   },
 
@@ -268,14 +282,19 @@ export default {
         .attr('class', 'brush')
         .call(this.brushX)
 
-      // Create hover line and date
+      // Create hover line and date (rect/text)
       this.$cursorLineGroup.append('path').attr('class', this.cursorLineClass)
       this.$cursorLineGroup
         .append('rect')
         .attr('class', this.cursorLineRectClass)
+        .attr('width', this.timeRectWidth)
+        .attr('height', this.timeRectHeight)
+        .attr('opacity', 0)
       this.$cursorLineGroup
         .append('text')
         .attr('class', this.cursorLineTextClass)
+        .attr('text-anchor', 'middle')
+        .style('fill', 'white')
 
       // This is a stacked area
       this.stack = stack()
@@ -289,26 +308,30 @@ export default {
       // Event handling
       // - Control tooltip visibility for mouse entering/leaving svg
       $svg.on('mouseenter', () => {
-        this.$cursorLineGroup.attr('opacity', 1)
+        // this.$cursorLineGroup.attr('opacity', 1)
         EventBus.$emit('vis.mouseenter')
       })
       $svg.on('mouseleave', () => {
-        this.$cursorLineGroup.attr('opacity', 0)
+        // this.$cursorLineGroup.attr('opacity', 0)
+        this.mouseEvt = null
         EventBus.$emit('vis.mouseleave')
       })
 
       // - find date when on the hoverLayer or brushLayer or when brushing
       this.$hoverLayer.on('touchmove mousemove', function() {
+        self.$emit('eventChange', this)
         self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
         self.$emit('domainOver', null)
       })
       this.brushX.on('brush', function() {
+        self.$emit('eventChange', this)
         self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
         self.$emit('domainOver', null)
       })
       this.$xAxisBrushGroup
         .selectAll('.brush')
         .on('touchmove mousemove', function() {
+          self.$emit('eventChange', this)
           self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
           self.$emit('domainOver', null)
         })
@@ -371,9 +394,59 @@ export default {
       this.$stackedAreaGroup
         .selectAll('path')
         .on('touchmove mousemove', function(d) {
+          self.$emit('eventChange', this)
           self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
           self.$emit('domainOver', d.key)
         })
+    },
+
+    updateTooltip(date) {
+      const $cursorLine = this.$cursorLineGroup.select(
+        `.${this.cursorLineClass}`
+      )
+      const $cursorLineRect = this.$cursorLineGroup.select(
+        `.${this.cursorLineRectClass}`
+      )
+      const $cursorLineText = this.$cursorLineGroup.select(
+        `.${this.cursorLineTextClass}`
+      )
+      const xDate = this.x(date)
+      const time = d3Timeformat('%H:%M')(date)
+
+      // Cursor line/rect/text to follow mouse
+      $cursorLineRect
+        .attr('x', xDate - this.timeRectWidth / 2)
+        .attr('y', -20)
+        .attr('opacity', 1)
+      $cursorLineText
+        .attr('x', xDate)
+        .attr('y', -5)
+        .text(time)
+      // Position and draw the line
+      $cursorLine.attr('d', () => {
+        let d = 'M' + xDate + ',' + this.height
+        d += ' ' + xDate + ',' + 0
+        return d
+      })
+
+      if (this.coordinates) {
+        const xMouse = this.coordinates[0]
+        const yMouse = this.coordinates[1]
+        const timeRectLeftCutoff = this.timeRectWidth
+        const timeRectRightCutoff = this.width - this.timeRectWidth - 2
+
+        // - check for time tooltip
+        if (xMouse >= timeRectRightCutoff) {
+          $cursorLineRect.attr('x', timeRectRightCutoff)
+          $cursorLineText.attr(
+            'x',
+            timeRectRightCutoff + this.timeRectWidth / 2
+          )
+        } else if (xMouse <= timeRectLeftCutoff) {
+          $cursorLineRect.attr('x', 0)
+          $cursorLineText.attr('x', this.timeRectWidth / 2)
+        }
+      }
     },
 
     // Update vis when container is resized
@@ -444,7 +517,6 @@ export default {
       // add secondary x axis tick label here
       const insertSecondaryAxisTick = function(d) {
         const el = select(this)
-        const tFormat = timeFormat('%d %b')
         const secondaryText = axisSecondaryTimeFormat(d)
         if (secondaryText !== '') {
           el.append('tspan')

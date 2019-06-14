@@ -50,7 +50,7 @@ function setupSignals(id, width, height, x) {
   let currentKey = '',
     label = ''
 
-  EventBus.$on('vis.mousemove', onMouseMove)
+  // EventBus.$on('vis.mousemove', onMouseMove)
   EventBus.$on('vis.mouseover', onMouseOver)
   EventBus.$on('vis.mouseout', onMouseOut)
   EventBus.$on('vis.areaover', onAreaOver)
@@ -159,7 +159,7 @@ function setupSignals(id, width, height, x) {
 }
 
 function destroySignals() {
-  EventBus.$off('vis.mousemove')
+  // EventBus.$off('vis.mousemove')
   EventBus.$off('vis.mouseover')
   EventBus.$off('vis.mouseout')
   EventBus.$off('vis.areaover')

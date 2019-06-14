@@ -14,8 +14,11 @@
           :domains="domains"
           :dataset="dataset"
           :dynamic-extent="dateFilter"
+          :hover-date="hoverDate"
+          :coordinates="coordinates"
           :step="step"
           :vis-height="400"
+          @eventChange="handleEventChange"
           @dateOver="handleDateOver"
           @domainOver="handleDomainOver"
         />
@@ -24,8 +27,10 @@
           :domains="domains"
           :dataset="dataset"
           :dynamic-extent="dateFilter"
+          :hover-date="hoverDate"
           :step="step"
           :vis-height="200"
+          @eventChange="handleEventChange"
           @dateOver="handleDateOver"
           @domainOver="handleDomainOver"
         />
@@ -35,6 +40,8 @@
           v-if="mounted"
           :domains="domains"
           :dataset="filteredDataset"
+          :hover-date="hoverDate"
+          :hover-on="hoverOn"
           :interval="interval"
           :is-energy="step"
         />
@@ -51,6 +58,7 @@ import {
   timeMonth as d3TimeMonth,
   timeYear as d3TimeYear
 } from 'd3-time'
+import { mouse as d3Mouse } from 'd3-selection'
 import { extent as d3Extent } from 'd3-array'
 import _uniqBy from 'lodash.uniqby'
 import _includes from 'lodash.includes'
@@ -88,8 +96,11 @@ export default {
       domainIds: [],
       responses: [],
       dateFilter: null,
+      hoverDate: null,
+      coordinates: null,
       filteredDataset: [],
-      visHeight: 0
+      visHeight: 0,
+      hoverOn: false
     }
   },
 
@@ -113,8 +124,12 @@ export default {
   },
 
   mounted() {
-    this.visHeight = window.innerWidth > 768 ? 578 : 350
     EventBus.$on('dataset.filter', this.handleDatasetFilter)
+    EventBus.$on('vis.mousemove', this.handleVisMouseMove)
+    EventBus.$on('vis.mouseenter', this.handleVisEnter)
+    EventBus.$on('vis.mouseleave', this.handleVisLeave)
+
+    this.visHeight = window.innerWidth > 768 ? 578 : 350
     this.$nextTick(() => {
       window.addEventListener('resize', () => {
         this.visHeight = window.innerWidth > 768 ? 578 : 350
@@ -127,6 +142,9 @@ export default {
 
   beforeDestroy() {
     EventBus.$off('dataset.filter')
+    EventBus.$off('vis.mousemove')
+    EventBus.$off('vis.mouseenter')
+    EventBus.$off('vis.mouseleave')
   },
 
   methods: {
@@ -322,6 +340,10 @@ export default {
       }
     },
 
+    handleEventChange(evt) {
+      this.coordinates = d3Mouse(evt)
+    },
+
     handleDateOver(evt, date) {
       EventBus.$emit(
         'vis.mousemove',
@@ -333,6 +355,18 @@ export default {
 
     handleDomainOver(domain) {
       EventBus.$emit('vis.areaover', domain)
+    },
+
+    handleVisMouseMove(evt, dataset, date) {
+      this.hoverDate = date
+    },
+
+    handleVisEnter() {
+      this.hoverOn = true
+    },
+
+    handleVisLeave() {
+      this.hoverOn = false
     },
 
     flatten(data, domains, range, interval) {

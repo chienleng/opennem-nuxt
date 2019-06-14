@@ -1,7 +1,7 @@
 <template>
   <div class="summary-table">
     <header>
-      <span v-if="!visEntered">
+      <span v-if="!hoverOn">
         <time :datetime="startDateTime">
           {{ startDate | formatDate }}
         </time>
@@ -12,7 +12,7 @@
       </span>
       
       <time
-        v-if="visEntered" 
+        v-if="hoverOn" 
         :datetime="hoveredDateTime">
         {{ hoveredDate | formatDate }}
       </time>
@@ -22,12 +22,12 @@
       <div class="summary-row">
         <div class="summary-col-label">{GROUP}</div>
         <div
-          v-if="!visEntered || isEnergy"
+          v-if="!hoverOn || isEnergy"
           class="summary-col-energy">
           Energy <small>GWh</small>
         </div>
         <div
-          v-if="visEntered && !isEnergy"
+          v-if="hoverOn && !isEnergy"
           class="summary-col-energy">
           Power <small>MW</small>
         </div>
@@ -36,12 +36,12 @@
       <div class="summary-row">
         <div class="summary-col-label">Sources</div>
         <div
-          v-if="!visEntered"
+          v-if="!hoverOn"
           class="summary-col-energy cell-value">
           {{ summarySources._totalEnergy | formatValue }}
         </div>
         <div
-          v-if="visEntered"
+          v-if="hoverOn"
           class="summary-col-energy cell-value">
           {{ pointSummarySources._total | formatValue }}
         </div>
@@ -51,7 +51,7 @@
     <items
       :group="'ft-sources'"
       :original-order="sourcesOrder"
-      :show-point-summary="visEntered"
+      :show-point-summary="hoverOn"
       :point-summary="pointSummarySources"
       :point-summary-total="pointSummary._total"
       :summary="summarySources"
@@ -64,12 +64,12 @@
       <div class="summary-row">
         <div class="summary-col-label">Loads</div>
         <div
-          v-if="!visEntered"
+          v-if="!hoverOn"
           class="summary-col-energy cell-value">
           {{ summaryLoads._totalEnergy | formatValue }}
         </div>
         <div
-          v-if="visEntered"
+          v-if="hoverOn"
           class="summary-col-energy cell-value">
           {{ pointSummaryLoads._total | formatValue }}
         </div>
@@ -79,7 +79,7 @@
     <items
       :group="'ft-loads'"
       :original-order="loadsOrder"
-      :show-point-summary="visEntered"
+      :show-point-summary="hoverOn"
       :point-summary="pointSummaryLoads"
       :point-summary-total="pointSummary._total"
       :summary="summaryLoads"
@@ -92,12 +92,12 @@
       <div class="summary-row last-row">
         <div class="summary-col-label">Net</div>
         <div
-          v-if="!visEntered"
+          v-if="!hoverOn"
           class="summary-col-energy cell-value">
           {{ summary._totalEnergy | formatValue }}
         </div>
         <div
-          v-if="visEntered"
+          v-if="hoverOn"
           class="summary-col-energy cell-value">
           {{ pointSummary._total | formatValue }}
         </div>
@@ -109,7 +109,6 @@
 <script>
 import moment from 'moment'
 import _isEmpty from 'lodash.isempty'
-import EventBus from '~/plugins/eventBus.js'
 import Items from './Items'
 
 export default {
@@ -136,6 +135,14 @@ export default {
       type: Array,
       default: () => []
     },
+    hoverDate: {
+      type: Date,
+      default: () => null
+    },
+    hoverOn: {
+      type: Boolean,
+      default: () => false
+    },
     temperatureId: {
       type: String,
       default: () => ''
@@ -159,8 +166,7 @@ export default {
       pointSummarySources: {},
       pointSummaryLoads: {},
       hiddenFuelTechs: [],
-      hoveredTemperature: 0,
-      visEntered: false
+      hoveredTemperature: 0
     }
   },
 
@@ -233,21 +239,14 @@ export default {
   watch: {
     dataset(updated) {
       this.calculateSummary(updated)
+    },
+    hoverDate(date) {
+      this.updatePointSummary(date)
     }
   },
 
   mounted() {
-    EventBus.$on('vis.mousemove', this.handleVisCursor)
-    EventBus.$on('vis.mouseenter', this.handleVisEnter)
-    EventBus.$on('vis.mouseleave', this.handleVisLeave)
-
     this.calculateSummary(this.dataset)
-  },
-
-  beforeDestroy() {
-    EventBus.$off('vis.mousemove')
-    EventBus.$off('vis.mouseenter')
-    EventBus.$off('vis.mouseleave')
   },
 
   methods: {
@@ -320,8 +319,8 @@ export default {
       this.pointSummaryLoads._total = totalLoads
     },
 
-    handleVisCursor(evt, dataset, date) {
-      const dataFound = dataset.find(d => {
+    updatePointSummary(date) {
+      const dataFound = this.dataset.find(d => {
         const fDate = moment(d.date)
         const rDate = moment(date)
         if (this.interval === 'Day') {
@@ -340,14 +339,6 @@ export default {
           ? dataFound[this.temperatureId].value
           : ''
       this.calculatePointSummary(dataFound)
-    },
-
-    handleVisEnter() {
-      this.visEntered = true
-    },
-
-    handleVisLeave() {
-      this.visEntered = false
     },
 
     handleSourcesOrderUpdate(newSourceOrder) {

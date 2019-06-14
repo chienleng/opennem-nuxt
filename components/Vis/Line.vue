@@ -75,7 +75,6 @@ import { format as d3Format } from 'd3-format'
 import { select, selectAll, mouse as d3Mouse, event } from 'd3-selection'
 import { schemeCategory10 } from 'd3-scale-chromatic'
 import { brushX } from 'd3-brush'
-import { timeFormat } from 'd3-time-format'
 import debounce from 'lodash.debounce'
 
 import EventBus from '~/plugins/eventBus.js'
@@ -99,6 +98,10 @@ export default {
     dynamicExtent: {
       type: Array,
       default: () => []
+    },
+    hoverDate: {
+      type: Date,
+      default: () => null
     },
     // OPTIONAL: height for the chart
     visHeight: {
@@ -190,6 +193,9 @@ export default {
         this.zoomed = true
         this.zoomRedraw()
       }
+    },
+    hoverDate(date) {
+      this.updateTooltip(date)
     }
   },
 
@@ -281,26 +287,29 @@ export default {
       // Event handling
       // - Control tooltip visibility for mouse entering/leaving svg
       $svg.on('mouseenter', () => {
-        this.$cursorLineGroup.attr('opacity', 1)
+        // this.$cursorLineGroup.attr('opacity', 1)
         EventBus.$emit('vis.mouseenter')
       })
       $svg.on('mouseleave', () => {
-        this.$cursorLineGroup.attr('opacity', 0)
+        // this.$cursorLineGroup.attr('opacity', 0)
         EventBus.$emit('vis.mouseleave')
       })
 
       // - find date when on the hoverLayer or brushLayer or when brushing
       this.$hoverLayer.on('touchmove mousemove', function() {
+        self.$emit('eventChange', this)
         self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
         self.$emit('domainOver', null)
       })
       this.brushX.on('brush', function() {
+        self.$emit('eventChange', this)
         self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
         self.$emit('domainOver', null)
       })
       this.$xAxisBrushGroup
         .selectAll('.brush')
         .on('touchmove mousemove', function() {
+          self.$emit('eventChange', this)
           self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
           self.$emit('domainOver', null)
         })
@@ -347,8 +356,22 @@ export default {
       // Event handling
       // - find date and domain
       this.$lineGroup.selectAll('path').on('touchmove mousemove', function(d) {
+        self.$emit('eventChange', this)
         self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
         self.$emit('domainOver', d.key)
+      })
+    },
+
+    updateTooltip(date) {
+      const $cursorLine = this.$cursorLineGroup.select(
+        `.${this.cursorLineClass}`
+      )
+      const xDate = this.x(date)
+      // Position and draw the line
+      $cursorLine.attr('d', () => {
+        let d = 'M' + xDate + ',' + this.height
+        d += ' ' + xDate + ',' + 0
+        return d
       })
     },
 
@@ -420,7 +443,6 @@ export default {
       // add secondary x axis tick label here
       const insertSecondaryAxisTick = function(d) {
         const el = select(this)
-        const tFormat = timeFormat('%d %b')
         const secondaryText = axisSecondaryTimeFormat(d)
         if (secondaryText !== '') {
           el.append('tspan')
