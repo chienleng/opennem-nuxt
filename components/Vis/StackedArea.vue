@@ -100,7 +100,7 @@ export default {
       type: Array,
       default: () => []
     },
-    coordinates: {
+    mouseLoc: {
       type: Array,
       default: () => null
     },
@@ -140,12 +140,14 @@ export default {
       brushX: null,
       zoomed: false,
       mouseEvt: null,
+      currentDomainOver: null,
       $xAxisGroup: null,
       $xAxisBrushGroup: null,
       $yAxisGroup: null,
       $yAxisTickGroup: null,
       $hoverLayer: null,
       $cursorLineGroup: null,
+      $tooltipGroup: null,
       $stackedAreaGroup: null,
       // Stacked Area
       stackedAreaPathClass: CONFIG.CHART_STACKED_AREA_PATH_CLASS,
@@ -155,13 +157,18 @@ export default {
       yAxisClass: CONFIG.Y_AXIS_CLASS,
       yAxisTickClass: CONFIG.Y_AXIS_TICK_CLASS,
       hoverLayerClass: CONFIG.HOVER_LAYER_CLASS,
-      // Tooltip
+      // Cursor Line and Tooltip
       timeRectWidth: 70,
       timeRectHeight: 20,
       cursorLineGroupClass: CONFIG.CURSOR_LINE_GROUP_CLASS,
       cursorLineClass: CONFIG.CURSOR_LINE_CLASS,
       cursorLineTextClass: CONFIG.CURSOR_LINE_TEXT_CLASS,
-      cursorLineRectClass: CONFIG.CURSOR_LINE_RECT_CLASS
+      cursorLineRectClass: CONFIG.CURSOR_LINE_RECT_CLASS,
+      tooltipRectWidth: 200,
+      tooltipRectHeight: 40,
+      tooltipGroupClass: CONFIG.TOOLTIP_GROUP_CLASS,
+      tooltipRectClass: CONFIG.TOOLTIP_RECT_CLASS,
+      tooltipTextClass: CONFIG.TOOLTIP_TEXT_CLASS
     }
   },
 
@@ -207,7 +214,7 @@ export default {
       }
     },
     hoverDate(date) {
-      this.updateTooltip(date)
+      this.updateCursorLineTooltip(date)
     }
   },
 
@@ -296,6 +303,23 @@ export default {
         .attr('text-anchor', 'middle')
         .style('fill', 'white')
 
+      // Create tooltip group
+      this.$tooltipGroup = this.$cursorLineGroup
+        .append('g')
+        .attr('class', this.tooltipGroupClass)
+      // Create tooltip rect
+      this.$tooltipGroup
+        .append('rect')
+        .attr('class', this.tooltipRectClass)
+        .attr('width', this.tooltipRectWidth)
+        .attr('height', this.tooltipRectHeight)
+        .attr('opacity', 0)
+      // Create tooltip text
+      this.$tooltipGroup
+        .append('text')
+        .attr('class', this.tooltipTextClass)
+        .attr('text-anchor', 'middle')
+
       // This is a stacked area
       this.stack = stack()
       // How to draw the area path
@@ -321,19 +345,19 @@ export default {
       this.$hoverLayer.on('touchmove mousemove', function() {
         self.$emit('eventChange', this)
         self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
-        self.$emit('domainOver', null)
+        self.currentDomainOver = null
       })
       this.brushX.on('brush', function() {
         self.$emit('eventChange', this)
         self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
-        self.$emit('domainOver', null)
+        self.currentDomainOver = null
       })
       this.$xAxisBrushGroup
         .selectAll('.brush')
         .on('touchmove mousemove', function() {
           self.$emit('eventChange', this)
           self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
-          self.$emit('domainOver', null)
+          self.currentDomainOver = null
         })
     },
 
@@ -396,57 +420,31 @@ export default {
         .on('touchmove mousemove', function(d) {
           self.$emit('eventChange', this)
           self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
-          self.$emit('domainOver', d.key)
+          self.currentDomainOver = d.key
         })
     },
 
-    updateTooltip(date) {
-      const $cursorLine = this.$cursorLineGroup.select(
-        `.${this.cursorLineClass}`
-      )
-      const $cursorLineRect = this.$cursorLineGroup.select(
-        `.${this.cursorLineRectClass}`
-      )
-      const $cursorLineText = this.$cursorLineGroup.select(
-        `.${this.cursorLineTextClass}`
-      )
+    updateCursorLineTooltip(date) {
       const xDate = this.x(date)
       const time = d3Timeformat('%H:%M')(date)
+      const valueFormat = d3Format(',.1f')
+      const millisecs = new Date(date).getTime()
+      const find = this.dataset.find(d => d.date === millisecs)
 
-      // Cursor line/rect/text to follow mouse
-      $cursorLineRect
-        .attr('x', xDate - this.timeRectWidth / 2)
-        .attr('y', -20)
-        .attr('opacity', 1)
-      $cursorLineText
-        .attr('x', xDate)
-        .attr('y', -5)
-        .text(time)
-      // Position and draw the line
-      $cursorLine.attr('d', () => {
-        let d = 'M' + xDate + ',' + this.height
-        d += ' ' + xDate + ',' + 0
-        return d
-      })
+      let total = null
+      let label = ''
+      let value = 0
 
-      if (this.coordinates) {
-        const xMouse = this.coordinates[0]
-        const yMouse = this.coordinates[1]
-        const timeRectLeftCutoff = this.timeRectWidth
-        const timeRectRightCutoff = this.width - this.timeRectWidth - 2
-
-        // - check for time tooltip
-        if (xMouse >= timeRectRightCutoff) {
-          $cursorLineRect.attr('x', timeRectRightCutoff)
-          $cursorLineText.attr(
-            'x',
-            timeRectRightCutoff + this.timeRectWidth / 2
-          )
-        } else if (xMouse <= timeRectLeftCutoff) {
-          $cursorLineRect.attr('x', 0)
-          $cursorLineText.attr('x', this.timeRectWidth / 2)
-        }
+      if (find && this.currentDomainOver && find[this.currentDomainOver]) {
+        label = find[this.currentDomainOver].fuelTech
+        value = valueFormat(find[this.currentDomainOver].value)
       }
+      if (find) {
+        total = valueFormat(find._total)
+      }
+
+      this.positionCursorLine(xDate, time)
+      this.positionTooltip(xDate, time, total, label, value)
     },
 
     // Update vis when container is resized
@@ -486,6 +484,91 @@ export default {
         .selectAll('path')
         .transition(transition)
         .attr('d', this.area)
+    },
+
+    positionCursorLine(xDate, time) {
+      const $cursorLine = this.$cursorLineGroup.select(
+        `.${this.cursorLineClass}`
+      )
+      const $cursorLineRect = this.$cursorLineGroup.select(
+        `.${this.cursorLineRectClass}`
+      )
+      const $cursorLineText = this.$cursorLineGroup.select(
+        `.${this.cursorLineTextClass}`
+      )
+
+      // Cursor line/rect/text to follow mouse
+      $cursorLineRect
+        .attr('x', xDate - this.timeRectWidth / 2)
+        .attr('y', -20)
+        .attr('opacity', 1)
+      $cursorLineText
+        .attr('x', xDate)
+        .attr('y', -5)
+        .text(time)
+      // Position and draw the line
+      $cursorLine.attr('d', () => {
+        let d = 'M' + xDate + ',' + this.height
+        d += ' ' + xDate + ',' + 0
+        return d
+      })
+
+      if (this.mouseLoc) {
+        const xMouse = this.mouseLoc[0]
+        const yMouse = this.mouseLoc[1]
+        const leftCutoff = this.timeRectWidth / 2
+        const rightCutoff = this.width - this.timeRectWidth / 2
+
+        // - check for time tooltip
+        if (xMouse >= rightCutoff) {
+          $cursorLineRect.attr('x', rightCutoff - this.timeRectWidth / 2)
+          $cursorLineText.attr('x', rightCutoff)
+        } else if (xMouse <= leftCutoff) {
+          $cursorLineRect.attr('x', 0)
+          $cursorLineText.attr('x', this.timeRectWidth / 2)
+        }
+      }
+    },
+
+    positionTooltip(xDate, time, total, label, value) {
+      const $tooltipRect = this.$tooltipGroup.select(
+        `.${this.tooltipRectClass}`
+      )
+      const $tooltipText = this.$tooltipGroup.select(
+        `.${this.tooltipTextClass}`
+      )
+
+      $tooltipRect
+        .attr('x', xDate - this.tooltipRectWidth / 2)
+        .attr('y', 0)
+        .attr('opacity', 1)
+      $tooltipText
+        .attr('x', xDate)
+        .attr('y', 15)
+        .text(`${label}: ${value}`)
+        .append('tspan')
+        .attr('x', xDate)
+        .attr('dy', 12)
+        .text(`${total}`)
+
+      // Tooltips to stick to left or right corners when close to the edge
+      // - check for value tooltip
+      if (this.mouseLoc) {
+        const xMouse = this.mouseLoc[0]
+        const yMouse = this.mouseLoc[1]
+        const leftCutoff = this.tooltipRectWidth / 2
+        const rightCutoff = this.width - this.tooltipRectWidth / 2
+
+        if (xMouse >= rightCutoff) {
+          $tooltipRect.attr('x', rightCutoff - this.tooltipRectWidth / 2)
+          $tooltipText.attr('x', rightCutoff)
+          $tooltipText.select('tspan').attr('x', rightCutoff)
+        } else if (xMouse <= leftCutoff) {
+          $tooltipRect.attr('x', 0)
+          $tooltipText.attr('x', this.tooltipRectWidth / 2)
+          $tooltipText.select('tspan').attr('x', this.tooltipRectWidth / 2)
+        }
+      }
     },
 
     // handle when selecting the date ranges on the brush area

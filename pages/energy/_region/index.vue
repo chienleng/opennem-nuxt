@@ -15,12 +15,11 @@
           :dataset="dataset"
           :dynamic-extent="dateFilter"
           :hover-date="hoverDate"
-          :coordinates="coordinates"
+          :mouse-loc="mouseLoc"
           :step="step"
           :vis-height="400"
           @eventChange="handleEventChange"
           @dateOver="handleDateOver"
-          @domainOver="handleDomainOver"
         />
         <line-vis
           v-if="ready"
@@ -32,7 +31,6 @@
           :vis-height="200"
           @eventChange="handleEventChange"
           @dateOver="handleDateOver"
-          @domainOver="handleDomainOver"
         />
       </div>
       <div class="table-container">
@@ -97,7 +95,7 @@ export default {
       responses: [],
       dateFilter: null,
       hoverDate: null,
-      coordinates: null,
+      mouseLoc: null,
       filteredDataset: [],
       visHeight: 0,
       hoverOn: false
@@ -341,7 +339,7 @@ export default {
     },
 
     handleEventChange(evt) {
-      this.coordinates = d3Mouse(evt)
+      this.mouseLoc = d3Mouse(evt)
     },
 
     handleDateOver(evt, date) {
@@ -351,10 +349,6 @@ export default {
         this.dataset,
         this.snapToClosestInterval(date)
       )
-    },
-
-    handleDomainOver(domain) {
-      EventBus.$emit('vis.areaover', domain)
     },
 
     handleVisMouseMove(evt, dataset, date) {

@@ -11,6 +11,7 @@ export const CURSOR_LINE_RECT_CLASS = 'cursor-line-rect'
 export const CURSOR_LINE_TEXT_CLASS = 'cursor-line-text'
 export const BRUSH_CLASS = 'brush'
 
+export const TOOLTIP_GROUP_CLASS = 'tooltip-group'
 export const TOOLTIP_RECT_CLASS = 'tooltip-rect'
 export const TOOLTIP_TEXT_CLASS = 'tooltip-text'
 

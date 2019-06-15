@@ -195,7 +195,7 @@ export default {
       }
     },
     hoverDate(date) {
-      this.updateTooltip(date)
+      this.updateCursorLineTooltip(date)
     }
   },
 
@@ -299,19 +299,16 @@ export default {
       this.$hoverLayer.on('touchmove mousemove', function() {
         self.$emit('eventChange', this)
         self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
-        self.$emit('domainOver', null)
       })
       this.brushX.on('brush', function() {
         self.$emit('eventChange', this)
         self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
-        self.$emit('domainOver', null)
       })
       this.$xAxisBrushGroup
         .selectAll('.brush')
         .on('touchmove mousemove', function() {
           self.$emit('eventChange', this)
           self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
-          self.$emit('domainOver', null)
         })
     },
 
@@ -347,6 +344,7 @@ export default {
       // Generate Line
       // Note: line #clip path is defined in CSS (safari workaround)
       // - look in /assets/scss/vis.scss
+      this.$lineGroup.select('path').remove()
       this.$lineGroup
         .append('path')
         .datum(this.dataset)
@@ -355,14 +353,13 @@ export default {
 
       // Event handling
       // - find date and domain
-      this.$lineGroup.selectAll('path').on('touchmove mousemove', function(d) {
+      this.$lineGroup.selectAll('path').on('touchmove mousemove', function() {
         self.$emit('eventChange', this)
         self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
-        self.$emit('domainOver', d.key)
       })
     },
 
-    updateTooltip(date) {
+    updateCursorLineTooltip(date) {
       const $cursorLine = this.$cursorLineGroup.select(
         `.${this.cursorLineClass}`
       )
