@@ -80,7 +80,6 @@ import debounce from 'lodash.debounce'
 
 import EventBus from '~/plugins/eventBus.js'
 import * as CONFIG from './shared/config.js'
-import { setupSignals, destroySignals } from './shared/signals.js'
 import axisTimeFormat from './shared/timeFormat.js'
 import axisSecondaryTimeFormat from './shared/secondaryTimeFormat.js'
 import axisTimeTicks from './shared/timeTicks.js'
@@ -230,13 +229,11 @@ export default {
 
     this.setupWidthHeight()
     this.setup()
-    setupSignals(this.id, this.width, this.height, this.x, this.dataset) // Eventbus signals
     this.update()
   },
 
   beforeDestroy() {
     window.removeEventListener('resize', this.handleResize)
-    destroySignals()
   },
 
   methods: {
@@ -393,9 +390,7 @@ export default {
       }
 
       // Setup the keys in the stack so the area knows how to draw the area
-      this.stack
-        .keys(this.domainIds)
-        .value((d, key) => (d[key] ? d[key].value : 0))
+      this.stack.keys(this.domainIds).value((d, key) => (d[key] ? d[key] : 0))
 
       // Generate Stacked Area
       // Note: stacked area #clip path is defined in CSS (safari workaround)
@@ -426,25 +421,24 @@ export default {
 
     updateCursorLineTooltip(date) {
       const xDate = this.x(date)
-      const time = d3Timeformat('%H:%M')(date)
+      const formattedTime = d3Timeformat('%H:%M')(date)
       const valueFormat = d3Format(',.1f')
-      const millisecs = new Date(date).getTime()
-      const find = this.dataset.find(d => d.date === millisecs)
-
+      const time = new Date(date).getTime()
+      const find = this.dataset.find(d => d.date === time)
       let total = null
       let label = ''
       let value = 0
 
       if (find && this.currentDomainOver && find[this.currentDomainOver]) {
-        label = find[this.currentDomainOver].fuelTech
-        value = valueFormat(find[this.currentDomainOver].value)
+        label = this.currentDomainOver
+        value = valueFormat(find[this.currentDomainOver])
       }
       if (find) {
         total = valueFormat(find._total)
       }
 
-      this.positionCursorLine(xDate, time)
-      this.positionTooltip(xDate, time, total, label, value)
+      this.positionCursorLine(xDate, formattedTime)
+      this.positionTooltip(xDate, label, value, total)
     },
 
     // Update vis when container is resized
@@ -516,8 +510,18 @@ export default {
       if (this.mouseLoc) {
         const xMouse = this.mouseLoc[0]
         const yMouse = this.mouseLoc[1]
+        const topCutoff = (20 / 100) * this.height
         const leftCutoff = this.timeRectWidth / 2
         const rightCutoff = this.width - this.timeRectWidth / 2
+
+        // Adjust the position of the tooltips if cursor is near the top
+        if (yMouse <= topCutoff) {
+          // $tooltipRect.attr('y', height - valueRectHeight)
+          // $tooltipText.attr('y', height - 25)
+          // $tooltipText2.attr('y', height - 5)
+          $cursorLineRect.attr('y', this.height)
+          $cursorLineText.attr('y', this.height + 15)
+        }
 
         // - check for time tooltip
         if (xMouse >= rightCutoff) {
@@ -530,7 +534,7 @@ export default {
       }
     },
 
-    positionTooltip(xDate, time, total, label, value) {
+    positionTooltip(xDate, label, value, total) {
       const $tooltipRect = this.$tooltipGroup.select(
         `.${this.tooltipRectClass}`
       )

@@ -23,11 +23,12 @@
         />
         <line-vis
           v-if="ready"
-          :domains="domains"
+          :domains="temperatureDomains"
           :dataset="dataset"
           :dynamic-extent="dateFilter"
           :hover-date="hoverDate"
           :step="step"
+          :y-axis-log="false"
           :vis-height="200"
           @eventChange="handleEventChange"
           @dateOver="handleDateOver"
@@ -92,6 +93,7 @@ export default {
       dataset: [],
       domains: [],
       domainIds: [],
+      temperatureDomains: [],
       responses: [],
       dateFilter: null,
       hoverDate: null,
@@ -197,6 +199,7 @@ export default {
       this.mergeResponses(
         responses,
         this.domains,
+        this.temperatureDomains,
         this.range,
         this.interval
       ).then(dataset => {
@@ -207,14 +210,16 @@ export default {
       })
     },
 
-    mergeResponses(res, domains, range, interval) {
+    mergeResponses(res, domains, temperatureDomains, range, interval) {
       return new Promise(resolve => {
         let data = []
         const promises = []
 
         // flatten data for vis and summary
         res.forEach(r => {
-          promises.push(this.flatten(r.data, domains, range, interval))
+          promises.push(
+            this.flatten(r.data, domains, temperatureDomains, range, interval)
+          )
         })
 
         // return flatten data and merge
@@ -239,18 +244,27 @@ export default {
           }
 
           // Roll up based on interval
-          DataTransformService.rollUp(data, domains, range, interval).then(
-            rolledUpData => {
-              // Then calculate min and total for each point for the chart
-              resolve(this.calculateMinTotal(rolledUpData, domains))
-            }
-          )
+          DataTransformService.rollUp(
+            data,
+            domains,
+            temperatureDomains,
+            range,
+            interval
+          ).then(rolledUpData => {
+            // Then calculate min and total for each point for the chart
+            resolve(this.calculateMinTotal(rolledUpData, domains))
+          })
         })
       })
     },
 
     updateDomains(res) {
       // Find out about available domains first before flattening data
+      this.updateEnergyDomains(res)
+      this.updateTemperatureDomains(res)
+    },
+
+    updateEnergyDomains(res) {
       let fuelTechEnergy = []
       res.forEach(r => {
         const energyObjs = r.data
@@ -262,6 +276,17 @@ export default {
       })
       this.getDomainIdsInOrder(fuelTechEnergy)
       this.domains = this.getFuelTechObjs()
+    },
+
+    updateTemperatureDomains(res) {
+      let domains = []
+      res.forEach(r => {
+        const objs = r.data.filter(d => d.type === 'temperature').map(d => {
+          return { id: d.id, type: d.type, colour: '#ff99dd' }
+        })
+        domains = [...domains, ...objs]
+      })
+      this.temperatureDomains = domains
     },
 
     updatedFilteredDataset(dataset) {
@@ -314,6 +339,7 @@ export default {
       this.mergeResponses(
         this.responses,
         this.domains,
+        this.temperatureDomains,
         this.range,
         this.interval
       ).then(dataset => {
@@ -363,13 +389,12 @@ export default {
       this.hoverOn = false
     },
 
-    flatten(data, domains, range, interval) {
+    flatten(data, domains, temperatureDomains, range, interval) {
       return new Promise(resolve => {
         DataTransformService.flattenAndInterpolate(
           data,
           domains,
-          range,
-          interval
+          temperatureDomains
         ).then(res => {
           if (interval === '5m' || interval === '30m') {
             const start = res[0].date
@@ -395,12 +420,12 @@ export default {
           const id = domain.id
 
           if (domain.category === 'load' || domain.fuelTech === 'imports') {
-            const negValue = -d[id].value
-            d[id].value = negValue
+            const negValue = -d[id]
+            d[id] = negValue
           }
-          total += d[id].value || 0
-          if (d[id].value < 0) {
-            min += d[id].value || 0
+          total += d[id] || 0
+          if (d[id] < 0) {
+            min += d[id] || 0
           }
         })
         dataset[i]._total = total

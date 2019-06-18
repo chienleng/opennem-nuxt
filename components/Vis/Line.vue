@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import { scaleOrdinal, scaleLinear, scaleTime } from 'd3-scale'
+import { scaleOrdinal, scaleLinear, scaleTime, scaleLog } from 'd3-scale'
 import { axisBottom, axisRight } from 'd3-axis'
 import { line } from 'd3-shape'
 import { extent, min, max } from 'd3-array'
@@ -79,7 +79,6 @@ import debounce from 'lodash.debounce'
 
 import EventBus from '~/plugins/eventBus.js'
 import * as CONFIG from './shared/config.js'
-import { setupSignals, destroySignals } from './shared/signals.js'
 import axisTimeFormat from './shared/timeFormat.js'
 import axisSecondaryTimeFormat from './shared/secondaryTimeFormat.js'
 import axisTimeTicks from './shared/timeTicks.js'
@@ -110,6 +109,11 @@ export default {
     },
     // OPTIONAL: whether it is a step curve
     step: {
+      type: Boolean,
+      default: () => false
+    },
+    // OPTIONAL: whether it is a log yAxis
+    yAxisLog: {
       type: Boolean,
       default: () => false
     }
@@ -211,13 +215,11 @@ export default {
 
     this.setupWidthHeight()
     this.setup()
-    setupSignals(this.id, this.width, this.height, this.x, this.dataset) // Eventbus signals
     this.update()
   },
 
   beforeDestroy() {
     window.removeEventListener('resize', this.handleResize)
-    destroySignals()
   },
 
   methods: {
@@ -247,7 +249,10 @@ export default {
 
       // Define x, y, z scale types
       this.x = scaleTime().range([0, this.width]) // Date axis
-      this.y = scaleLinear().range([this.height, 0]) // Value axis
+      this.y = this.yAxisLog // Value axis
+        ? scaleLog().range([this.height, 0])
+        : scaleLinear().range([this.height, 0])
+      // this.y = scaleLog().range([this.height, 0]) // Value axis
       this.z = scaleOrdinal() // Colour
 
       // Set up where x, y axis appears
@@ -321,13 +326,11 @@ export default {
       const xDomainExtent = this.dynamicExtent.length
         ? this.dynamicExtent
         : this.datasetDateExtent
+      const yMin = this.yAxisLog ? 0.01 : min(this.dataset, d => d._min)
+      const yMax = max(this.dataset, d => d._total)
+
       this.x.domain(xDomainExtent)
-      this.y
-        .domain([
-          min(this.dataset, d => d._min),
-          max(this.dataset, d => d._total)
-        ])
-        .nice()
+      this.y.domain([yMin, yMax]).nice()
       this.z.range(this.domainColours).domain(this.domainIds)
 
       this.$xAxisGroup.call(this.customXAxis)
@@ -350,6 +353,10 @@ export default {
         .datum(this.dataset)
         .attr('class', `${this.linePathClass}`)
         .attr('d', this.line)
+        .style('stroke', d => {
+          // console.log(d)
+          return this.z(d.key)
+        })
 
       // Event handling
       // - find date and domain

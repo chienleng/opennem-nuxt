@@ -264,11 +264,11 @@ export default {
           const energy = {}
 
           if (this.isEnergy) {
-            energy[ft.id] = d[ft.id].value
+            energy[ft.id] = d[ft.id]
           } else {
             // calculate energy (GWh) += power * 5mins/60/100
             const mins = this.interval === '30m' ? 30 : 5
-            energy[ft.id] = (d[ft.id].value * mins) / 60 / 1000
+            energy[ft.id] = (d[ft.id] * mins) / 60 / 1000
           }
 
           return energy
@@ -304,7 +304,7 @@ export default {
       if (!_isEmpty(this.pointSummary)) {
         this.domains.forEach(ft => {
           const category = ft.category
-          const value = this.pointSummary[ft.id].value
+          const value = this.pointSummary[ft.id]
 
           if (category === 'source') {
             this.pointSummarySources[ft.id] = value
@@ -336,7 +336,7 @@ export default {
 
       this.hoveredTemperature =
         dataFound && dataFound[this.temperatureId]
-          ? dataFound[this.temperatureId].value
+          ? dataFound[this.temperatureId]
           : ''
       this.calculatePointSummary(dataFound)
     },

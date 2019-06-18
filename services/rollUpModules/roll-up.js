@@ -1,15 +1,13 @@
 import { nest as d3Nest } from 'd3-collection'
-import { mean as d3Mean } from 'd3-array'
+import { sum as d3Sum } from 'd3-array'
 
 export default function(ids, data) {
-  const coeff = 1000 * 60 * 30
-
   const entries = d3Nest()
-    .key(d => Math.round(d.date / coeff) * coeff)
+    .key(d => d.nestDate)
     .rollup(a => {
       let obj = {}
       ids.forEach(id => {
-        obj[id] = d3Mean(a, d => d[id] || 0)
+        obj[id] = d3Sum(a, d => d[id] || 0)
       })
       return obj
     })
@@ -17,7 +15,7 @@ export default function(ids, data) {
 
   return entries.map(e => {
     const object = {
-      date: parseInt(e.key)
+      date: new Date(e.key).getTime()
     }
 
     Object.keys(e.value).forEach(k => {
