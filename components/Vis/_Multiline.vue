@@ -13,7 +13,7 @@
       class="line-chart">
       <defs>
         <!-- where to clip -->
-        <clipPath class="clip">
+        <clipPath id="clip">
           <rect
             :width="width"
             :height="height"/>

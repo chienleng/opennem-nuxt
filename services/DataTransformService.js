@@ -14,6 +14,15 @@ import rollUpAllYear from './rollUpModules/ru-all-year.js'
 const PRICE_ABOVE_300 = 'price.above300'
 const PRICE_BELOW_0 = 'price.below0'
 
+function checkTemperatureType(type) {
+  return (
+    type === 'temperature' ||
+    type === 'temperature_min' ||
+    type === 'temperature_mean' ||
+    type === 'temperature_max'
+  )
+}
+
 /**
  *
  * @param {*} data: response data from API
@@ -31,7 +40,7 @@ function transformData(data, domains, temperatureDomains, priceDomains) {
    */
   function mergeIntoFlatData(id, type, newHistory) {
     const isEnergyData = type === 'power' || type === 'energy'
-    const isTemperatureData = type === 'temperature'
+    const isTemperatureType = checkTemperatureType(type)
     const isPriceData = type === 'price' || type === 'volume_weighted_price'
 
     newHistory.forEach(r => {
@@ -40,7 +49,7 @@ function transformData(data, domains, temperatureDomains, priceDomains) {
         // if Date point doesn't exist, create date point with empty values
         const newObj = { date: r.date }
 
-        if (isEnergyData || isTemperatureData || isPriceData) {
+        if (isEnergyData || isTemperatureType || isPriceData) {
           // Add energy domains
           domains.forEach(domain => {
             newObj[domain.id] = null
@@ -57,12 +66,12 @@ function transformData(data, domains, temperatureDomains, priceDomains) {
           dataset.push(newObj)
         }
       } else {
-        if (isEnergyData || isTemperatureData) {
+        if (isEnergyData || isTemperatureType) {
           findDate[id] = r.value
         } else if (isPriceData) {
           findDate[id] = r.value
-          findDate[PRICE_ABOVE_300] = r.value > 300 ? r.value : 0.001
-          findDate[PRICE_BELOW_0] = r.value < 0 ? r.value : 0.001
+          findDate[PRICE_ABOVE_300] = r.value > 300 ? r.value : 0.1
+          findDate[PRICE_BELOW_0] = r.value < 0 ? r.value : -0.1
         }
       }
     })
@@ -232,14 +241,6 @@ export default {
     range,
     interval
   ) {
-    const energyDomainIds = energyDomains.map(d => d.id)
-    const temperatureDomainIds = temperatureDomains.map(d => d.id)
-    const priceDomainIds = priceDomains.map(d => d.id)
-    const domainIds = [
-      ...energyDomainIds,
-      ...priceDomainIds,
-      ...temperatureDomainIds
-    ]
     const domains = [...energyDomains, ...priceDomains, ...temperatureDomains]
     const promise = new Promise(resolve => {
       if (interval === '30m') {

@@ -289,8 +289,6 @@ export default {
         }
       })
 
-      console.log(this.domains, this.summary, data)
-
       this.summary._totalEnergy = total
       this.summarySources._totalEnergy = totalSources
       this.summaryLoads._totalEnergy = totalLoads

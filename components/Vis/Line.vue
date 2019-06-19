@@ -13,7 +13,7 @@
       class="line-chart">
       <defs>
         <!-- where to clip -->
-        <clipPath class="clip">
+        <clipPath id="clip">
           <rect
             :width="width"
             :height="height"/>
@@ -24,7 +24,8 @@
         :transform="gTransform"
         class="axis-line-group">
         <!-- x and y axis ticks/lines/text -->
-        <g 
+        <g
+          v-if="showXAxis"
           :transform="xAxisTransform" 
           :class="xAxisClass" />
 
@@ -32,6 +33,7 @@
 
         <!-- x axis layer to allow zoom in (brush) -->
         <g 
+          v-if="showXAxis"
           :transform="xAxisBrushTransform" 
           class="x-axis-brush-group" />
       </g>
@@ -44,6 +46,9 @@
             :width="width"
             :height="height"/>
         </g>
+
+        <!-- where the area path will show -->
+        <g class="area-group" />
 
         <!-- where the line path will show -->
         <g class="line-group" />
@@ -69,7 +74,7 @@
 <script>
 import { scaleOrdinal, scaleLinear, scaleTime, scaleLog } from 'd3-scale'
 import { axisBottom, axisRight } from 'd3-axis'
-import { line, curveStep, curveLinear } from 'd3-shape'
+import { area as d3Area, line, curveStep, curveLinear } from 'd3-shape'
 import { extent, min, max } from 'd3-array'
 import { format as d3Format } from 'd3-format'
 import { select, selectAll, mouse as d3Mouse, event } from 'd3-selection'
@@ -90,6 +95,14 @@ export default {
       default: () => []
     },
     domainId: {
+      type: String,
+      default: () => ''
+    },
+    minDomainId: {
+      type: String,
+      default: () => ''
+    },
+    maxDomainId: {
       type: String,
       default: () => ''
     },
@@ -124,6 +137,26 @@ export default {
     yAxisLog: {
       type: Boolean,
       default: () => false
+    },
+    // OPTIONAL: whether to flp the log chart
+    yAxisInvert: {
+      type: Boolean,
+      default: () => false
+    },
+    // OPTIONAL: specify minimum yaxis value
+    yMin: {
+      type: Number,
+      default: () => null
+    },
+    // OPTIONAL: specify maximum yaxis value
+    yMax: {
+      type: Number,
+      default: () => null
+    },
+    // OPTIONAL: whether to show xAxis
+    showXAxis: {
+      type: Boolean,
+      default: () => true
     }
   },
 
@@ -137,9 +170,11 @@ export default {
       x: null,
       y: null,
       z: null,
+      yRange: null,
       xAxis: null,
       yAxis: null,
       line: null,
+      area: null,
       colours: schemeCategory10,
       brushX: null,
       zoomed: false,
@@ -150,8 +185,11 @@ export default {
       $hoverLayer: null,
       $cursorLineGroup: null,
       $lineGroup: null,
+      $areaGroup: null,
       linePathClass: 'line-path',
       lineGroupClass: 'line-group',
+      areaPathClass: 'area-path',
+      areaGroupClass: 'area-group',
       xAxisClass: CONFIG.X_AXIS_CLASS,
       xAxisBrushGroupClass: CONFIG.X_AXIS_BRUSH_GROUP_CLASS,
       yAxisClass: CONFIG.Y_AXIS_CLASS,
@@ -172,6 +210,9 @@ export default {
     domainIds() {
       return this.domains.map(d => d.id).reverse()
     },
+    hasMinMax() {
+      return this.minDomainId !== '' && this.maxDomainId !== ''
+    },
     domainColours() {
       return this.domains.map(d => d.colour).reverse()
     },
@@ -179,7 +220,7 @@ export default {
       return `line-${this._uid}`
     },
     gTransform() {
-      return `translate(${this.margin.left},${this.margin.top})`
+      return `translate(${this.margin.left},0)`
     },
     xAxisTransform() {
       return `translate(0, ${this.height})`
@@ -233,9 +274,12 @@ export default {
   methods: {
     setupWidthHeight() {
       const chartWidth = this.$el.offsetWidth
+      const height = this.showXAxis
+        ? this.svgHeight - this.margin.top - this.margin.bottom
+        : this.svgHeight
       this.svgWidth = chartWidth
       this.width = chartWidth - this.margin.left - this.margin.right
-      this.height = this.svgHeight - this.margin.top - this.margin.bottom
+      this.height = height
     },
 
     setup() {
@@ -256,9 +300,10 @@ export default {
       this.$cursorLineGroup = $svg.select(`.${this.cursorLineGroupClass}`)
 
       // Define x, y, z scale types
+      this.yRange = this.yAxisInvert ? [0, this.height] : [this.height, 0]
       this.x = scaleTime().range([0, this.width]) // Date axis
       this.y = this.yAxisLog // Value axis
-        ? scaleLog().range([this.height, 0])
+        ? scaleLog().range(this.yRange)
         : scaleLinear().range([this.height, 0])
       this.z = scaleOrdinal() // Colour
 
@@ -268,7 +313,7 @@ export default {
         .tickFormat(d => axisTimeFormat(d))
       this.yAxis = axisRight(this.y)
         .tickSize(this.width)
-        // .ticks(10)
+        .ticks(5)
         .tickFormat(d => d3Format(CONFIG.Y_AXIS_FORMAT_STRING)(d))
 
       // Setup the 'brush' area and event handler
@@ -295,6 +340,12 @@ export default {
       this.line = line()
         .x(d => this.x(d.date))
         .y(d => this.y(d[this.domainId]))
+
+      // How to draw the area path
+      this.area = d3Area()
+        .x(d => this.x(d.date))
+        .y0(d => this.y(d[this.minDomainId]))
+        .y1(d => this.y(d[this.maxDomainId]))
 
       // Event handling
       // - Control tooltip visibility for mouse entering/leaving svg
@@ -327,19 +378,21 @@ export default {
     update() {
       const self = this
       this.$lineGroup = select(`#${this.id} .${this.lineGroupClass}`)
+      this.$areaGroup = select(`#${this.id} .${this.areaGroupClass}`)
 
       // Setup the x/y/z Axis domains
       // - Use dataset date range if there is none being passed into
       const xDomainExtent = this.dynamicExtent.length
         ? this.dynamicExtent
         : this.datasetDateExtent
-      const yMin = this.yAxisLog
-        ? 0.01
-        : min(this.dataset, d => d[this.domainId])
-      const yMax = max(this.dataset, d => d[this.domainId])
+      const yMin =
+        this.yMin || this.yMin === 0
+          ? this.yMin
+          : min(this.dataset, d => d[this.domainId])
+      const yMax = this.yMax || max(this.dataset, d => d[this.domainId])
 
       this.x.domain(xDomainExtent)
-      this.y.domain([yMin, yMax]).nice()
+      this.y.domain([yMin, yMax])
       this.z.range([this.domainColour]).domain([this.domainId])
 
       this.$xAxisGroup.call(this.customXAxis)
@@ -349,14 +402,17 @@ export default {
       // To step or not to step
       if (this.step) {
         this.line.curve(curveStep)
+        this.area.curve(curveStep)
       } else {
         this.line.curve(curveLinear)
+        this.area.curve(curveLinear)
       }
 
       // Generate Line
       // Note: line #clip path is defined in CSS (safari workaround)
       // - look in /assets/scss/vis.scss
       this.$lineGroup.selectAll('path').remove()
+      this.$areaGroup.selectAll('path').remove()
 
       this.$lineGroup
         .append('path')
@@ -364,6 +420,17 @@ export default {
         .attr('class', `${this.linePathClass}`)
         .attr('d', this.line)
         .style('stroke', d => this.z(this.domainId))
+
+      // Generate area
+      if (this.hasMinMax) {
+        this.$areaGroup
+          .append('path')
+          .datum(this.dataset)
+          .attr('class', `${this.areaPathClass}`)
+          .attr('d', this.area)
+          .style('fill', 'red')
+          .style('fill-opacity', 0.1)
+      }
 
       // Event handling
       // - find date and domain
@@ -401,7 +468,7 @@ export default {
 
     resizeRedraw() {
       this.x.range([0, this.width])
-      this.y.range([this.height, 0])
+      this.y.range(this.yRange)
 
       this.xAxis.tickSize(-this.height)
       this.yAxis.tickSize(this.width)

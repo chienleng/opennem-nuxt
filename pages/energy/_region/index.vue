@@ -24,6 +24,23 @@
         <line-vis
           v-if="ready && hasPriceData"
           :domains="priceDomains"
+          :domain-id="'price.above300'"
+          :domain-colour="'blue'"
+          :dataset="dataset"
+          :dynamic-extent="dateFilter"
+          :hover-date="hoverDate"
+          :step="true"
+          :y-axis-log="true"
+          :y-min="300"
+          :y-max="20000"
+          :show-x-axis="false"
+          :vis-height="50"
+          @eventChange="handleEventChange"
+          @dateOver="handleDateOver"
+        />
+        <line-vis
+          v-if="ready && hasPriceData"
+          :domains="priceDomains"
           :domain-id="priceDomains[0].id"
           :domain-colour="priceDomains[0].colour"
           :dataset="dataset"
@@ -31,19 +48,44 @@
           :hover-date="hoverDate"
           :step="true"
           :y-axis-log="false"
-          :vis-height="200"
+          :y-min="0"
+          :y-max="300"
+          :show-x-axis="false"
+          :vis-height="150"
+          class="price-vis"
+          @eventChange="handleEventChange"
+          @dateOver="handleDateOver"
+        />
+        <line-vis
+          v-if="ready && hasPriceData"
+          :domains="priceDomains"
+          :domain-id="'price.below0'"
+          :domain-colour="'blue'"
+          :dataset="dataset"
+          :dynamic-extent="dateFilter"
+          :hover-date="hoverDate"
+          :step="true"
+          :y-axis-log="true"
+          :y-axis-invert="true"
+          :y-min="-0.1"
+          :y-max="-1000"
+          :show-x-axis="false"
+          :vis-height="50"
+          class="price-neg-vis"
           @eventChange="handleEventChange"
           @dateOver="handleDateOver"
         />
         <line-vis
           v-if="ready && hasTemperatureData"
           :domains="temperatureDomains"
-          :domain-id="temperatureDomains[0].id"
+          :domain-id="temperatureMeanId"
+          :min-domain-id="temperatureMinId"
+          :max-domain-id="temperatureMaxId"
           :domain-colour="temperatureDomains[0].colour"
           :dataset="dataset"
           :dynamic-extent="dateFilter"
           :hover-date="hoverDate"
-          :step="step"
+          :step="false"
           :y-axis-log="false"
           :vis-height="200"
           @eventChange="handleEventChange"
@@ -110,6 +152,9 @@ export default {
       energyDomains: [],
       domainIds: [],
       temperatureDomains: [],
+      temperatureMeanId: '',
+      temperatureMinId: '',
+      temperatureMaxId: '',
       priceDomains: [],
       responses: [],
       dateFilter: [],
@@ -178,7 +223,9 @@ export default {
         case '3D':
         case '7D':
           this.type = 'power'
-          urls.push(`/power/${region}.json`)
+          // https://data.opennem.org.au/power/history/5minute/sa1_2019W23.json
+          // urls.push(`/power/${region}.json`)
+          urls.push(`/power/history/5minute/${region}_2019W23.json`)
           break
         case '30D':
           this.type = 'energy'
@@ -290,7 +337,6 @@ export default {
             range,
             interval
           ).then(rolledUpData => {
-            console.log(rolledUpData)
             // Then calculate min and total for each point for the chart
             resolve(this.calculateMinTotal(rolledUpData, energyDomains))
           })
@@ -320,13 +366,41 @@ export default {
     },
 
     updateTemperatureDomains(res) {
+      function isTemperatureType(type) {
+        return (
+          type === 'temperature' ||
+          type === 'temperature_min' ||
+          type === 'temperature_mean' ||
+          type === 'temperature_max'
+        )
+      }
+
+      function isTemperatureMeanType(type) {
+        return type === 'temperature' || type === 'temperature_mean'
+      }
+      function isTemperatureMinType(type) {
+        return type === 'temperature_min'
+      }
+      function isTemperatureMaxType(type) {
+        return type === 'temperature_max'
+      }
+
+      // reset temperature Ids
+      this.temperatureMeanId = ''
+      this.temperatureMinId = ''
+      this.temperatureMaxId = ''
+
       let domains = []
       res.forEach(r => {
-        const objs = r.data.filter(d => d.type === 'temperature').map(d => {
+        const objs = r.data.filter(d => isTemperatureType(d.type)).map(d => {
+          if (isTemperatureMeanType(d.type)) this.temperatureMeanId = d.id
+          if (isTemperatureMinType(d.type)) this.temperatureMinId = d.id
+          if (isTemperatureMaxType(d.type)) this.temperatureMaxId = d.id
           return { id: d.id, type: d.type, colour: 'red' }
         })
         domains = [...domains, ...objs]
       })
+
       this.temperatureDomains = domains
     },
 
@@ -602,5 +676,14 @@ export default {
       width: 30%;
     }
   }
+}
+
+.price-vis {
+  position: relative;
+  top: -7px;
+}
+.price-neg-vis {
+  position: relative;
+  top: -14px;
 }
 </style>
