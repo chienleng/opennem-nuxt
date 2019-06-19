@@ -10,25 +10,29 @@ import rollUpAllSeason from './rollUpModules/ru-all-season.js'
 import rollUpAllQuarter from './rollUpModules/ru-all-quarter.js'
 import rollUpAllFinYear from './rollUpModules/ru-all-financial-year.js'
 import rollUpAllYear from './rollUpModules/ru-all-year.js'
+
+const PRICE_ABOVE_300 = 'price.above300'
+const PRICE_BELOW_0 = 'price.below0'
+
 /**
  *
  * @param {*} data: response data from API
  */
-function transformData(data, domains, temperatureDomains) {
+function transformData(data, domains, temperatureDomains, priceDomains) {
   const dataset = []
 
   /**
    *
    * @param {*} id: data id
-   * @param {*} fuelTech: fuel tech name
    * @param {*} type: data type
    * @param {*} newHistory: updated history list
    *
-   * Flat data array contains a list of dates and data values (fuelTech, type, value)
+   * Flat data array contains a list of dates and data values
    */
-  function mergeIntoFlatData(id, fuelTech, type, newHistory) {
+  function mergeIntoFlatData(id, type, newHistory) {
     const isEnergyData = type === 'power' || type === 'energy'
     const isTemperatureData = type === 'temperature'
+    const isPriceData = type === 'price' || type === 'volume_weighted_price'
 
     newHistory.forEach(r => {
       const findDate = dataset.find(f => f.date === r.date)
@@ -36,40 +40,29 @@ function transformData(data, domains, temperatureDomains) {
         // if Date point doesn't exist, create date point with empty values
         const newObj = { date: r.date }
 
-        if (isEnergyData || isTemperatureData) {
+        if (isEnergyData || isTemperatureData || isPriceData) {
           // Add energy domains
           domains.forEach(domain => {
             newObj[domain.id] = null
-            // newObj[domain.id] = {
-            //   fuelTech: domain.fuelTech,
-            //   type: domain.type,
-            //   value: null,
-            //   category: domain.category
-            // }
           })
-
+          // Add temperature domains
           temperatureDomains.forEach(domain => {
             newObj[domain.id] = null
-            // newObj[domain.id] = {
-            //   type: domain.type,
-            //   value: null
-            // }
+          })
+          // Add price domains
+          priceDomains.forEach(domain => {
+            newObj[domain.id] = null
           })
           newObj[id] = r.value
           dataset.push(newObj)
         }
-        // if (!newObj[id]) {
-        //   console.log(id)
-        //   newObj[id] = {
-        //     value: null
-        //   }
-        // }
-        // newObj[id].value = r.value
-        // dataset.push(newObj)
       } else {
         if (isEnergyData || isTemperatureData) {
-          // findDate[id].value = r.value
           findDate[id] = r.value
+        } else if (isPriceData) {
+          findDate[id] = r.value
+          findDate[PRICE_ABOVE_300] = r.value > 300 ? r.value : 0.001
+          findDate[PRICE_BELOW_0] = r.value < 0 ? r.value : 0.001
         }
       }
     })
@@ -112,7 +105,7 @@ function transformData(data, domains, temperatureDomains) {
     }
 
     const historyObjs = createHistoryObject(historyData)
-    mergeIntoFlatData(id, fuelTech, type, historyObjs)
+    mergeIntoFlatData(id, type, historyObjs)
   }
   data.forEach(d => {
     if (d.history && d.history.start) {
@@ -133,7 +126,9 @@ function transformData(data, domains, temperatureDomains) {
 function findInterpolateSeriesTypes(data) {
   const rooftopSolarItem = data.find(d => d['fuel_tech'] === 'rooftop_solar')
   const temperatureItem = data.find(d => d.type === 'temperature')
-  // const priceItem = data.find(d => d.type === 'price')
+  const priceItem = data.find(
+    d => d.type === 'price' || d.type === 'volume_weighted_price'
+  )
   const interpolateSeriesTypes = []
   if (rooftopSolarItem) {
     interpolateSeriesTypes.push({
@@ -151,14 +146,26 @@ function findInterpolateSeriesTypes(data) {
       currentValue: null
     })
   }
-  // if (priceItem) {
-  //   interpolateSeriesTypes.push({
-  //     key: priceItem.id,
-  //     interpolation: 'step',
-  //     startIndex: -1,
-  //     currentValue: null
-  //   })
-  // }
+  if (priceItem) {
+    interpolateSeriesTypes.push({
+      key: priceItem.id,
+      interpolation: 'step',
+      startIndex: -1,
+      currentValue: null
+    })
+    interpolateSeriesTypes.push({
+      key: PRICE_ABOVE_300,
+      interpolation: 'step',
+      startIndex: -1,
+      currentValue: null
+    })
+    interpolateSeriesTypes.push({
+      key: PRICE_BELOW_0,
+      interpolation: 'step',
+      startIndex: -1,
+      currentValue: null
+    })
+  }
 
   return interpolateSeriesTypes
 }
@@ -200,10 +207,15 @@ export default {
     return promise
   },
 
-  flattenAndInterpolate(data, domains, temperatureDomains) {
+  flattenAndInterpolate(data, energyDomains, temperatureDomains, priceDomains) {
     const promise = new Promise(resolve => {
       const interpolateSeriesTypes = findInterpolateSeriesTypes(data)
-      let flatData = transformData(data, domains, temperatureDomains)
+      let flatData = transformData(
+        data,
+        energyDomains,
+        temperatureDomains,
+        priceDomains
+      )
       mutateDataForInterpolation(flatData, interpolateSeriesTypes)
 
       resolve(flatData)
@@ -212,25 +224,38 @@ export default {
     return promise
   },
 
-  rollUp(data, domains, temperatureDomains, range, interval) {
-    const energyDomainIds = domains.map(d => d.id)
+  rollUp(
+    data,
+    energyDomains,
+    temperatureDomains,
+    priceDomains,
+    range,
+    interval
+  ) {
+    const energyDomainIds = energyDomains.map(d => d.id)
     const temperatureDomainIds = temperatureDomains.map(d => d.id)
-    const domainIds = [...energyDomainIds, ...temperatureDomainIds]
+    const priceDomainIds = priceDomains.map(d => d.id)
+    const domainIds = [
+      ...energyDomainIds,
+      ...priceDomainIds,
+      ...temperatureDomainIds
+    ]
+    const domains = [...energyDomains, ...priceDomains, ...temperatureDomains]
     const promise = new Promise(resolve => {
       if (interval === '30m') {
-        resolve(rollUp30m(domainIds, data))
+        resolve(rollUp30m(domains, data))
       } else if (range === '1Y' && interval === 'Week') {
-        resolve(rollUp1YWeek(domainIds, data))
+        resolve(rollUp1YWeek(domains, data))
       } else if (range === '1Y' && interval === 'Month') {
-        resolve(rollUp1YMonth(domainIds, data))
+        resolve(rollUp1YMonth(domains, data))
       } else if (range === 'ALL' && interval === 'Season') {
-        resolve(rollUpAllSeason(domainIds, data))
+        resolve(rollUpAllSeason(domains, data))
       } else if (range === 'ALL' && interval === 'Quarter') {
-        resolve(rollUpAllQuarter(domainIds, data))
+        resolve(rollUpAllQuarter(domains, data))
       } else if (range === 'ALL' && interval === 'Fin Year') {
-        resolve(rollUpAllFinYear(domainIds, data))
+        resolve(rollUpAllFinYear(domains, data))
       } else if (range === 'ALL' && interval === 'Year') {
-        resolve(rollUpAllYear(domainIds, data))
+        resolve(rollUpAllYear(domains, data))
       }
       resolve(data)
     })

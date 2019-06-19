@@ -11,7 +11,7 @@
       <div class="vis-container">
         <stacked-area-vis
           v-if="ready"
-          :domains="domains"
+          :domains="energyDomains"
           :dataset="dataset"
           :dynamic-extent="dateFilter"
           :hover-date="hoverDate"
@@ -22,8 +22,24 @@
           @dateOver="handleDateOver"
         />
         <line-vis
-          v-if="ready"
+          v-if="ready && hasPriceData"
+          :domains="priceDomains"
+          :domain-id="priceDomains[0].id"
+          :domain-colour="priceDomains[0].colour"
+          :dataset="dataset"
+          :dynamic-extent="dateFilter"
+          :hover-date="hoverDate"
+          :step="true"
+          :y-axis-log="false"
+          :vis-height="200"
+          @eventChange="handleEventChange"
+          @dateOver="handleDateOver"
+        />
+        <line-vis
+          v-if="ready && hasTemperatureData"
           :domains="temperatureDomains"
+          :domain-id="temperatureDomains[0].id"
+          :domain-colour="temperatureDomains[0].colour"
           :dataset="dataset"
           :dynamic-extent="dateFilter"
           :hover-date="hoverDate"
@@ -36,8 +52,8 @@
       </div>
       <div class="table-container">
         <summary-table
-          v-if="mounted"
-          :domains="domains"
+          v-if="ready"
+          :domains="energyDomains"
           :dataset="filteredDataset"
           :hover-date="hoverDate"
           :hover-on="hoverOn"
@@ -91,11 +107,12 @@ export default {
       range: '7D',
       interval: '30m',
       dataset: [],
-      domains: [],
+      energyDomains: [],
       domainIds: [],
       temperatureDomains: [],
+      priceDomains: [],
       responses: [],
-      dateFilter: null,
+      dateFilter: [],
       hoverDate: null,
       mouseLoc: null,
       filteredDataset: [],
@@ -110,6 +127,12 @@ export default {
     },
     fuelTechOrder() {
       return this.$store.getters.fuelTechOrder
+    },
+    hasTemperatureData() {
+      return this.temperatureDomains.length > 0
+    },
+    hasPriceData() {
+      return this.priceDomains.length > 0
     },
     step() {
       switch (this.range) {
@@ -198,8 +221,9 @@ export default {
       this.updateDomains(responses)
       this.mergeResponses(
         responses,
-        this.domains,
+        this.energyDomains,
         this.temperatureDomains,
+        this.priceDomains,
         this.range,
         this.interval
       ).then(dataset => {
@@ -210,7 +234,14 @@ export default {
       })
     },
 
-    mergeResponses(res, domains, temperatureDomains, range, interval) {
+    mergeResponses(
+      res,
+      energyDomains,
+      temperatureDomains,
+      priceDomains,
+      range,
+      interval
+    ) {
       return new Promise(resolve => {
         let data = []
         const promises = []
@@ -218,7 +249,14 @@ export default {
         // flatten data for vis and summary
         res.forEach(r => {
           promises.push(
-            this.flatten(r.data, domains, temperatureDomains, range, interval)
+            this.flatten(
+              r.data,
+              energyDomains,
+              temperatureDomains,
+              priceDomains,
+              range,
+              interval
+            )
           )
         })
 
@@ -246,13 +284,15 @@ export default {
           // Roll up based on interval
           DataTransformService.rollUp(
             data,
-            domains,
+            energyDomains,
             temperatureDomains,
+            priceDomains,
             range,
             interval
           ).then(rolledUpData => {
+            console.log(rolledUpData)
             // Then calculate min and total for each point for the chart
-            resolve(this.calculateMinTotal(rolledUpData, domains))
+            resolve(this.calculateMinTotal(rolledUpData, energyDomains))
           })
         })
       })
@@ -262,6 +302,7 @@ export default {
       // Find out about available domains first before flattening data
       this.updateEnergyDomains(res)
       this.updateTemperatureDomains(res)
+      this.updatePriceDomains(res)
     },
 
     updateEnergyDomains(res) {
@@ -275,24 +316,54 @@ export default {
         fuelTechEnergy = [...fuelTechEnergy, ...energyObjs]
       })
       this.getDomainIdsInOrder(fuelTechEnergy)
-      this.domains = this.getFuelTechObjs()
+      this.energyDomains = this.getFuelTechObjs()
     },
 
     updateTemperatureDomains(res) {
       let domains = []
       res.forEach(r => {
         const objs = r.data.filter(d => d.type === 'temperature').map(d => {
-          return { id: d.id, type: d.type, colour: '#ff99dd' }
+          return { id: d.id, type: d.type, colour: 'red' }
         })
         domains = [...domains, ...objs]
       })
       this.temperatureDomains = domains
     },
 
+    updatePriceDomains(res) {
+      const PRICE_ABOVE_300 = 'price.above300'
+      const PRICE_BELOW_0 = 'price.below0'
+      const PRICE_COLOUR = 'blue'
+
+      let domains = []
+      res.forEach(r => {
+        const objs = r.data
+          .filter(d => d.type === 'price' || d.type === 'volume_weighted_price')
+          .map(d => {
+            return { id: d.id, type: d.type, colour: PRICE_COLOUR }
+          })
+        domains = [...domains, ...objs]
+      })
+
+      if (domains.length > 0) {
+        domains.push({
+          id: PRICE_ABOVE_300,
+          type: 'price',
+          colour: PRICE_COLOUR
+        })
+        domains.push({
+          id: PRICE_BELOW_0,
+          type: 'price',
+          colour: PRICE_COLOUR
+        })
+      }
+      this.priceDomains = domains
+    },
+
     updatedFilteredDataset(dataset) {
       // This is to filter the dataset based on the chart zoom
       // - used by Summary table
-      if (this.dateFilter) {
+      if (this.dateFilter.length > 0) {
         this.filteredDataset = DataTransformService.filterDataByStartEndDates(
           dataset,
           this.dateFilter[0],
@@ -308,24 +379,24 @@ export default {
       switch (this.range) {
         case '1D':
           this.interval = '5m'
-          this.dateFilter = null
+          this.dateFilter = []
           break
         case '3D':
         case '7D':
           this.interval = '30m'
-          this.dateFilter = null
+          this.dateFilter = []
           break
         case '30D':
           this.interval = 'Day'
-          this.dateFilter = null
+          this.dateFilter = []
           break
         case '1Y':
           this.interval = 'Week'
-          this.dateFilter = null
+          this.dateFilter = []
           break
         case 'ALL':
           this.interval = 'Month'
-          this.dateFilter = null
+          this.dateFilter = []
           break
         default:
           console.log('nothing yet')
@@ -338,8 +409,9 @@ export default {
       this.interval = interval
       this.mergeResponses(
         this.responses,
-        this.domains,
+        this.energyDomains,
         this.temperatureDomains,
+        this.priceDomains,
         this.range,
         this.interval
       ).then(dataset => {
@@ -389,12 +461,20 @@ export default {
       this.hoverOn = false
     },
 
-    flatten(data, domains, temperatureDomains, range, interval) {
+    flatten(
+      data,
+      energyDomains,
+      temperatureDomains,
+      priceDomains,
+      range,
+      interval
+    ) {
       return new Promise(resolve => {
         DataTransformService.flattenAndInterpolate(
           data,
-          domains,
-          temperatureDomains
+          energyDomains,
+          temperatureDomains,
+          priceDomains
         ).then(res => {
           if (interval === '5m' || interval === '30m') {
             const start = res[0].date
@@ -411,12 +491,12 @@ export default {
       })
     },
 
-    calculateMinTotal(dataset, domains) {
+    calculateMinTotal(dataset, energyDomains) {
       // Calculate total, min, reverse value for imports and load types
       dataset.forEach((d, i) => {
         let total = 0
         let min = 0
-        domains.forEach(domain => {
+        energyDomains.forEach(domain => {
           const id = domain.id
 
           if (domain.category === 'load' || domain.fuelTech === 'imports') {

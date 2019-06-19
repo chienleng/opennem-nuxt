@@ -69,8 +69,9 @@
 <script>
 import { scaleOrdinal, scaleLinear, scaleTime, scaleLog } from 'd3-scale'
 import { axisBottom, axisRight } from 'd3-axis'
-import { line, curveStep, curveLinear } from 'd3-shape'
+import { line } from 'd3-shape'
 import { extent, min, max } from 'd3-array'
+import { nest as d3Nest } from 'd3-collection'
 import { format as d3Format } from 'd3-format'
 import { select, selectAll, mouse as d3Mouse, event } from 'd3-selection'
 import { schemeCategory10 } from 'd3-scale-chromatic'
@@ -88,14 +89,6 @@ export default {
     dataset: {
       type: Array,
       default: () => []
-    },
-    domainId: {
-      type: String,
-      default: () => ''
-    },
-    domainColour: {
-      type: String,
-      default: () => '#999'
     },
     // !!REQUIRED: domains.colour, domain.id
     domains: {
@@ -294,7 +287,7 @@ export default {
       // How to draw the line
       this.line = line()
         .x(d => this.x(d.date))
-        .y(d => this.y(d[this.domainId]))
+        .y(d => this.y(d[this.domainIds[0]]))
 
       // Event handling
       // - Control tooltip visibility for mouse entering/leaving svg
@@ -328,6 +321,16 @@ export default {
       const self = this
       this.$lineGroup = select(`#${this.id} .${this.lineGroupClass}`)
 
+      // TODO: multi line chart requires another nest/rollup
+      const dataNest = d3Nest()
+        .key(d => this.domainIds)
+        .rollup(d => {
+          console.log(d)
+          return d
+        })
+        .entries(this.dataset)
+      console.log(dataNest)
+
       // Setup the x/y/z Axis domains
       // - Use dataset date range if there is none being passed into
       const xDomainExtent = this.dynamicExtent.length
@@ -335,23 +338,23 @@ export default {
         : this.datasetDateExtent
       const yMin = this.yAxisLog
         ? 0.01
-        : min(this.dataset, d => d[this.domainId])
-      const yMax = max(this.dataset, d => d[this.domainId])
+        : min(this.dataset, d => d[this.domainIds[0]])
+      const yMax = max(this.dataset, d => d[this.domainIds[0]])
 
       this.x.domain(xDomainExtent)
       this.y.domain([yMin, yMax]).nice()
-      this.z.range([this.domainColour]).domain([this.domainId])
+      this.z.range(this.domainColours).domain(this.domainIds)
 
       this.$xAxisGroup.call(this.customXAxis)
       this.$yAxisGroup.call(this.customYAxis)
       this.$yAxisTickGroup.call(this.customYAxis)
 
       // To step or not to step
-      if (this.step) {
-        this.line.curve(curveStep)
-      } else {
-        this.line.curve(curveLinear)
-      }
+      // if (this.step) {
+      //   this.area.curve(curveStep)
+      // } else {
+      //   this.area.curve(curveLinear)
+      // }
 
       // Generate Line
       // Note: line #clip path is defined in CSS (safari workaround)
@@ -363,7 +366,10 @@ export default {
         .datum(this.dataset)
         .attr('class', `${this.linePathClass}`)
         .attr('d', this.line)
-        .style('stroke', d => this.z(this.domainId))
+        .style('stroke', d => {
+          // console.log(d)
+          return this.z(d.key)
+        })
 
       // Event handling
       // - find date and domain
