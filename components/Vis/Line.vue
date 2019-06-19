@@ -40,18 +40,18 @@
 
       <g 
         :transform="gTransform">
+        <!-- where the area path will show -->
+        <g class="area-group" />
+
+        <!-- where the line path will show -->
+        <g class="line-group" />
+
         <!-- hover layer to read interaction movements -->
         <g :class="hoverLayerClass">
           <rect
             :width="width"
             :height="height"/>
         </g>
-
-        <!-- where the area path will show -->
-        <g class="area-group" />
-
-        <!-- where the line path will show -->
-        <g class="line-group" />
       </g>
 
       <!-- add another yAxis tick text here so it show above the vis -->
@@ -74,7 +74,13 @@
 <script>
 import { scaleOrdinal, scaleLinear, scaleTime, scaleLog } from 'd3-scale'
 import { axisBottom, axisRight } from 'd3-axis'
-import { area as d3Area, line, curveStep, curveLinear } from 'd3-shape'
+import {
+  area as d3Area,
+  line,
+  curveStep,
+  curveLinear,
+  curveNatural
+} from 'd3-shape'
 import { extent, min, max } from 'd3-array'
 import { format as d3Format } from 'd3-format'
 import { select, selectAll, mouse as d3Mouse, event } from 'd3-selection'
@@ -128,10 +134,10 @@ export default {
       type: Number,
       default: () => CONFIG.DEFAULT_SVG_HEIGHT
     },
-    // OPTIONAL: whether it is a step curve
-    step: {
-      type: Boolean,
-      default: () => false
+    // OPTIONAL: what kind of curve
+    curve: {
+      type: String,
+      default: () => 'linear'
     },
     // OPTIONAL: whether it is a log yAxis
     yAxisLog: {
@@ -227,6 +233,17 @@ export default {
     },
     xAxisBrushTransform() {
       return `translate(0, ${this.height})`
+    },
+    curveType() {
+      switch (this.curve) {
+        case 'step':
+          return curveStep
+        case 'smooth':
+          return curveNatural
+        case 'linear':
+        default:
+          return curveLinear
+      }
     }
   },
 
@@ -340,12 +357,14 @@ export default {
       this.line = line()
         .x(d => this.x(d.date))
         .y(d => this.y(d[this.domainId]))
+        .curve(this.curveType)
 
       // How to draw the area path
       this.area = d3Area()
         .x(d => this.x(d.date))
         .y0(d => this.y(d[this.minDomainId]))
         .y1(d => this.y(d[this.maxDomainId]))
+        .curve(this.curveType)
 
       // Event handling
       // - Control tooltip visibility for mouse entering/leaving svg
@@ -385,11 +404,13 @@ export default {
       const xDomainExtent = this.dynamicExtent.length
         ? this.dynamicExtent
         : this.datasetDateExtent
+      const minDomain = this.hasMinMax ? this.minDomainId : this.domainId
+      const maxDomain = this.hasMinMax ? this.maxDomainId : this.domainId
       const yMin =
         this.yMin || this.yMin === 0
           ? this.yMin
-          : min(this.dataset, d => d[this.domainId])
-      const yMax = this.yMax || max(this.dataset, d => d[this.domainId])
+          : min(this.dataset, d => d[minDomain])
+      const yMax = this.yMax || max(this.dataset, d => d[maxDomain])
 
       this.x.domain(xDomainExtent)
       this.y.domain([yMin, yMax])
@@ -398,15 +419,6 @@ export default {
       this.$xAxisGroup.call(this.customXAxis)
       this.$yAxisGroup.call(this.customYAxis)
       this.$yAxisTickGroup.call(this.customYAxis)
-
-      // To step or not to step
-      if (this.step) {
-        this.line.curve(curveStep)
-        this.area.curve(curveStep)
-      } else {
-        this.line.curve(curveLinear)
-        this.area.curve(curveLinear)
-      }
 
       // Generate Line
       // Note: line #clip path is defined in CSS (safari workaround)
@@ -480,6 +492,7 @@ export default {
       this.brushX.extent([[0, 0], [this.width, 40]])
       this.$xAxisBrushGroup.selectAll('.brush').call(this.brushX)
       this.$lineGroup.selectAll('path').attr('d', this.line)
+      this.$areaGroup.selectAll('path').attr('d', this.area)
     },
 
     zoomRedraw() {
@@ -490,6 +503,10 @@ export default {
         .selectAll('path')
         .transition(transition)
         .attr('d', this.line)
+      this.$areaGroup
+        .selectAll('path')
+        .transition(transition)
+        .attr('d', this.area)
     },
 
     // handle when selecting the date ranges on the brush area

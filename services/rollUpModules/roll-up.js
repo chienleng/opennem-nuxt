@@ -4,7 +4,12 @@
  *  Use d3-array’s group and rollup instead of d3-collection’s nest.
  */
 import { nest as d3Nest } from 'd3-collection'
-import { sum as d3Sum, mean as d3Mean } from 'd3-array'
+import {
+  sum as d3Sum,
+  mean as d3Mean,
+  min as d3Min,
+  max as d3Max
+} from 'd3-array'
 
 const PRICE_ABOVE_300 = 'price.above300'
 const PRICE_BELOW_0 = 'price.below0'
@@ -36,11 +41,16 @@ export default function(domains, data) {
 
         if (isEnergyType) {
           obj[id] = d3Sum(a, d => d[id] || 0)
-        } else if (isPriceType || isTemperatureType) {
+        } else if (isPriceType) {
           obj[id] = d3Mean(a, d => d[id] || 0)
-
-          if (isOriginalPrice) {
-            priceId = id
+          if (isOriginalPrice) priceId = id
+        } else if (isTemperatureType) {
+          if (type === 'temperature' || type === 'temperature_mean') {
+            obj[id] = d3Mean(a, d => d[id] || null)
+          } else if (type === 'temperature_min') {
+            obj[id] = d3Min(a, d => d[id] || null)
+          } else if (type === 'temperature_max') {
+            obj[id] = d3Max(a, d => d[id] || null)
           }
         }
       })

@@ -134,7 +134,7 @@ function transformData(data, domains, temperatureDomains, priceDomains) {
 
 function findInterpolateSeriesTypes(data) {
   const rooftopSolarItem = data.find(d => d['fuel_tech'] === 'rooftop_solar')
-  const temperatureItem = data.find(d => d.type === 'temperature')
+  const temperatureItem = data.find(d => checkTemperatureType(d.type))
   const priceItem = data.find(
     d => d.type === 'price' || d.type === 'volume_weighted_price'
   )

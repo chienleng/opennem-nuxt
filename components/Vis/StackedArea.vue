@@ -69,7 +69,13 @@
 <script>
 import { scaleOrdinal, scaleLinear, scaleTime } from 'd3-scale'
 import { axisBottom, axisRight } from 'd3-axis'
-import { area, stack, curveStep, curveLinear } from 'd3-shape'
+import {
+  area as d3Area,
+  stack,
+  curveStep,
+  curveLinear,
+  curveNatural
+} from 'd3-shape'
 import { extent, min, max } from 'd3-array'
 import { format as d3Format } from 'd3-format'
 import { select, selectAll, mouse, event } from 'd3-selection'
@@ -112,10 +118,10 @@ export default {
       type: Number,
       default: () => CONFIG.DEFAULT_SVG_HEIGHT
     },
-    // OPTIONAL: whether it is a step curve
-    step: {
-      type: Boolean,
-      default: () => false
+    // OPTIONAL: what kind of curve
+    curve: {
+      type: String,
+      default: () => 'linear'
     }
   },
 
@@ -192,6 +198,17 @@ export default {
     },
     xAxisBrushTransform() {
       return `translate(0, ${this.height})`
+    },
+    curveType() {
+      switch (this.curve) {
+        case 'step':
+          return curveStep
+        case 'smooth':
+          return curveNatural
+        case 'linear':
+        default:
+          return curveLinear
+      }
     }
   },
 
@@ -321,7 +338,7 @@ export default {
       this.stack = stack()
       // How to draw the area path
       // - define the area's x value and y0,y1 values
-      this.area = area()
+      this.area = d3Area()
         .x(d => this.x(d.data.date))
         .y0(d => this.y(d[0]))
         .y1(d => this.y(d[1]))
@@ -382,15 +399,9 @@ export default {
       this.$yAxisGroup.call(this.customYAxis)
       this.$yAxisTickGroup.call(this.customYAxis)
 
-      // To step or not to step
-      if (this.step) {
-        this.area.curve(curveStep)
-      } else {
-        this.area.curve(curveLinear)
-      }
-
       // Setup the keys in the stack so the area knows how to draw the area
       this.stack.keys(this.domainIds).value((d, key) => (d[key] ? d[key] : 0))
+      this.area.curve(this.curveType)
 
       // Generate Stacked Area
       // Note: stacked area #clip path is defined in CSS (safari workaround)

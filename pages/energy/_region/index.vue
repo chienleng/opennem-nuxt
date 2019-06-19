@@ -16,7 +16,7 @@
           :dynamic-extent="dateFilter"
           :hover-date="hoverDate"
           :mouse-loc="mouseLoc"
-          :step="step"
+          :curve="energyCurveType"
           :vis-height="400"
           @eventChange="handleEventChange"
           @dateOver="handleDateOver"
@@ -29,7 +29,7 @@
           :dataset="dataset"
           :dynamic-extent="dateFilter"
           :hover-date="hoverDate"
-          :step="true"
+          :curve="'step'"
           :y-axis-log="true"
           :y-min="300"
           :y-max="20000"
@@ -46,7 +46,7 @@
           :dataset="dataset"
           :dynamic-extent="dateFilter"
           :hover-date="hoverDate"
-          :step="true"
+          :curve="'step'"
           :y-axis-log="false"
           :y-min="0"
           :y-max="300"
@@ -64,7 +64,7 @@
           :dataset="dataset"
           :dynamic-extent="dateFilter"
           :hover-date="hoverDate"
-          :step="true"
+          :curve="'step'"
           :y-axis-log="true"
           :y-axis-invert="true"
           :y-min="-0.1"
@@ -85,9 +85,11 @@
           :dataset="dataset"
           :dynamic-extent="dateFilter"
           :hover-date="hoverDate"
-          :step="false"
+          :curve="'smooth'"
           :y-axis-log="false"
-          :vis-height="200"
+          :y-min="0"
+          :show-x-axis="false"
+          :vis-height="100"
           @eventChange="handleEventChange"
           @dateOver="handleDateOver"
         />
@@ -179,6 +181,16 @@ export default {
     hasPriceData() {
       return this.priceDomains.length > 0
     },
+    energyCurveType() {
+      switch (this.range) {
+        case '1D':
+        case '3D':
+        case '7D':
+          return 'linear'
+        default:
+          return 'step'
+      }
+    },
     step() {
       switch (this.range) {
         case '1D':
@@ -223,9 +235,8 @@ export default {
         case '3D':
         case '7D':
           this.type = 'power'
-          // https://data.opennem.org.au/power/history/5minute/sa1_2019W23.json
-          // urls.push(`/power/${region}.json`)
-          urls.push(`/power/history/5minute/${region}_2019W23.json`)
+          urls.push(`/power/${region}.json`)
+          // urls.push(`/power/history/5minute/${region}_2019W23.json`)
           break
         case '30D':
           this.type = 'energy'
