@@ -13,7 +13,7 @@
       class="line-chart">
       <defs>
         <!-- where to clip -->
-        <clipPath id="clip">
+        <clipPath :id="`${id}-clip`">
           <rect
             :width="width"
             :height="height"/>
@@ -225,6 +225,9 @@ export default {
     id() {
       return `line-${this._uid}`
     },
+    clipPathUrl() {
+      return `url(#${this.id}-clip)`
+    },
     gTransform() {
       return `translate(${this.margin.left},0)`
     },
@@ -432,6 +435,8 @@ export default {
         .attr('class', `${this.linePathClass}`)
         .attr('d', this.line)
         .style('stroke', d => this.z(this.domainId))
+        .style('clip-path', this.clipPathUrl)
+        .style('-webkit-clip-path', this.clipPathUrl)
 
       // Generate area
       if (this.hasMinMax) {
@@ -442,6 +447,8 @@ export default {
           .attr('d', this.area)
           .style('fill', 'red')
           .style('fill-opacity', 0.1)
+          .style('clip-path', this.clipPathUrl)
+          .style('-webkit-clip-path', this.clipPathUrl)
       }
 
       // Event handling

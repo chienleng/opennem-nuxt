@@ -14,7 +14,7 @@
       class="stacked-area-chart">
       <defs>
         <!-- where to clip -->
-        <clipPath id="clip">
+        <clipPath :id="`${id}-clip`">
           <rect
             :width="width"
             :height="height"/>
@@ -189,6 +189,9 @@ export default {
     },
     id() {
       return `stacked-area-${this._uid}`
+    },
+    clipPathUrl() {
+      return `url(#${this.id}-clip)`
     },
     gTransform() {
       return `translate(${this.margin.left},${this.margin.top})`
@@ -415,6 +418,8 @@ export default {
         .attr('id', d => d.key)
         .attr('class', `${this.stackedAreaPathClass}`)
         .attr('d', this.area)
+        .style('clip-path', this.clipPathUrl)
+        .style('-webkit-clip-path', this.clipPathUrl)
         .style('fill', d => this.z(d.key))
 
       stackArea.exit().remove()
