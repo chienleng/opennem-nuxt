@@ -407,8 +407,6 @@ export default {
       this.area.curve(this.curveType)
 
       // Generate Stacked Area
-      // Note: stacked area #clip path is defined in CSS (safari workaround)
-      // - look in /assets/scss/vis.scss
       const stackArea = this.$stackedAreaGroup
         .selectAll(`.${this.stackedAreaPathClass}`)
         .data(this.stack(this.dataset))

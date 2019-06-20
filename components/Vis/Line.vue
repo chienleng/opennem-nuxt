@@ -423,9 +423,7 @@ export default {
       this.$yAxisGroup.call(this.customYAxis)
       this.$yAxisTickGroup.call(this.customYAxis)
 
-      // Generate Line
-      // Note: line #clip path is defined in CSS (safari workaround)
-      // - look in /assets/scss/vis.scss
+      // Generate Line and Area
       this.$lineGroup.selectAll('path').remove()
       this.$areaGroup.selectAll('path').remove()
 
