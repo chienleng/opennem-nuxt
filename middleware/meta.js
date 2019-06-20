@@ -7,7 +7,7 @@ export default function({ store }) {
   if (!store.getters.fuelTechMeta) {
     store.commit('fuelTechNames', fuelTechNames)
   }
-  if (!store.getters.fuelTechGroup) {
-    store.commit('fuelTechGroup', fuelTechGroup)
-  }
+  // if (!store.getters.fuelTechGroup) {
+  //   store.commit('fuelTechGroup', fuelTechGroup)
+  // }
 }

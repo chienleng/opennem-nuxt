@@ -1,7 +1,6 @@
 import moment from 'moment'
 import _sortBy from 'lodash.sortby'
 import parseInterval from '~/plugins/intervalParser.js'
-import * as FUEL_TECHS from '~/constants/fuelTech.js'
 
 import rollUp30m from './rollUpModules/ru-30m.js'
 import rollUp1YWeek from './rollUpModules/ru-1y-week.js'

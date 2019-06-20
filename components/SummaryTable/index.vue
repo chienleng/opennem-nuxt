@@ -20,7 +20,11 @@
 
     <div class="summary-column-headers">
       <div class="summary-row">
-        <div class="summary-col-label">{GROUP}</div>
+        <div
+          class="summary-col-label"
+          style="padding-top: 3px;">
+          <group-selector />
+        </div>
         <div
           v-if="!hoverOn || isEnergy"
           class="summary-col-energy">
@@ -109,10 +113,12 @@
 <script>
 import moment from 'moment'
 import _isEmpty from 'lodash.isempty'
+import GroupSelector from '~/components/energy/FuelTechGroupSelector'
 import Items from './Items'
 
 export default {
   components: {
+    GroupSelector,
     Items
   },
 

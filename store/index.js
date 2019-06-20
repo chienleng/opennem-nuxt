@@ -1,12 +1,11 @@
 import cloneDeep from 'lodash.clonedeep'
 import * as FUEL_TECHS from '~/constants/fuelTech.js'
-import * as FUEL_TECH_GROUPS from '~/constants/fuelTechDefaultGroup.js'
 
 export const state = () => ({
   nem: [],
   fuelTechMeta: null,
   fuelTechNames: null,
-  fuelTechGroup: null,
+  fuelTechGroup: 'Default',
   fuelTechOrder: cloneDeep(FUEL_TECHS.DEFAULT_FUEL_TECH_ORDER)
 })
 

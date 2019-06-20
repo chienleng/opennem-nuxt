@@ -402,10 +402,12 @@ export default {
       this.$yAxisGroup.call(this.customYAxis)
       this.$yAxisTickGroup.call(this.customYAxis)
 
-      // Setup the keys in the stack so the area knows how to draw the area
+      // Setup the keys in the stack so it knows how to draw the area
       this.stack.keys(this.domainIds).value((d, key) => (d[key] ? d[key] : 0))
       this.area.curve(this.curveType)
 
+      // Remove Area
+      this.$stackedAreaGroup.selectAll('path').remove()
       // Generate Stacked Area
       const stackArea = this.$stackedAreaGroup
         .selectAll(`.${this.stackedAreaPathClass}`)

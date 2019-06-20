@@ -11,7 +11,7 @@
       <div class="vis-container">
         <stacked-area-vis
           v-if="ready"
-          :domains="energyDomains"
+          :domains="groupDomains.length > 0 ? groupDomains : energyDomains"
           :dataset="dataset"
           :dynamic-extent="dateFilter"
           :hover-date="hoverDate"
@@ -97,7 +97,7 @@
       <div class="table-container">
         <summary-table
           v-if="ready"
-          :domains="energyDomains"
+          :domains="groupDomains.length > 0 ? groupDomains : energyDomains"
           :dataset="filteredDataset"
           :hover-date="hoverDate"
           :hover-on="hoverOn"
@@ -124,6 +124,10 @@ import _includes from 'lodash.includes'
 import _cloneDeep from 'lodash.clonedeep'
 
 import * as FUEL_TECHS from '~/constants/fuelTech.js'
+import * as SimplifiedGroup from '~/constants/group-simplified.js'
+import * as FlexibilityGroup from '~/constants/group-flexibility.js'
+import * as RenewableFossilGroup from '~/constants/group-renewable-fossil.js'
+import * as SolarResidualGroup from '~/constants/group-solar-residual.js'
 import EventBus from '~/plugins/eventBus.js'
 import http from '~/services/HttpService.js'
 import DataTransformService from '~/services/DataTransformService.js'
@@ -152,6 +156,7 @@ export default {
       interval: '30m',
       dataset: [],
       energyDomains: [],
+      // groupDomains: [],
       domainIds: [],
       temperatureDomains: [],
       temperatureMeanId: '',
@@ -174,6 +179,57 @@ export default {
     },
     fuelTechOrder() {
       return this.$store.getters.fuelTechOrder
+    },
+    fuelTechGroup() {
+      const fuelTechGroup = this.$store.getters.fuelTechGroup
+      let group = null
+      switch (fuelTechGroup) {
+        case 'Simplified':
+          group = SimplifiedGroup
+          break
+        case 'Flexibility':
+          group = FlexibilityGroup
+          break
+        case 'Renewable/Fossil':
+          group = RenewableFossilGroup
+          break
+        case 'Solar/Residual':
+          group = SolarResidualGroup
+          break
+        default:
+      }
+      return group
+    },
+    groupDomains() {
+      const groupDomains = []
+      const group = this.fuelTechGroup
+      if (group) {
+        const energyDomains = this.energyDomains
+        const groupOrder = group.FUEL_TECH_ORDER
+
+        groupOrder.forEach(groupId => {
+          const grouping = group.FUEL_TECH_GROUP[groupId]
+          const find = energyDomains.find(d => _includes(grouping, d.fuelTech))
+
+          if (find) {
+            const domainIds = []
+            grouping.forEach(g => {
+              const domain = energyDomains.find(d => d.fuelTech === g)
+              if (domain) domainIds.push(domain.id)
+            })
+            groupDomains.push({
+              id: groupId,
+              label: group.FUEL_TECH_LABEL[groupId],
+              colour: group.FUEL_TECH_GROUP_COLOUR[groupId],
+              category: group.FUEL_TECH_CATEGORY[groupId],
+              type: find.type,
+              domainIds
+            })
+          }
+        })
+      }
+
+      return groupDomains.reverse()
     },
     hasTemperatureData() {
       return this.temperatureDomains.length > 0
@@ -200,6 +256,12 @@ export default {
         default:
           return true
       }
+    }
+  },
+
+  watch: {
+    groupDomains() {
+      this.updateDatasetGroups(this.dataset)
     }
   },
 
@@ -286,6 +348,7 @@ export default {
         this.interval
       ).then(dataset => {
         this.dataset = dataset
+        this.updateDatasetGroups(dataset)
         this.updatedFilteredDataset(dataset)
         this.dateFilter = d3Extent(this.dataset, d => d.date)
         this.ready = true
@@ -354,6 +417,50 @@ export default {
         })
       })
     },
+
+    updateDatasetGroups(dataset) {
+      this.dataset = dataset.map(d => {
+        // create new group domains (if not already there)
+        this.groupDomains.forEach(g => {
+          let groupValue = 0
+          g.domainIds.forEach(dId => {
+            groupValue += d[dId]
+          })
+          d[g.id] = groupValue
+        })
+        return d
+      })
+    },
+
+    // updateGroupDomains(group) {
+    //   const groupDomains = []
+    //   const groupOrder = group.FUEL_TECH_ORDER
+
+    //   groupOrder.forEach(groupId => {
+    //     const grouping = group.FUEL_TECH_GROUP[groupId]
+    //     const find = this.energyDomains.find(d =>
+    //       _includes(grouping, d.fuelTech)
+    //     )
+
+    //     if (find) {
+    //       const domainIds = []
+    //       grouping.forEach(g => {
+    //         const domain = this.energyDomains.find(d => d.fuelTech === g)
+    //         if (domain) domainIds.push(domain.id)
+    //       })
+    //       groupDomains.push({
+    //         id: groupId,
+    //         label: group.FUEL_TECH_LABEL[groupId],
+    //         colour: group.FUEL_TECH_GROUP_COLOUR[groupId],
+    //         category: group.FUEL_TECH_CATEGORY[groupId],
+    //         type: find.type,
+    //         domainIds
+    //       })
+    //     }
+    //   })
+
+    //   this.groupDomains = groupDomains.reverse()
+    // },
 
     updateDomains(res) {
       // Find out about available domains first before flattening data
@@ -501,6 +608,7 @@ export default {
         this.interval
       ).then(dataset => {
         this.dataset = dataset
+        this.updateDatasetGroups(dataset)
         this.updatedFilteredDataset(dataset)
         this.ready = true
       })

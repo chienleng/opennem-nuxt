@@ -423,7 +423,7 @@ export default {
       this.$yAxisGroup.call(this.customYAxis)
       this.$yAxisTickGroup.call(this.customYAxis)
 
-      // Generate Line and Area
+      // Remove existing Line and Area
       this.$lineGroup.selectAll('path').remove()
       this.$areaGroup.selectAll('path').remove()
 
