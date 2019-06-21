@@ -9,6 +9,7 @@
 
     <div class="vis-table-container">
       <div class="vis-container">
+
         <stacked-area-vis
           v-if="ready"
           :domains="groupDomains.length > 0 ? groupDomains : energyDomains"
@@ -21,20 +22,24 @@
           @eventChange="handleEventChange"
           @dateOver="handleDateOver"
         />
+        
         <line-vis
           v-if="ready && hasPriceData"
           :domains="priceDomains"
           :domain-id="'price.above300'"
-          :domain-colour="'blue'"
+          :domain-colour="lineColour"
           :dataset="dataset"
           :dynamic-extent="dateFilter"
           :hover-date="hoverDate"
           :curve="'step'"
+          :show-y-axis="false"
           :y-axis-log="true"
           :y-min="300"
           :y-max="20000"
           :show-x-axis="false"
           :vis-height="50"
+          :show-zoom-out="false"
+          :y-guides="[300, 2000, 6000, 10000, 14000]"
           @eventChange="handleEventChange"
           @dateOver="handleDateOver"
         />
@@ -42,16 +47,19 @@
           v-if="ready && hasPriceData"
           :domains="priceDomains"
           :domain-id="priceDomains[0].id"
-          :domain-colour="priceDomains[0].colour"
+          :domain-colour="lineColour"
           :dataset="dataset"
           :dynamic-extent="dateFilter"
           :hover-date="hoverDate"
           :curve="'step'"
+          :show-y-axis="false"
           :y-axis-log="false"
           :y-min="0"
           :y-max="300"
           :show-x-axis="false"
-          :vis-height="150"
+          :vis-height="100"
+          :show-zoom-out="false"
+          :y-guides="[0, 100, 200, 300]"
           class="price-vis"
           @eventChange="handleEventChange"
           @dateOver="handleDateOver"
@@ -60,28 +68,32 @@
           v-if="ready && hasPriceData"
           :domains="priceDomains"
           :domain-id="'price.below0'"
-          :domain-colour="'blue'"
+          :domain-colour="lineColour"
           :dataset="dataset"
           :dynamic-extent="dateFilter"
           :hover-date="hoverDate"
           :curve="'step'"
+          :show-y-axis="false"
           :y-axis-log="true"
           :y-axis-invert="true"
           :y-min="-0.1"
           :y-max="-1000"
           :show-x-axis="false"
           :vis-height="50"
+          :show-zoom-out="false"
+          :y-guides="[-50, -200, -400, -800]"
           class="price-neg-vis"
           @eventChange="handleEventChange"
           @dateOver="handleDateOver"
         />
+
         <line-vis
           v-if="ready && hasTemperatureData"
           :domains="temperatureDomains"
           :domain-id="temperatureMeanId"
           :min-domain-id="temperatureMinId"
           :max-domain-id="temperatureMaxId"
-          :domain-colour="temperatureDomains[0].colour"
+          :domain-colour="lineColour"
           :dataset="dataset"
           :dynamic-extent="dateFilter"
           :hover-date="hoverDate"
@@ -169,7 +181,8 @@ export default {
       mouseLoc: null,
       filteredDataset: [],
       visHeight: 0,
-      hoverOn: false
+      hoverOn: false,
+      lineColour: '#e34a33'
     }
   },
 
@@ -431,36 +444,6 @@ export default {
         return d
       })
     },
-
-    // updateGroupDomains(group) {
-    //   const groupDomains = []
-    //   const groupOrder = group.FUEL_TECH_ORDER
-
-    //   groupOrder.forEach(groupId => {
-    //     const grouping = group.FUEL_TECH_GROUP[groupId]
-    //     const find = this.energyDomains.find(d =>
-    //       _includes(grouping, d.fuelTech)
-    //     )
-
-    //     if (find) {
-    //       const domainIds = []
-    //       grouping.forEach(g => {
-    //         const domain = this.energyDomains.find(d => d.fuelTech === g)
-    //         if (domain) domainIds.push(domain.id)
-    //       })
-    //       groupDomains.push({
-    //         id: groupId,
-    //         label: group.FUEL_TECH_LABEL[groupId],
-    //         colour: group.FUEL_TECH_GROUP_COLOUR[groupId],
-    //         category: group.FUEL_TECH_CATEGORY[groupId],
-    //         type: find.type,
-    //         domainIds
-    //       })
-    //     }
-    //   })
-
-    //   this.groupDomains = groupDomains.reverse()
-    // },
 
     updateDomains(res) {
       // Find out about available domains first before flattening data

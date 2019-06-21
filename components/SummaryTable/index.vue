@@ -246,6 +246,9 @@ export default {
     dataset(updated) {
       this.calculateSummary(updated)
     },
+    domains(updated) {
+      this.calculateSummary(this.dataset)
+    },
     hoverDate(date) {
       this.updatePointSummary(date)
     }

@@ -1,6 +1,7 @@
 <template>
   <div class="vis line-vis">
     <button
+      v-if="showZoomOut"
       class="button is-rounded is-small reset-btn"
       @click="handleReset"
     >
@@ -25,11 +26,16 @@
         class="axis-line-group">
         <!-- x and y axis ticks/lines/text -->
         <g
+          v-show="hasYGuides"
+          class="y-axis-guide-group" />
+        <g
           v-if="showXAxis"
           :transform="xAxisTransform" 
           :class="xAxisClass" />
 
-        <g :class="yAxisClass" />
+        <g
+          v-show="showYAxis"
+          :class="yAxisClass" />
 
         <!-- x axis layer to allow zoom in (brush) -->
         <g 
@@ -55,7 +61,8 @@
       </g>
 
       <!-- add another yAxis tick text here so it show above the vis -->
-      <g 
+      <g
+        v-show="showYAxis"
         :transform="gTransform"
         class="axis-text-group">
         <g :class="yAxisTickClass" />
@@ -163,6 +170,20 @@ export default {
     showXAxis: {
       type: Boolean,
       default: () => true
+    },
+    // OPTIONAL: whether to show zoom out button
+    showZoomOut: {
+      type: Boolean,
+      default: () => true
+    },
+    // OPTIONAL: whether to show y axis
+    showYAxis: {
+      type: Boolean,
+      default: () => true
+    },
+    yGuides: {
+      type: Array,
+      default: () => []
     }
   },
 
@@ -188,6 +209,7 @@ export default {
       $xAxisBrushGroup: null,
       $yAxisGroup: null,
       $yAxisTickGroup: null,
+      $yAxisGuideGroup: null,
       $hoverLayer: null,
       $cursorLineGroup: null,
       $lineGroup: null,
@@ -196,6 +218,7 @@ export default {
       lineGroupClass: 'line-group',
       areaPathClass: 'area-path',
       areaGroupClass: 'area-group',
+      yAxisGuideGroupClass: 'y-axis-guide-group',
       xAxisClass: CONFIG.X_AXIS_CLASS,
       xAxisBrushGroupClass: CONFIG.X_AXIS_BRUSH_GROUP_CLASS,
       yAxisClass: CONFIG.Y_AXIS_CLASS,
@@ -218,6 +241,9 @@ export default {
     },
     hasMinMax() {
       return this.minDomainId !== '' && this.maxDomainId !== ''
+    },
+    hasYGuides() {
+      return this.yGuides.length > 0
     },
     domainColours() {
       return this.domains.map(d => d.colour).reverse()
@@ -311,6 +337,7 @@ export default {
       this.$xAxisGroup = $svg.select(`.${this.xAxisClass}`)
       this.$yAxisGroup = $svg.select(`.${this.yAxisClass}`)
       this.$yAxisTickGroup = $svg.select(`.${this.yAxisTickClass}`)
+      this.$yAxisGuideGroup = $svg.select(`.${this.yAxisGuideGroupClass}`)
 
       // Brush
       this.$xAxisBrushGroup = $svg.select(`.${this.xAxisBrushGroupClass}`)
@@ -422,6 +449,7 @@ export default {
       this.$xAxisGroup.call(this.customXAxis)
       this.$yAxisGroup.call(this.customYAxis)
       this.$yAxisTickGroup.call(this.customYAxis)
+      this.$yAxisGuideGroup.call(this.guideYAxis)
 
       // Remove existing Line and Area
       this.$lineGroup.selectAll('path').remove()
@@ -565,6 +593,23 @@ export default {
       g.selectAll('.tick text')
         .attr('x', 4)
         .attr('dy', -4)
+    },
+
+    guideYAxis(g) {
+      const yAxis = axisRight(this.y)
+        .tickSize(this.width)
+        .tickValues(this.yGuides)
+        .tickFormat(d => d3Format(CONFIG.Y_AXIS_FORMAT_STRING)(d))
+
+      g.call(yAxis)
+
+      g.selectAll('.tick line')
+        .style('stroke-dasharray', '3.8')
+        .style('stroke', 'rgba(0, 0, 0, 0.2)')
+      g.selectAll('.tick text')
+        .attr('x', 4)
+        .attr('dy', -4)
+        .style('color', '#444')
     },
 
     getXAxisDateByMouse(evt) {
