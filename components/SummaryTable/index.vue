@@ -3,18 +3,18 @@
     <header>
       <span v-if="!hoverOn">
         <time :datetime="startDateTime">
-          {{ startDate | formatDate }}
+          {{ startDate | customFormatDate({ range, interval }) }}
         </time>
         –
         <time :datetime="endDateTime">
-          {{ endDate | formatDate }}
+          {{ endDate | customFormatDate({ range, interval, showYear: true }) }}
         </time>
       </span>
       
       <time
         v-if="hoverOn" 
         :datetime="hoveredDateTime">
-        {{ hoveredDate | formatDate }}
+        {{ hoveredDate | customFormatDate({ range, interval, showIntervalRange: true }) }}
       </time>
     </header>
 
@@ -150,6 +150,10 @@ export default {
       default: () => false
     },
     temperatureId: {
+      type: String,
+      default: () => ''
+    },
+    range: {
       type: String,
       default: () => ''
     },

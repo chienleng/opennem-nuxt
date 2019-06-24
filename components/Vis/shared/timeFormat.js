@@ -16,7 +16,7 @@ const formatMillisecond = timeFormat('.%L'),
   formatHour = timeFormat('%H:%M'),
   formatDay = timeFormat('%a'),
   formatWeek = timeFormat('%a'),
-  formatMonth = timeFormat('%B %Y'),
+  formatMonth = timeFormat('%b %y'),
   formatYear = timeFormat('%Y')
 
 export default function(d) {

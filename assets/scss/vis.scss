@@ -32,12 +32,12 @@ path.line-path {
   text-anchor: start;
 }
 .x-axis .tick line {
-  stroke-dasharray: 3.8;
-  stroke: rgba(0, 0, 0, 0.2);
+  stroke-dasharray: 4.8;
+  stroke: rgba(0, 0, 0, 0.1);
 }
 .y-axis .tick:not(:first-of-type) line {
-  stroke-dasharray: 3.8;
-  stroke: rgba(0, 0, 0, 0.2);
+  stroke-dasharray: 4.8;
+  stroke: rgba(0, 0, 0, 0.1);
 }
 .y-axis-tick .tick text {
   color: #888;
@@ -68,9 +68,9 @@ path.line-path {
 
 // brush styles
 .brush {
-  fill: #999;
-  fill-opacity: 0.2;
-  stroke: #000;
+  // fill: #999;
+  // fill-opacity: 0.2;
+  // stroke: #000;
 
   .selection {
     fill: $opennem-link-color;

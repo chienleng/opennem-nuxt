@@ -37,9 +37,10 @@
           :y-min="300"
           :y-max="20000"
           :show-x-axis="false"
-          :vis-height="50"
+          :vis-height="30"
           :show-zoom-out="false"
           :y-guides="[300, 2000, 6000, 10000, 14000]"
+          class="price-pos-vis"
           @eventChange="handleEventChange"
           @dateOver="handleDateOver"
         />
@@ -57,7 +58,7 @@
           :y-min="0"
           :y-max="300"
           :show-x-axis="false"
-          :vis-height="100"
+          :vis-height="60"
           :show-zoom-out="false"
           :y-guides="[0, 100, 200, 300]"
           class="price-vis"
@@ -79,9 +80,9 @@
           :y-min="-0.1"
           :y-max="-1000"
           :show-x-axis="false"
-          :vis-height="50"
+          :vis-height="30"
           :show-zoom-out="false"
-          :y-guides="[-50, -200, -400, -800]"
+          :y-guides="[-50, -800]"
           class="price-neg-vis"
           @eventChange="handleEventChange"
           @dateOver="handleDateOver"
@@ -102,6 +103,8 @@
           :y-min="0"
           :show-x-axis="false"
           :vis-height="100"
+          :show-zoom-out="false"
+          class="temperature-vis"
           @eventChange="handleEventChange"
           @dateOver="handleDateOver"
         />
@@ -113,6 +116,7 @@
           :dataset="filteredDataset"
           :hover-date="hoverDate"
           :hover-on="hoverOn"
+          :range="range"
           :interval="interval"
           :is-energy="step"
         />
@@ -780,6 +784,7 @@ export default {
   }
 }
 
+// Chart style adjustments
 .price-vis {
   position: relative;
   top: -7px;
@@ -787,5 +792,13 @@ export default {
 .price-neg-vis {
   position: relative;
   top: -14px;
+}
+::v-deep .price-vis .y-axis-guide-group .domain,
+::v-deep .temperature-vis .y-axis .domain {
+  fill: rgba(255, 255, 255, 0.6);
+}
+::v-deep .price-pos-vis .y-axis-guide-group .tick:not(:first-of-type) text,
+::v-deep .price-neg-vis .y-axis-guide-group .tick text {
+  display: none;
 }
 </style>

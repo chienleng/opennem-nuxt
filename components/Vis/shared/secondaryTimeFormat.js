@@ -34,5 +34,5 @@ export default function(date) {
               : formatWeek
             : timeYear(date) < date
               ? emptyTime
-              : formatYear)(date)
+              : emptyTime)(date)
 }

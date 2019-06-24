@@ -521,6 +521,7 @@ export default {
       this.$xAxisGroup.call(this.customXAxis)
       this.$yAxisGroup.call(this.customYAxis)
       this.$yAxisTickGroup.call(this.customYAxis)
+      this.$yAxisGuideGroup.call(this.guideYAxis)
 
       this.brushX.extent([[0, 0], [this.width, 40]])
       this.$xAxisBrushGroup.selectAll('.brush').call(this.brushX)
@@ -604,8 +605,8 @@ export default {
       g.call(yAxis)
 
       g.selectAll('.tick line')
-        .style('stroke-dasharray', '3.8')
-        .style('stroke', 'rgba(0, 0, 0, 0.2)')
+        .style('stroke-dasharray', '4.8')
+        .style('stroke', 'rgba(0, 0, 0, 0.1)')
       g.selectAll('.tick text')
         .attr('x', 4)
         .attr('dy', -4)
