@@ -89,6 +89,7 @@ import * as CONFIG from './shared/config.js'
 import axisTimeFormat from './shared/timeFormat.js'
 import axisSecondaryTimeFormat from './shared/secondaryTimeFormat.js'
 import axisTimeTicks from './shared/timeTicks.js'
+import dateDisplayService from '~/services/DateDisplayService.js'
 
 export default {
   props: {
@@ -112,6 +113,14 @@ export default {
     hoverDate: {
       type: Date,
       default: () => null
+    },
+    range: {
+      type: String,
+      default: () => ''
+    },
+    interval: {
+      type: String,
+      default: () => ''
     },
     // OPTIONAL: height for the chart
     visHeight: {
@@ -437,7 +446,7 @@ export default {
 
     updateCursorLineTooltip(date) {
       const xDate = this.x(date)
-      const formattedTime = d3Timeformat('%H:%M')(date)
+      const fTime = dateDisplayService(date, this.range, this.interval)
       const valueFormat = d3Format(',.1f')
       const time = new Date(date).getTime()
       const find = this.dataset.find(d => d.date === time)
@@ -453,7 +462,7 @@ export default {
         total = valueFormat(find._total)
       }
 
-      this.positionCursorLine(xDate, formattedTime)
+      this.positionCursorLine(xDate, fTime)
       this.positionTooltip(xDate, label, value, total)
     },
 

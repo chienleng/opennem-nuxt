@@ -16,6 +16,8 @@
           :dataset="dataset"
           :dynamic-extent="dateFilter"
           :hover-date="hoverDate"
+          :range="range"
+          :interval="interval"
           :mouse-loc="mouseLoc"
           :curve="energyCurveType"
           :vis-height="400"
