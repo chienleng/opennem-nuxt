@@ -123,11 +123,6 @@ export default {
       type: String,
       default: () => '#999'
     },
-    // !!REQUIRED: domains.colour, domain.id
-    domains: {
-      type: Array,
-      default: () => []
-    },
     dynamicExtent: {
       type: Array,
       default: () => []
@@ -236,17 +231,11 @@ export default {
     datasetDateExtent() {
       return extent(this.dataset, d => new Date(d.date))
     },
-    domainIds() {
-      return this.domains.map(d => d.id).reverse()
-    },
     hasMinMax() {
       return this.minDomainId !== '' && this.maxDomainId !== ''
     },
     hasYGuides() {
       return this.yGuides.length > 0
-    },
-    domainColours() {
-      return this.domains.map(d => d.colour).reverse()
     },
     id() {
       return `line-${this._uid}`
@@ -440,7 +429,7 @@ export default {
         this.yMin || this.yMin === 0
           ? this.yMin
           : min(this.dataset, d => d[minDomain])
-      const yMax = this.yMax || max(this.dataset, d => d[maxDomain])
+      const yMax = this.yMax || max(this.dataset, d => d[maxDomain]) + 2
 
       this.x.domain(xDomainExtent)
       this.y.domain([yMin, yMax])

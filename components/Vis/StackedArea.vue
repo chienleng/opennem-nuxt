@@ -172,13 +172,11 @@ export default {
       yAxisTickClass: CONFIG.Y_AXIS_TICK_CLASS,
       hoverLayerClass: CONFIG.HOVER_LAYER_CLASS,
       // Cursor Line and Tooltip
-      timeRectWidth: 70,
       timeRectHeight: 20,
       cursorLineGroupClass: CONFIG.CURSOR_LINE_GROUP_CLASS,
       cursorLineClass: CONFIG.CURSOR_LINE_CLASS,
       cursorLineTextClass: CONFIG.CURSOR_LINE_TEXT_CLASS,
       cursorLineRectClass: CONFIG.CURSOR_LINE_RECT_CLASS,
-      tooltipRectWidth: 200,
       tooltipRectHeight: 40,
       tooltipGroupClass: CONFIG.TOOLTIP_GROUP_CLASS,
       tooltipRectClass: CONFIG.TOOLTIP_RECT_CLASS,
@@ -320,7 +318,6 @@ export default {
       this.$cursorLineGroup
         .append('rect')
         .attr('class', this.cursorLineRectClass)
-        .attr('width', this.timeRectWidth)
         .attr('height', this.timeRectHeight)
         .attr('opacity', 0)
       this.$cursorLineGroup
@@ -337,7 +334,6 @@ export default {
       this.$tooltipGroup
         .append('rect')
         .attr('class', this.tooltipRectClass)
-        .attr('width', this.tooltipRectWidth)
         .attr('height', this.tooltipRectHeight)
         .attr('opacity', 0)
       // Create tooltip text
@@ -446,7 +442,13 @@ export default {
 
     updateCursorLineTooltip(date) {
       const xDate = this.x(date)
-      const fTime = dateDisplayService(date, this.range, this.interval)
+      const fTime = dateDisplayService(
+        new Date(date).getTime(),
+        this.range,
+        this.interval,
+        false,
+        true
+      )
       const valueFormat = d3Format(',.1f')
       const time = new Date(date).getTime()
       const find = this.dataset.find(d => d.date === time)
@@ -506,6 +508,7 @@ export default {
     },
 
     positionCursorLine(xDate, time) {
+      const rectWidth = time.length * 5 + 15
       const $cursorLine = this.$cursorLineGroup.select(
         `.${this.cursorLineClass}`
       )
@@ -518,12 +521,13 @@ export default {
 
       // Cursor line/rect/text to follow mouse
       $cursorLineRect
-        .attr('x', xDate - this.timeRectWidth / 2)
+        .attr('x', xDate - rectWidth / 2)
         .attr('y', -20)
+        .attr('width', rectWidth)
         .attr('opacity', 1)
       $cursorLineText
         .attr('x', xDate)
-        .attr('y', -5)
+        .attr('y', -6)
         .text(time)
       // Position and draw the line
       $cursorLine.attr('d', () => {
@@ -536,8 +540,8 @@ export default {
         const xMouse = this.mouseLoc[0]
         const yMouse = this.mouseLoc[1]
         const topCutoff = (20 / 100) * this.height
-        const leftCutoff = this.timeRectWidth / 2
-        const rightCutoff = this.width - this.timeRectWidth / 2
+        const leftCutoff = rectWidth / 2
+        const rightCutoff = this.width - rectWidth / 2
 
         // Adjust the position of the tooltips if cursor is near the top
         if (yMouse <= topCutoff) {
@@ -550,16 +554,20 @@ export default {
 
         // - check for time tooltip
         if (xMouse >= rightCutoff) {
-          $cursorLineRect.attr('x', rightCutoff - this.timeRectWidth / 2)
+          $cursorLineRect.attr('x', rightCutoff - rectWidth / 2)
           $cursorLineText.attr('x', rightCutoff)
         } else if (xMouse <= leftCutoff) {
           $cursorLineRect.attr('x', 0)
-          $cursorLineText.attr('x', this.timeRectWidth / 2)
+          $cursorLineText.attr('x', rectWidth / 2)
         }
       }
     },
 
     positionTooltip(xDate, label, value, total) {
+      const text = `${label}: ${value}`
+      const totalText = `Total: ${total}`
+      const longest = text > totalText ? text : totalText
+      const rectWidth = longest.length * 6 + 15
       const $tooltipRect = this.$tooltipGroup.select(
         `.${this.tooltipRectClass}`
       )
@@ -568,34 +576,35 @@ export default {
       )
 
       $tooltipRect
-        .attr('x', xDate - this.tooltipRectWidth / 2)
+        .attr('x', xDate - rectWidth / 2)
         .attr('y', 0)
+        .attr('width', rectWidth)
         .attr('opacity', 1)
       $tooltipText
         .attr('x', xDate)
         .attr('y', 15)
-        .text(`${label}: ${value}`)
+        .text(text)
         .append('tspan')
         .attr('x', xDate)
         .attr('dy', 12)
-        .text(`${total}`)
+        .text(totalText)
 
       // Tooltips to stick to left or right corners when close to the edge
       // - check for value tooltip
       if (this.mouseLoc) {
         const xMouse = this.mouseLoc[0]
         const yMouse = this.mouseLoc[1]
-        const leftCutoff = this.tooltipRectWidth / 2
-        const rightCutoff = this.width - this.tooltipRectWidth / 2
+        const leftCutoff = rectWidth / 2
+        const rightCutoff = this.width - rectWidth / 2
 
         if (xMouse >= rightCutoff) {
-          $tooltipRect.attr('x', rightCutoff - this.tooltipRectWidth / 2)
+          $tooltipRect.attr('x', rightCutoff - rectWidth / 2)
           $tooltipText.attr('x', rightCutoff)
           $tooltipText.select('tspan').attr('x', rightCutoff)
         } else if (xMouse <= leftCutoff) {
           $tooltipRect.attr('x', 0)
-          $tooltipText.attr('x', this.tooltipRectWidth / 2)
-          $tooltipText.select('tspan').attr('x', this.tooltipRectWidth / 2)
+          $tooltipText.attr('x', rectWidth / 2)
+          $tooltipText.select('tspan').attr('x', rectWidth / 2)
         }
       }
     },

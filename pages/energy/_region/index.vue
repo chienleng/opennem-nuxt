@@ -27,7 +27,6 @@
         
         <line-vis
           v-if="ready && hasPriceData"
-          :domains="priceDomains"
           :domain-id="'price.above300'"
           :domain-colour="lineColour"
           :dataset="dataset"
@@ -48,7 +47,6 @@
         />
         <line-vis
           v-if="ready && hasPriceData"
-          :domains="priceDomains"
           :domain-id="priceDomains[0].id"
           :domain-colour="lineColour"
           :dataset="dataset"
@@ -69,7 +67,6 @@
         />
         <line-vis
           v-if="ready && hasPriceData"
-          :domains="priceDomains"
           :domain-id="'price.below0'"
           :domain-colour="lineColour"
           :dataset="dataset"
@@ -92,7 +89,6 @@
 
         <line-vis
           v-if="ready && hasTemperatureData"
-          :domains="temperatureDomains"
           :domain-id="temperatureMeanId"
           :min-domain-id="temperatureMinId"
           :max-domain-id="temperatureMaxId"
