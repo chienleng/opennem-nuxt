@@ -11,13 +11,14 @@ path.line-path {
   fill: $opennem-link-color;
 }
 .tooltip-rect {
-  fill: white;
+  fill: rgba(255, 255, 255, 0.6);
   stroke-width: 1px;
   stroke: #ddd;
 }
 .tooltip-text {
   fill: #333;
-  font-size: 12px;
+  font-size: 10px;
+  font-weight: bold;
 }
 .cursor-line-text {
   font-size: 10px;
@@ -33,6 +34,7 @@ path.line-path {
 .x-axis .tick text {
   color: #666;
   text-anchor: start;
+  font-size: 9px;
 }
 .x-axis .tick line {
   stroke-dasharray: 4.8;

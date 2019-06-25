@@ -119,6 +119,10 @@ export default {
       type: String,
       default: () => ''
     },
+    valueDomainId: {
+      type: String,
+      default: () => ''
+    },
     domainColour: {
       type: String,
       default: () => '#999'
@@ -126,6 +130,10 @@ export default {
     dynamicExtent: {
       type: Array,
       default: () => []
+    },
+    mouseLoc: {
+      type: Array,
+      default: () => null
     },
     hoverDate: {
       type: Date,
@@ -176,6 +184,11 @@ export default {
       type: Boolean,
       default: () => true
     },
+    // OPTIONAL: whether to show value tooltip
+    showTooltip: {
+      type: Boolean,
+      default: () => true
+    },
     yGuides: {
       type: Array,
       default: () => []
@@ -207,6 +220,7 @@ export default {
       $yAxisGuideGroup: null,
       $hoverLayer: null,
       $cursorLineGroup: null,
+      $tooltipGroup: null,
       $lineGroup: null,
       $areaGroup: null,
       linePathClass: 'line-path',
@@ -223,7 +237,11 @@ export default {
       cursorLineGroupClass: CONFIG.CURSOR_LINE_GROUP_CLASS,
       cursorLineClass: CONFIG.CURSOR_LINE_CLASS,
       cursorLineTextClass: CONFIG.CURSOR_LINE_TEXT_CLASS,
-      cursorLineRectClass: CONFIG.CURSOR_LINE_RECT_CLASS
+      cursorLineRectClass: CONFIG.CURSOR_LINE_RECT_CLASS,
+      tooltipRectHeight: 23,
+      tooltipGroupClass: CONFIG.TOOLTIP_GROUP_CLASS,
+      tooltipRectClass: CONFIG.TOOLTIP_RECT_CLASS,
+      tooltipTextClass: CONFIG.TOOLTIP_TEXT_CLASS
     }
   },
 
@@ -372,6 +390,22 @@ export default {
         .append('text')
         .attr('class', this.cursorLineTextClass)
 
+      // Create tooltip group
+      this.$tooltipGroup = this.$cursorLineGroup
+        .append('g')
+        .attr('class', this.tooltipGroupClass)
+      // Create tooltip rect
+      this.$tooltipGroup
+        .append('rect')
+        .attr('class', this.tooltipRectClass)
+        .attr('height', this.tooltipRectHeight)
+        .attr('opacity', 0)
+      // Create tooltip text
+      this.$tooltipGroup
+        .append('text')
+        .attr('class', this.tooltipTextClass)
+        .attr('text-anchor', 'middle')
+
       // How to draw the line
       this.line = line()
         .x(d => this.x(d.date))
@@ -475,16 +509,78 @@ export default {
     },
 
     updateCursorLineTooltip(date) {
+      const xDate = this.x(date)
+
+      const valueFormat = d3Format(',.1f')
+      const time = new Date(date).getTime()
+      const find = this.dataset.find(d => d.date === time)
+      let value = 0
+      let minValue = null
+      let maxValue = null
+
+      if (find) {
+        const dId = this.valueDomainId || this.domainId
+        value = valueFormat(find[dId])
+        minValue = this.minDomainId ? valueFormat(find[this.minDomainId]) : null
+        maxValue = this.maxDomainId ? valueFormat(find[this.maxDomainId]) : null
+      }
+
+      if (this.showTooltip) {
+        this.positionTooltip(xDate, value, minValue, maxValue)
+      }
+
       const $cursorLine = this.$cursorLineGroup.select(
         `.${this.cursorLineClass}`
       )
-      const xDate = this.x(date)
       // Position and draw the line
       $cursorLine.attr('d', () => {
         let d = 'M' + xDate + ',' + this.height
         d += ' ' + xDate + ',' + 0
         return d
       })
+    },
+
+    positionTooltip(xDate, value, minValue, maxValue) {
+      let text = `${value}`
+      if (minValue && maxValue) {
+        text = `min: ${minValue} — av: ${value} — max: ${maxValue}`
+      }
+      const rectWidth = text.length * 6 + 15
+      const $tooltipRect = this.$tooltipGroup.select(
+        `.${this.tooltipRectClass}`
+      )
+      const $tooltipText = this.$tooltipGroup.select(
+        `.${this.tooltipTextClass}`
+      )
+
+      $tooltipRect
+        .attr('x', xDate - rectWidth / 2)
+        .attr('y', 0)
+        .attr('width', rectWidth)
+        .attr('opacity', 1)
+      $tooltipText
+        .attr('x', xDate)
+        .attr('y', 15)
+        .text(text)
+
+      // Tooltips to stick to left or right corners when close to the edge
+      // - check for value tooltip
+      if (this.mouseLoc) {
+        const xMouse = this.mouseLoc[0]
+        const yMouse = this.mouseLoc[1]
+        const leftCutoff = rectWidth / 2
+        const rightCutoff = this.width - rectWidth / 2
+
+        if (xMouse >= rightCutoff) {
+          $tooltipRect.attr('x', rightCutoff - rectWidth / 2)
+          $tooltipText.attr('x', rightCutoff)
+          $tooltipText.select('tspan').attr('x', rightCutoff)
+        } else if (xMouse <= leftCutoff) {
+          $tooltipRect.attr('x', 0)
+          $tooltipText.attr('x', rectWidth / 2)
+          $tooltipText.select('tspan').attr('x', rectWidth / 2)
+        }
+      }
     },
 
     // Update vis when container is resized

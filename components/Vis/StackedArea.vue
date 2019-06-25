@@ -154,7 +154,6 @@ export default {
       brushX: null,
       zoomed: false,
       mouseEvt: null,
-      currentDomainOver: null,
       $xAxisGroup: null,
       $xAxisBrushGroup: null,
       $yAxisGroup: null,
@@ -336,11 +335,6 @@ export default {
         .attr('class', this.tooltipRectClass)
         .attr('height', this.tooltipRectHeight)
         .attr('opacity', 0)
-      // Create tooltip text
-      this.$tooltipGroup
-        .append('text')
-        .attr('class', this.tooltipTextClass)
-        .attr('text-anchor', 'middle')
 
       // This is a stacked area
       this.stack = stack()
@@ -367,19 +361,19 @@ export default {
       this.$hoverLayer.on('touchmove mousemove', function() {
         self.$emit('eventChange', this)
         self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
-        self.currentDomainOver = null
+        self.$emit('domainOver', null)
       })
       this.brushX.on('brush', function() {
         self.$emit('eventChange', this)
         self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
-        self.currentDomainOver = null
+        self.$emit('domainOver', null)
       })
       this.$xAxisBrushGroup
         .selectAll('.brush')
         .on('touchmove mousemove', function() {
           self.$emit('eventChange', this)
           self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
-          self.currentDomainOver = null
+          self.$emit('domainOver', null)
         })
     },
 
@@ -436,7 +430,7 @@ export default {
         .on('touchmove mousemove', function(d) {
           self.$emit('eventChange', this)
           self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
-          self.currentDomainOver = d.key
+          self.$emit('domainOver', d.key)
         })
     },
 
@@ -456,16 +450,16 @@ export default {
       let label = ''
       let value = 0
 
-      if (find && this.currentDomainOver && find[this.currentDomainOver]) {
-        label = this.currentDomainOver
-        value = valueFormat(find[this.currentDomainOver])
-      }
+      // if (find && this.currentDomainOver && find[this.currentDomainOver]) {
+      //   label = this.currentDomainOver
+      //   value = valueFormat(find[this.currentDomainOver])
+      // }
       if (find) {
         total = valueFormat(find._total)
       }
 
       this.positionCursorLine(xDate, fTime)
-      this.positionTooltip(xDate, label, value, total)
+      // this.positionTooltip(xDate, label, value, total)
     },
 
     // Update vis when container is resized
@@ -544,13 +538,10 @@ export default {
         const rightCutoff = this.width - rectWidth / 2
 
         // Adjust the position of the tooltips if cursor is near the top
-        if (yMouse <= topCutoff) {
-          // $tooltipRect.attr('y', height - valueRectHeight)
-          // $tooltipText.attr('y', height - 25)
-          // $tooltipText2.attr('y', height - 5)
-          $cursorLineRect.attr('y', this.height)
-          $cursorLineText.attr('y', this.height + 15)
-        }
+        // if (yMouse <= topCutoff) {
+        //   $cursorLineRect.attr('y', this.height)
+        //   $cursorLineText.attr('y', this.height + 15)
+        // }
 
         // - check for time tooltip
         if (xMouse >= rightCutoff) {
@@ -563,51 +554,55 @@ export default {
       }
     },
 
-    positionTooltip(xDate, label, value, total) {
-      const text = `${label}: ${value}`
-      const totalText = `Total: ${total}`
-      const longest = text > totalText ? text : totalText
-      const rectWidth = longest.length * 6 + 15
-      const $tooltipRect = this.$tooltipGroup.select(
-        `.${this.tooltipRectClass}`
-      )
-      const $tooltipText = this.$tooltipGroup.select(
-        `.${this.tooltipTextClass}`
-      )
+    // positionTooltip(xDate, label, value, total) {
+    //   const text = `${label}: ${value}`
+    //   const totalText = `Total: ${total}`
+    //   const longest = text > totalText ? text : totalText
+    //   const rectWidth = longest.length * 6 + 15
+    //   const $tooltipRect = this.$tooltipGroup.select(
+    //     `.${this.tooltipRectClass}`
+    //   )
+    //   const $tooltipText = this.$tooltipGroup.select(
+    //     `.${this.tooltipTextClass}`
+    //   )
+    //   const $tooltipDomainColour = this.$tooltipGroup.select(
+    //     '.tooltip-domain-colour'
+    //   )
 
-      $tooltipRect
-        .attr('x', xDate - rectWidth / 2)
-        .attr('y', 0)
-        .attr('width', rectWidth)
-        .attr('opacity', 1)
-      $tooltipText
-        .attr('x', xDate)
-        .attr('y', 15)
-        .text(text)
-        .append('tspan')
-        .attr('x', xDate)
-        .attr('dy', 12)
-        .text(totalText)
+    //   // create fuel tech colour square
+    //   $tooltipRect
+    //     .attr('x', xDate - rectWidth / 2)
+    //     .attr('y', 0)
+    //     .attr('width', rectWidth)
+    //     .attr('opacity', 1)
+    //   $tooltipText
+    //     .attr('x', xDate)
+    //     .attr('y', 15)
+    //     .text(text)
+    //     .append('tspan')
+    //     .attr('x', xDate)
+    //     .attr('dy', 12)
+    //     .text(totalText)
 
-      // Tooltips to stick to left or right corners when close to the edge
-      // - check for value tooltip
-      if (this.mouseLoc) {
-        const xMouse = this.mouseLoc[0]
-        const yMouse = this.mouseLoc[1]
-        const leftCutoff = rectWidth / 2
-        const rightCutoff = this.width - rectWidth / 2
+    //   // Tooltips to stick to left or right corners when close to the edge
+    //   // - check for value tooltip
+    //   if (this.mouseLoc) {
+    //     const xMouse = this.mouseLoc[0]
+    //     const yMouse = this.mouseLoc[1]
+    //     const leftCutoff = rectWidth / 2
+    //     const rightCutoff = this.width - rectWidth / 2
 
-        if (xMouse >= rightCutoff) {
-          $tooltipRect.attr('x', rightCutoff - rectWidth / 2)
-          $tooltipText.attr('x', rightCutoff)
-          $tooltipText.select('tspan').attr('x', rightCutoff)
-        } else if (xMouse <= leftCutoff) {
-          $tooltipRect.attr('x', 0)
-          $tooltipText.attr('x', rectWidth / 2)
-          $tooltipText.select('tspan').attr('x', rectWidth / 2)
-        }
-      }
-    },
+    //     if (xMouse >= rightCutoff) {
+    //       $tooltipRect.attr('x', rightCutoff - rectWidth / 2)
+    //       $tooltipText.attr('x', rightCutoff)
+    //       $tooltipText.select('tspan').attr('x', rightCutoff)
+    //     } else if (xMouse <= leftCutoff) {
+    //       $tooltipRect.attr('x', 0)
+    //       $tooltipText.attr('x', rectWidth / 2)
+    //       $tooltipText.select('tspan').attr('x', rectWidth / 2)
+    //     }
+    //   }
+    // },
 
     // handle when selecting the date ranges on the brush area
     brushEnded(d) {

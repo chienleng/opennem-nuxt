@@ -9,104 +9,133 @@
 
     <div class="vis-table-container">
       <div class="vis-container">
+        <div class="chart">
+          <div
+            :style="{ 'left': `${tooltipLeft}px` }"
+            class="tooltip">
+            <div
+              v-if="hoverValue"
+              class="tooltip-value">
+              <span
+                :style="{ 'background-color': hoverDomainColour}"
+                class="colour-square" />
+              {{ hoverValue | formatValue }}
+            </div>  
+            <div class="tooltip-total">
+              Total: {{ hoverTotal | formatValue }}
+            </div>        
+          </div>
+          <stacked-area-vis
+            v-if="ready"
+            :domains="stackedAreaDomains"
+            :dataset="dataset"
+            :dynamic-extent="dateFilter"
+            :hover-date="hoverDate"
+            :range="range"
+            :interval="interval"
+            :mouse-loc="mouseLoc"
+            :curve="energyCurveType"
+            :vis-height="stackedAreaHeight"
+            @eventChange="handleEventChange"
+            @dateOver="handleDateOver"
+            @domainOver="handleDomainOver"
+          />
+        </div>
 
-        <stacked-area-vis
-          v-if="ready"
-          :domains="groupDomains.length > 0 ? groupDomains : energyDomains"
-          :dataset="dataset"
-          :dynamic-extent="dateFilter"
-          :hover-date="hoverDate"
-          :range="range"
-          :interval="interval"
-          :mouse-loc="mouseLoc"
-          :curve="energyCurveType"
-          :vis-height="400"
-          @eventChange="handleEventChange"
-          @dateOver="handleDateOver"
-        />
-        
-        <line-vis
-          v-if="ready && hasPriceData"
-          :domain-id="'price.above300'"
-          :domain-colour="lineColour"
-          :dataset="dataset"
-          :dynamic-extent="dateFilter"
-          :hover-date="hoverDate"
-          :curve="'step'"
-          :show-y-axis="false"
-          :y-axis-log="true"
-          :y-min="300"
-          :y-max="20000"
-          :show-x-axis="false"
-          :vis-height="30"
-          :show-zoom-out="false"
-          :y-guides="[300, 2000, 6000, 10000, 14000]"
-          class="price-pos-vis"
-          @eventChange="handleEventChange"
-          @dateOver="handleDateOver"
-        />
-        <line-vis
-          v-if="ready && hasPriceData"
-          :domain-id="priceDomains[0].id"
-          :domain-colour="lineColour"
-          :dataset="dataset"
-          :dynamic-extent="dateFilter"
-          :hover-date="hoverDate"
-          :curve="'step'"
-          :show-y-axis="false"
-          :y-axis-log="false"
-          :y-min="0"
-          :y-max="300"
-          :show-x-axis="false"
-          :vis-height="60"
-          :show-zoom-out="false"
-          :y-guides="[0, 100, 200, 300]"
-          class="price-vis"
-          @eventChange="handleEventChange"
-          @dateOver="handleDateOver"
-        />
-        <line-vis
-          v-if="ready && hasPriceData"
-          :domain-id="'price.below0'"
-          :domain-colour="lineColour"
-          :dataset="dataset"
-          :dynamic-extent="dateFilter"
-          :hover-date="hoverDate"
-          :curve="'step'"
-          :show-y-axis="false"
-          :y-axis-log="true"
-          :y-axis-invert="true"
-          :y-min="-0.1"
-          :y-max="-1000"
-          :show-x-axis="false"
-          :vis-height="30"
-          :show-zoom-out="false"
-          :y-guides="[-50, -800]"
-          class="price-neg-vis"
-          @eventChange="handleEventChange"
-          @dateOver="handleDateOver"
-        />
+        <div class="chart">  
+          <line-vis
+            v-if="ready && hasPriceData"
+            :domain-id="'price.above300'"
+            :domain-colour="lineColour"
+            :value-domain-id="priceDomains[0].id"
+            :dataset="dataset"
+            :dynamic-extent="dateFilter"
+            :hover-date="hoverDate"
+            :mouse-loc="mouseLoc"
+            :curve="'step'"
+            :show-y-axis="false"
+            :y-axis-log="true"
+            :y-min="300"
+            :y-max="20000"
+            :show-x-axis="false"
+            :vis-height="30"
+            :show-zoom-out="false"
+            :y-guides="[300, 2000, 6000, 10000, 14000]"
+            class="price-pos-vis"
+            @eventChange="handleEventChange"
+            @dateOver="handleDateOver"
+          />
+          <line-vis
+            v-if="ready && hasPriceData"
+            :domain-id="priceDomains[0].id"
+            :domain-colour="lineColour"
+            :dataset="dataset"
+            :dynamic-extent="dateFilter"
+            :hover-date="hoverDate"
+            :mouse-loc="mouseLoc"
+            :show-tooltip="false"
+            :curve="'step'"
+            :show-y-axis="false"
+            :y-axis-log="false"
+            :y-min="0"
+            :y-max="300"
+            :show-x-axis="false"
+            :vis-height="80"
+            :show-zoom-out="false"
+            :y-guides="[0, 100, 200, 300]"
+            class="price-vis"
+            @eventChange="handleEventChange"
+            @dateOver="handleDateOver"
+          />
+          <line-vis
+            v-if="ready && hasPriceData"
+            :domain-id="'price.below0'"
+            :domain-colour="lineColour"
+            :dataset="dataset"
+            :dynamic-extent="dateFilter"
+            :hover-date="hoverDate"
+            :mouse-loc="mouseLoc"
+            :show-tooltip="false"
+            :curve="'step'"
+            :show-y-axis="false"
+            :y-axis-log="true"
+            :y-axis-invert="true"
+            :y-min="-0.1"
+            :y-max="-1000"
+            :show-x-axis="false"
+            :vis-height="30"
+            :show-zoom-out="false"
+            :y-guides="[-50, -800]"
+            class="price-neg-vis"
+            @eventChange="handleEventChange"
+            @dateOver="handleDateOver"
+          />
+        </div>
 
-        <line-vis
-          v-if="ready && hasTemperatureData"
-          :domain-id="temperatureMeanId"
-          :min-domain-id="temperatureMinId"
-          :max-domain-id="temperatureMaxId"
-          :domain-colour="lineColour"
-          :dataset="dataset"
-          :dynamic-extent="dateFilter"
-          :hover-date="hoverDate"
-          :curve="'smooth'"
-          :y-axis-log="false"
-          :y-min="0"
-          :show-x-axis="false"
-          :vis-height="100"
-          :show-zoom-out="false"
-          class="temperature-vis"
-          @eventChange="handleEventChange"
-          @dateOver="handleDateOver"
-        />
+        <div class="chart">
+          <line-vis
+            v-if="ready && hasTemperatureData"
+            :domain-id="temperatureMeanId"
+            :min-domain-id="temperatureMinId"
+            :max-domain-id="temperatureMaxId"
+            :domain-colour="lineColour"
+            :dataset="dataset"
+            :dynamic-extent="dateFilter"
+            :hover-date="hoverDate"
+            :mouse-loc="mouseLoc"
+            :curve="'smooth'"
+            :y-axis-log="false"
+            :y-min="0"
+            :show-x-axis="false"
+            :vis-height="100"
+            :show-zoom-out="false"
+            class="temperature-vis"
+            @eventChange="handleEventChange"
+            @dateOver="handleDateOver"
+          />
+        </div>
       </div>
+
       <div class="table-container">
         <summary-table
           v-if="ready"
@@ -180,7 +209,9 @@ export default {
       responses: [],
       dateFilter: [],
       hoverDate: null,
+      hoverDomain: null,
       mouseLoc: null,
+      tooltipLeft: 0,
       filteredDataset: [],
       visHeight: 0,
       hoverOn: false,
@@ -271,6 +302,30 @@ export default {
         default:
           return true
       }
+    },
+    stackedAreaDomains() {
+      return this.groupDomains.length > 0
+        ? this.groupDomains
+        : this.energyDomains
+    },
+    stackedAreaHeight() {
+      return this.regionId === 'nem' ? 578 : 400
+    },
+    hoverData() {
+      const time = new Date(this.hoverDate).getTime()
+      return this.dataset.find(d => d.date === time)
+    },
+    hoverValue() {
+      return this.hoverData ? this.hoverData[this.hoverDomain] : null
+    },
+    hoverDomainColour() {
+      const find = this.stackedAreaDomains.find(d => d.id === this.hoverDomain)
+      if (find) return find.colour
+      return null
+    },
+    hoverTotal() {
+      if (this.hoverData) return this.hoverData._total
+      return 0
     }
   },
 
@@ -616,6 +671,8 @@ export default {
 
     handleEventChange(evt) {
       this.mouseLoc = d3Mouse(evt)
+      this.tooltipLeft = this.mouseLoc[0]
+      console.log(this.mouseLoc, this.tooltipLeft)
     },
 
     handleDateOver(evt, date) {
@@ -625,6 +682,10 @@ export default {
         this.dataset,
         this.snapToClosestInterval(date)
       )
+    },
+
+    handleDomainOver(domain) {
+      this.hoverDomain = domain
     },
 
     handleVisMouseMove(evt, dataset, date) {
@@ -780,6 +841,28 @@ export default {
       width: 30%;
     }
   }
+  .chart {
+    position: relative;
+  }
+}
+
+.tooltip {
+  font-size: 0.7rem;
+  background-color: rgba(255, 255, 255, 0.7);
+  position: absolute;
+  z-index: 9;
+  top: 26px;
+  left: 30px;
+  margin-left: 10px;
+  padding: 5px 6px 2px;
+  text-align: right;
+}
+.colour-square {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  position: relative;
+  top: 1px;
 }
 
 // Chart style adjustments
