@@ -429,7 +429,7 @@ export default {
         this.yMin || this.yMin === 0
           ? this.yMin
           : min(this.dataset, d => d[minDomain])
-      const yMax = this.yMax || max(this.dataset, d => d[maxDomain]) + 2
+      const yMax = this.yMax || max(this.dataset, d => d[maxDomain]) + 5
 
       this.x.domain(xDomainExtent)
       this.y.domain([yMin, yMax])

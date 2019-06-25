@@ -793,8 +793,10 @@ export default {
 }
 ::v-deep .price-vis .y-axis-guide-group .domain,
 ::v-deep .temperature-vis .y-axis .domain {
-  fill: rgba(255, 255, 255, 0.6);
+  fill: rgba(255, 255, 255, 0.1);
 }
+::v-deep .temperature-vis .y-axis .tick:last-of-type text,
+::v-deep .temperature-vis .y-axis-tick .tick:last-of-type text,
 ::v-deep .price-pos-vis .y-axis-guide-group .tick:not(:first-of-type) text,
 ::v-deep .price-neg-vis .y-axis-guide-group .tick text {
   display: none;
