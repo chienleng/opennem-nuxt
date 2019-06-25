@@ -868,11 +868,11 @@ export default {
 // Chart style adjustments
 .price-vis {
   position: relative;
-  top: -7px;
+  top: -6px;
 }
 .price-neg-vis {
   position: relative;
-  top: -14px;
+  top: -12px;
 }
 ::v-deep .price-vis .y-axis-guide-group .domain,
 ::v-deep .temperature-vis .y-axis .domain {
