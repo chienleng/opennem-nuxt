@@ -113,7 +113,7 @@
 <script>
 import moment from 'moment'
 import _isEmpty from 'lodash.isempty'
-import GroupSelector from '~/components/energy/FuelTechGroupSelector'
+import GroupSelector from '~/components/Energy/FuelTechGroupSelector'
 import Items from './Items'
 
 export default {

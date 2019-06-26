@@ -6,21 +6,36 @@
       <region-dropdown />
     </div>
 
-    <!-- <div class="buttons has-addons">
-      <span class="button is-rounded">Image</span>
-      <span class="button is-rounded">Data</span>
-    </div> -->
+    <div class="buttons has-addons">
+      <!-- <span class="button is-rounded">Image</span> -->
+      <button class="button is-rounded">
+        <download-csv
+          :data="exportData"
+          :name="`test.csv`"
+        >
+          <span class="csv-label">Data</span>
+        </download-csv>
+      </button>
+    </div>
   </header>
 </template>
 
 <script>
+import DownloadCsv from 'vue-json-csv'
 import Logo from '~/components/ui/Logo'
 import RegionDropdown from '~/components/ui/RegionDropdown'
 
 export default {
   components: {
+    DownloadCsv,
     Logo,
     RegionDropdown
+  },
+
+  computed: {
+    exportData() {
+      return this.$store.getters.exportData
+    }
   }
 }
 </script>

@@ -10,21 +10,12 @@
     <div class="vis-table-container">
       <div class="vis-container">
         <div class="chart">
-          <div
-            :style="{ 'left': `${tooltipLeft}px` }"
-            class="tooltip">
-            <div
-              v-if="hoverValue"
-              class="tooltip-value">
-              <span
-                :style="{ 'background-color': hoverDomainColour}"
-                class="colour-square" />
-              {{ hoverValue | formatValue }}
-            </div>  
-            <div class="tooltip-total">
-              Total: {{ hoverTotal | formatValue }}
-            </div>        
-          </div>
+          <vis-tooltip
+            :left-position="tooltipLeft"
+            :hover-value="hoverValue"
+            :hover-total="hoverTotal"
+            :hover-domain-colour="hoverDomainColour"
+          />
           <stacked-area-vis
             v-if="ready"
             :domains="stackedAreaDomains"
@@ -175,10 +166,11 @@ import EventBus from '~/plugins/eventBus.js'
 import http from '~/services/HttpService.js'
 import DataTransformService from '~/services/DataTransformService.js'
 
-import DataOptionsBar from '~/components/energy/DataOptionsBar'
+import DataOptionsBar from '~/components/Energy/DataOptionsBar'
 import StackedAreaVis from '~/components/Vis/StackedArea.vue'
 import LineVis from '~/components/Vis/Line.vue'
 import SummaryTable from '~/components/SummaryTable'
+import VisTooltip from '~/components/ui/Tooltip'
 
 export default {
   layout: 'main',
@@ -187,7 +179,8 @@ export default {
     DataOptionsBar,
     StackedAreaVis,
     LineVis,
-    SummaryTable
+    SummaryTable,
+    VisTooltip
   },
 
   data() {
@@ -335,6 +328,9 @@ export default {
   watch: {
     groupDomains() {
       this.updateDatasetGroups(this.dataset)
+    },
+    filteredDataset(updated) {
+      this.$store.dispatch('exportData', updated)
     }
   },
 
@@ -848,25 +844,6 @@ export default {
   .chart {
     position: relative;
   }
-}
-
-.tooltip {
-  font-size: 0.7rem;
-  background-color: rgba(255, 255, 255, 0.7);
-  position: absolute;
-  z-index: 9;
-  top: 26px;
-  left: 30px;
-  margin-left: 10px;
-  padding: 5px 6px 2px;
-  text-align: right;
-}
-.colour-square {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  position: relative;
-  top: 1px;
 }
 
 // Chart style adjustments
