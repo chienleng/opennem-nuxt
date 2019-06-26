@@ -1,6 +1,7 @@
 <template>
   <footer>
     <p>v3</p>
+    <nuxt-link to="/about">About</nuxt-link> 
   </footer>
 </template>
 

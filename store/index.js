@@ -6,7 +6,9 @@ export const state = () => ({
   fuelTechMeta: null,
   fuelTechNames: null,
   fuelTechGroup: 'Default',
-  fuelTechOrder: cloneDeep(FUEL_TECHS.DEFAULT_FUEL_TECH_ORDER)
+  fuelTechOrder: cloneDeep(FUEL_TECHS.DEFAULT_FUEL_TECH_ORDER),
+  range: '7D',
+  interval: '30m'
 })
 
 export const mutations = {
@@ -24,6 +26,12 @@ export const mutations = {
   },
   fuelTechOrder(state, data) {
     state.fuelTechOrder = data
+  },
+  range(state, data) {
+    state.range = data
+  },
+  interval(state, data) {
+    state.interval = data
   }
 }
 
@@ -33,7 +41,9 @@ export const getters = {
   fuelTechMeta: state => state.fuelTechMeta,
   fuelTechNames: state => state.fuelTechNames,
   fuelTechGroup: state => state.fuelTechGroup,
-  fuelTechOrder: state => state.fuelTechOrder
+  fuelTechOrder: state => state.fuelTechOrder,
+  range: state => state.range,
+  interval: state => state.interval
 }
 
 export const actions = {
@@ -48,5 +58,11 @@ export const actions = {
   },
   fuelTechOrder({ commit }, data) {
     commit('fuelTechOrder', data)
+  },
+  range({ commit }, data) {
+    commit('range', data)
+  },
+  interval({ commit }, data) {
+    commit('interval', data)
   }
 }

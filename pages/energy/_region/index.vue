@@ -195,11 +195,8 @@ export default {
       mounted: false,
       ready: false,
       type: 'power', // power, energy
-      range: '7D',
-      interval: '30m',
       dataset: [],
       energyDomains: [],
-      // groupDomains: [],
       domainIds: [],
       temperatureDomains: [],
       temperatureMeanId: '',
@@ -222,6 +219,12 @@ export default {
   computed: {
     regionId() {
       return this.$route.params.region
+    },
+    range() {
+      return this.$store.getters.range
+    },
+    interval() {
+      return this.$store.getters.interval
     },
     fuelTechOrder() {
       return this.$store.getters.fuelTechOrder
@@ -607,45 +610,47 @@ export default {
     },
 
     handleRangeChange(range) {
-      this.range = range
-      switch (this.range) {
+      let interval = ''
+      switch (range) {
         case '1D':
-          this.interval = '5m'
+          interval = '5m'
           this.dateFilter = []
           break
         case '3D':
         case '7D':
-          this.interval = '30m'
+          interval = '30m'
           this.dateFilter = []
           break
         case '30D':
-          this.interval = 'Day'
+          interval = 'Day'
           this.dateFilter = []
           break
         case '1Y':
-          this.interval = 'Week'
+          interval = 'Week'
           this.dateFilter = []
           break
         case 'ALL':
-          this.interval = 'Month'
+          interval = 'Month'
           this.dateFilter = []
           break
         default:
           console.log('nothing yet')
       }
 
-      this.fetchData(this.regionId, this.range)
+      this.$store.dispatch('interval', interval)
+      this.$store.dispatch('range', range)
+      this.fetchData(this.regionId, range)
     },
 
     handleIntervalChange(interval) {
-      this.interval = interval
+      this.$store.dispatch('interval', interval)
       this.mergeResponses(
         this.responses,
         this.energyDomains,
         this.temperatureDomains,
         this.priceDomains,
         this.range,
-        this.interval
+        interval
       ).then(dataset => {
         this.dataset = dataset
         this.updateDatasetGroups(dataset)
@@ -672,7 +677,6 @@ export default {
     handleEventChange(evt) {
       this.mouseLoc = d3Mouse(evt)
       this.tooltipLeft = this.mouseLoc[0]
-      console.log(this.mouseLoc, this.tooltipLeft)
     },
 
     handleDateOver(evt, date) {

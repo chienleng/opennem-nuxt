@@ -7,6 +7,7 @@
 <script>
 export default {
   layout: 'default',
+  middleware: 'root-redirect',
 
   mounted() {
     // TODO: redirect from Hash

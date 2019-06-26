@@ -63,6 +63,11 @@ export default {
     }
   },
 
+  mounted() {
+    this.selectedRange = this.range
+    this.selectedInterval = this.interval
+  },
+
   methods: {
     handleRangeChange(range) {
       this.$emit('onRangeChange', range)
