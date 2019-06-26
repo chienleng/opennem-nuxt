@@ -46,11 +46,11 @@ export default function(domains, data) {
           if (isOriginalPrice) priceId = id
         } else if (isTemperatureType) {
           if (type === 'temperature' || type === 'temperature_mean') {
-            obj[id] = d3Mean(a, d => d[id] || null)
+            obj[id] = d3Mean(a, d => d[id] || 0)
           } else if (type === 'temperature_min') {
-            obj[id] = d3Min(a, d => d[id] || null)
+            obj[id] = d3Min(a, d => d[id] || 0)
           } else if (type === 'temperature_max') {
-            obj[id] = d3Max(a, d => d[id] || null)
+            obj[id] = d3Max(a, d => d[id] || 0)
           }
         }
       })

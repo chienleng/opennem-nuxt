@@ -9,6 +9,43 @@
 
     <div class="vis-table-container">
       <div class="vis-container">
+        <!-- <draggable
+          :group="'charts'"
+          :direction="'horizontal'"
+          :ghost-class="'sortable-ghost'"
+          :drag-class="'sortable-drag'"
+          :animation="150"
+          handle=".handle"
+          @start="drag=true"
+          @end="drag=false">
+
+          <div class="chart">
+            <div class="handle">...</div>
+            <vis-tooltip
+              :left-position="tooltipLeft"
+              :hover-value="hoverValue"
+              :hover-total="hoverTotal"
+              :hover-domain-colour="hoverDomainColour"
+            />
+            <stacked-area-vis
+              v-if="ready"
+              :domains="stackedAreaDomains"
+              :dataset="dataset"
+              :dynamic-extent="dateFilter"
+              :hover-date="hoverDate"
+              :range="range"
+              :interval="interval"
+              :mouse-loc="mouseLoc"
+              :curve="energyCurveType"
+              :vis-height="stackedAreaHeight"
+              @eventChange="handleEventChange"
+              @dateOver="handleDateOver"
+              @domainOver="handleDomainOver"
+            />
+          </div>
+          
+        </draggable> -->
+
         <div class="chart">
           <vis-tooltip
             :left-position="tooltipLeft"
@@ -151,11 +188,13 @@ import {
   timeMonth as d3TimeMonth,
   timeYear as d3TimeYear
 } from 'd3-time'
+import { timeFormat as d3TimeFormat } from 'd3-time-format'
 import { mouse as d3Mouse } from 'd3-selection'
 import { extent as d3Extent } from 'd3-array'
 import _uniqBy from 'lodash.uniqby'
 import _includes from 'lodash.includes'
 import _cloneDeep from 'lodash.clonedeep'
+import Draggable from 'vuedraggable'
 
 import * as FUEL_TECHS from '~/constants/fuelTech.js'
 import * as SimplifiedGroup from '~/constants/group-simplified.js'
@@ -176,6 +215,7 @@ export default {
   layout: 'main',
 
   components: {
+    Draggable,
     DataOptionsBar,
     StackedAreaVis,
     LineVis,
@@ -676,12 +716,8 @@ export default {
     },
 
     handleDateOver(evt, date) {
-      EventBus.$emit(
-        'vis.mousemove',
-        evt,
-        this.dataset,
-        this.snapToClosestInterval(date)
-      )
+      const closestDate = this.snapToClosestInterval(date)
+      EventBus.$emit('vis.mousemove', evt, this.dataset, closestDate)
     },
 
     handleDomainOver(domain) {
@@ -828,6 +864,7 @@ export default {
 
   .vis-container {
     width: 100%;
+    padding: 1rem;
 
     @include tablet {
       width: 70%;

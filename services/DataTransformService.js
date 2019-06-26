@@ -3,6 +3,7 @@ import _sortBy from 'lodash.sortby'
 import parseInterval from '~/plugins/intervalParser.js'
 
 import rollUp30m from './rollUpModules/ru-30m.js'
+import rollUp1YDay from './rollUpModules/ru-1y-day.js'
 import rollUp1YWeek from './rollUpModules/ru-1y-week.js'
 import rollUp1YMonth from './rollUpModules/ru-1y-month.js'
 import rollUpAllSeason from './rollUpModules/ru-all-season.js'
@@ -244,6 +245,8 @@ export default {
     const promise = new Promise(resolve => {
       if (interval === '30m') {
         resolve(rollUp30m(domains, data))
+      } else if (range === '1Y' && interval === 'Day') {
+        resolve(rollUp1YDay(domains, data))
       } else if (range === '1Y' && interval === 'Week') {
         resolve(rollUp1YWeek(domains, data))
       } else if (range === '1Y' && interval === 'Month') {
