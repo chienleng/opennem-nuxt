@@ -12,7 +12,7 @@
     @end="drag=false"> -->
   <div class="summary-list">
     <div
-      v-for="ft in order"
+      v-for="(ft, index) in order"
       :key="ft.id"
       class="item summary-row"
       @click="handleRowClick(ft.fuelTech)">
@@ -38,6 +38,10 @@
       >
         {{ getContribution(ft.id) | formatValue }}%
       </div>
+
+      <div class="summary-col-contribution">
+        {{ getAverageValue(index) | formatCurrency }}
+      </div>
     </div>
   </div>
     
@@ -56,6 +60,10 @@ export default {
 
   props: {
     originalOrder: {
+      type: Array,
+      default: () => []
+    },
+    marketValueOrder: {
       type: Array,
       default: () => []
     },
@@ -134,6 +142,13 @@ export default {
         : this.summaryTotal
 
       return (rowValue / total) * 100
+    },
+
+    getAverageValue(index) {
+      const id = this.marketValueOrder[index].id
+      return this.showPointSummary
+        ? this.pointSummary[id] || ''
+        : this.summary[id] || ''
     }
   }
 }

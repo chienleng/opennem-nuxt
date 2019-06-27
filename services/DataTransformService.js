@@ -27,7 +27,13 @@ function checkTemperatureType(type) {
  *
  * @param {*} data: response data from API
  */
-function transformData(data, domains, temperatureDomains, priceDomains) {
+function transformData(
+  data,
+  domains,
+  marketValueDomains,
+  temperatureDomains,
+  priceDomains
+) {
   const dataset = []
 
   /**
@@ -40,6 +46,7 @@ function transformData(data, domains, temperatureDomains, priceDomains) {
    */
   function mergeIntoFlatData(id, type, newHistory) {
     const isEnergyData = type === 'power' || type === 'energy'
+    const isMarketValueData = type === 'market_value'
     const isTemperatureType = checkTemperatureType(type)
     const isPriceData = type === 'price' || type === 'volume_weighted_price'
 
@@ -49,9 +56,18 @@ function transformData(data, domains, temperatureDomains, priceDomains) {
         // if Date point doesn't exist, create date point with empty values
         const newObj = { date: r.date }
 
-        if (isEnergyData || isTemperatureType || isPriceData) {
+        if (
+          isEnergyData ||
+          isTemperatureType ||
+          isPriceData ||
+          isMarketValueData
+        ) {
           // Add energy domains
           domains.forEach(domain => {
+            newObj[domain.id] = null
+          })
+          // Add market value domains
+          marketValueDomains.forEach(domain => {
             newObj[domain.id] = null
           })
           // Add temperature domains
@@ -66,7 +82,7 @@ function transformData(data, domains, temperatureDomains, priceDomains) {
           dataset.push(newObj)
         }
       } else {
-        if (isEnergyData || isTemperatureType) {
+        if (isEnergyData || isTemperatureType || isMarketValueData) {
           findDate[id] = r.value
         } else if (isPriceData) {
           findDate[id] = r.value
@@ -216,12 +232,19 @@ export default {
     return promise
   },
 
-  flattenAndInterpolate(data, energyDomains, temperatureDomains, priceDomains) {
+  flattenAndInterpolate(
+    data,
+    energyDomains,
+    marketValueDomains,
+    temperatureDomains,
+    priceDomains
+  ) {
     const promise = new Promise(resolve => {
       const interpolateSeriesTypes = findInterpolateSeriesTypes(data)
       let flatData = transformData(
         data,
         energyDomains,
+        marketValueDomains,
         temperatureDomains,
         priceDomains
       )
@@ -236,12 +259,18 @@ export default {
   rollUp(
     data,
     energyDomains,
+    marketValueDomains,
     temperatureDomains,
     priceDomains,
     range,
     interval
   ) {
-    const domains = [...energyDomains, ...priceDomains, ...temperatureDomains]
+    const domains = [
+      ...energyDomains,
+      ...marketValueDomains,
+      ...priceDomains,
+      ...temperatureDomains
+    ]
     const promise = new Promise(resolve => {
       if (interval === '30m') {
         resolve(rollUp30m(domains, data))

@@ -28,5 +28,6 @@ Vue.filter('formatValue', value => {
 
 Vue.filter('formatCurrency', value => {
   const f = d3Format('$,.2f')
-  return f(value)
+  const fValue = f(value)
+  return isFinite(value) ? fValue : '–'
 })

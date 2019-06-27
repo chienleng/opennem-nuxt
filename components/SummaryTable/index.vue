@@ -36,6 +36,7 @@
           Power <small>MW</small>
         </div>
         <div class="summary-col-contribution">Contribution <small>to demand</small></div>
+        <div class="summary-col-av-value">Av.Value <small>$/MWh</small></div>
       </div>
       <div class="summary-row">
         <div class="summary-col-label">Sources</div>
@@ -49,12 +50,24 @@
           class="summary-col-energy cell-value">
           {{ pointSummarySources._total | formatValue }}
         </div>
+        <div class="summary-col-contribution cell-value" />
+        <div
+          v-if="!hoverOn"
+          class="summary-col-av-value cell-value">
+          {{ summary._totalAverageValue | formatCurrency }}
+        </div>
+        <div
+          v-if="hoverOn"
+          class="summary-col-av-value cell-value">
+          {{ pointSummary._totalAverageValue | formatCurrency }}
+        </div>
       </div>
     </div>
 
     <items
       :group="'ft-sources'"
       :original-order="sourcesOrder"
+      :market-value-order="sourcesMarketValueOrder"
       :show-point-summary="hoverOn"
       :point-summary="pointSummarySources"
       :point-summary-total="pointSummary._total"
@@ -77,12 +90,15 @@
           class="summary-col-energy cell-value">
           {{ pointSummaryLoads._total | formatValue }}
         </div>
+        <div class="summary-col-contribution cell-value" />
+        <div class="summary-col-av-value cell-value" />
       </div>
     </div>
 
     <items
       :group="'ft-loads'"
       :original-order="loadsOrder"
+      :market-value-order="loadsMarketValueOrder"
       :show-point-summary="hoverOn"
       :point-summary="pointSummaryLoads"
       :point-summary-total="pointSummary._total"
@@ -113,6 +129,7 @@
 <script>
 import moment from 'moment'
 import _isEmpty from 'lodash.isempty'
+import _cloneDeep from 'lodash.clonedeep'
 import GroupSelector from '~/components/Energy/FuelTechGroupSelector'
 import Items from './Items'
 
@@ -137,6 +154,10 @@ export default {
       type: Array,
       default: () => []
     },
+    marketValueDomains: {
+      type: Array,
+      default: () => []
+    },
     dataset: {
       type: Array,
       default: () => []
@@ -148,6 +169,10 @@ export default {
     hoverOn: {
       type: Boolean,
       default: () => false
+    },
+    priceId: {
+      type: String,
+      default: () => ''
     },
     temperatureId: {
       type: String,
@@ -187,6 +212,14 @@ export default {
 
     loadsOrder() {
       return this.domains.filter(d => d.category === 'load')
+    },
+
+    sourcesMarketValueOrder() {
+      return this.marketValueDomains.filter(d => d.category === 'source')
+    },
+
+    loadsMarketValueOrder() {
+      return this.marketValueDomains.filter(d => d.category === 'load')
     },
 
     totalGeneration() {
@@ -267,10 +300,17 @@ export default {
       let total = 0
       let totalSources = 0
       let totalLoads = 0
+      let totalPriceMarketValue = 0
+      // const totalVolWeightPrice = data.reduce(
+      //   (prev, cur) => prev + cur[this.priceId],
+      //   0
+      // )
       this.summary = {}
       this.summarySources = {}
       this.summaryLoads = {}
+      // console.log(data, totalVolWeightPrice)
 
+      // Calculate Energy
       this.domains.forEach(ft => {
         const category = ft.category
         const dataEnergy = data.map(d => {
@@ -302,7 +342,32 @@ export default {
         }
       })
 
+      // Calculate Market Value
+      this.marketValueDomains.forEach((ft, index) => {
+        const category = ft.category
+        const dataMarketValue = data.map(d => {
+          const marketValue = {}
+          marketValue[ft.id] = Math.abs(d[ft.id])
+          return marketValue
+        })
+        const dataMarketValueSum = dataMarketValue.reduce(
+          (prev, cur) => prev + cur[ft.id],
+          0
+        )
+        const ftTotal = Math.abs(this.summary[this.domains[index].id])
+        const avValue = dataMarketValueSum / ftTotal / 1000
+        this.summary[ft.id] = avValue
+        totalPriceMarketValue += dataMarketValueSum
+
+        if (category === 'source') {
+          this.summarySources[ft.id] = avValue
+        } else if (category === 'load') {
+          this.summaryLoads[ft.id] = avValue
+        }
+      })
+
       this.summary._totalEnergy = total
+      this.summary._totalAverageValue = totalPriceMarketValue / total / 1000
       this.summarySources._totalEnergy = totalSources
       this.summaryLoads._totalEnergy = totalLoads
     },
@@ -310,6 +375,7 @@ export default {
     calculatePointSummary(data) {
       let totalSources = 0
       let totalLoads = 0
+      let totalPriceMarketValue = 0
       this.pointSummary = data || {} // pointSummary._total is already calculated
       this.pointSummarySources = {}
       this.pointSummaryLoads = {}
@@ -327,6 +393,30 @@ export default {
             totalLoads += value
           }
         })
+
+        // Calculate Market Value
+        this.marketValueDomains.forEach((ft, index) => {
+          const category = ft.category
+          const value = Math.abs(this.pointSummary[ft.id])
+          const ftTotal = Math.abs(this.pointSummary[this.domains[index].id])
+          const avValue = value / ftTotal / 1000
+
+          this.pointSummary[ft.id] = avValue
+          totalPriceMarketValue += value
+
+          if (category === 'source') {
+            this.pointSummarySources[ft.id] = avValue
+          } else if (category === 'load') {
+            this.pointSummaryLoads[ft.id] = avValue
+          }
+        })
+      }
+
+      if (this.priceId) {
+        this.pointSummary._totalAverageValue = this.pointSummary[this.priceId]
+      } else {
+        this.pointSummary._totalAverageValue =
+          totalPriceMarketValue / this.pointSummary._total / 1000
       }
       this.pointSummarySources._total = totalSources
       this.pointSummaryLoads._total = totalLoads
@@ -351,7 +441,7 @@ export default {
         dataFound && dataFound[this.temperatureId]
           ? dataFound[this.temperatureId]
           : ''
-      this.calculatePointSummary(dataFound)
+      this.calculatePointSummary(_cloneDeep(dataFound))
     },
 
     handleSourcesOrderUpdate(newSourceOrder) {

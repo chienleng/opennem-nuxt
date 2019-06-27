@@ -167,7 +167,9 @@
       <div class="table-container">
         <summary-table
           v-if="ready"
-          :domains="groupDomains.length > 0 ? groupDomains : energyDomains"
+          :domains="stackedAreaDomains"
+          :price-id="priceDomains.length > 0 ? priceDomains[0].id : null"
+          :market-value-domains="mvDomains"
           :dataset="filteredDataset"
           :hover-date="hoverDate"
           :hover-on="hoverOn"
@@ -230,7 +232,8 @@ export default {
       type: 'power', // power, energy
       dataset: [],
       energyDomains: [],
-      domainIds: [],
+      fuelTechEnergyOrder: [],
+      marketValueDomains: [],
       temperatureDomains: [],
       temperatureMeanId: '',
       temperatureMinId: '',
@@ -300,7 +303,41 @@ export default {
               if (domain) domainIds.push(domain.id)
             })
             groupDomains.push({
-              id: groupId,
+              id: `${groupId}.energy`,
+              label: group.FUEL_TECH_LABEL[groupId],
+              colour: group.FUEL_TECH_GROUP_COLOUR[groupId],
+              category: group.FUEL_TECH_CATEGORY[groupId],
+              type: find.type,
+              domainIds
+            })
+          }
+        })
+      }
+
+      return groupDomains.reverse()
+    },
+    groupMarketValueDomains() {
+      const groupDomains = []
+      const group = this.fuelTechGroup
+      console.log(group)
+      if (group) {
+        const marketValueDomains = this.marketValueDomains
+        const groupOrder = group.FUEL_TECH_ORDER
+
+        groupOrder.forEach(groupId => {
+          const grouping = group.FUEL_TECH_GROUP[groupId]
+          const find = marketValueDomains.find(d =>
+            _includes(grouping, d.fuelTech)
+          )
+
+          if (find) {
+            const domainIds = []
+            grouping.forEach(g => {
+              const domain = marketValueDomains.find(d => d.fuelTech === g)
+              if (domain) domainIds.push(domain.id)
+            })
+            groupDomains.push({
+              id: `${groupId}.market_value`,
               label: group.FUEL_TECH_LABEL[groupId],
               colour: group.FUEL_TECH_GROUP_COLOUR[groupId],
               category: group.FUEL_TECH_CATEGORY[groupId],
@@ -339,6 +376,11 @@ export default {
           return true
       }
     },
+    mvDomains() {
+      return this.groupMarketValueDomains.length > 0
+        ? this.groupMarketValueDomains
+        : this.marketValueDomains
+    },
     stackedAreaDomains() {
       return this.groupDomains.length > 0
         ? this.groupDomains
@@ -366,8 +408,17 @@ export default {
   },
 
   watch: {
-    groupDomains() {
-      this.updateDatasetGroups(this.dataset)
+    groupDomains(domains) {
+      console.log('energy', domains)
+      if (domains) {
+        this.updateDatasetGroups(this.dataset, domains)
+      }
+    },
+    groupMarketValueDomains(domains) {
+      console.log('mv', domains)
+      if (domains) {
+        this.updateDatasetGroups(this.dataset, domains)
+      }
     },
     filteredDataset(updated) {
       this.$store.dispatch('exportData', updated)
@@ -451,13 +502,19 @@ export default {
       this.mergeResponses(
         responses,
         this.energyDomains,
+        this.marketValueDomains,
         this.temperatureDomains,
         this.priceDomains,
         this.range,
         this.interval
       ).then(dataset => {
         this.dataset = dataset
-        this.updateDatasetGroups(dataset)
+        if (this.groupDomains.length > 0) {
+          this.updateDatasetGroups(dataset, this.groupDomains)
+        }
+        if (this.groupMarketValueDomains.length > 0) {
+          this.updateDatasetGroups(dataset, this.groupMarketValueDomains)
+        }
         this.updatedFilteredDataset(dataset)
         this.dateFilter = d3Extent(this.dataset, d => d.date)
         this.ready = true
@@ -467,6 +524,7 @@ export default {
     mergeResponses(
       res,
       energyDomains,
+      marketValueDomains,
       temperatureDomains,
       priceDomains,
       range,
@@ -482,6 +540,7 @@ export default {
             this.flatten(
               r.data,
               energyDomains,
+              marketValueDomains,
               temperatureDomains,
               priceDomains,
               range,
@@ -515,6 +574,7 @@ export default {
           DataTransformService.rollUp(
             data,
             energyDomains,
+            marketValueDomains,
             temperatureDomains,
             priceDomains,
             range,
@@ -527,10 +587,10 @@ export default {
       })
     },
 
-    updateDatasetGroups(dataset) {
+    updateDatasetGroups(dataset, groupDomains) {
       this.dataset = dataset.map(d => {
         // create new group domains (if not already there)
-        this.groupDomains.forEach(g => {
+        groupDomains.forEach(g => {
           let groupValue = 0
           g.domainIds.forEach(dId => {
             groupValue += d[dId]
@@ -539,11 +599,13 @@ export default {
         })
         return d
       })
+      console.log(this.dataset)
     },
 
     updateDomains(res) {
       // Find out about available domains first before flattening data
       this.updateEnergyDomains(res)
+      this.updateMarketValueDomains(res)
       this.updateTemperatureDomains(res)
       this.updatePriceDomains(res)
     },
@@ -558,8 +620,27 @@ export default {
           })
         fuelTechEnergy = [...fuelTechEnergy, ...energyObjs]
       })
-      this.getDomainIdsInOrder(fuelTechEnergy)
-      this.energyDomains = this.getFuelTechObjs()
+      this.fuelTechEnergyOrder = this.getFuelTechOrder(fuelTechEnergy)
+      this.energyDomains = this.getFuelTechObjs(
+        this.fuelTechEnergyOrder,
+        this.type
+      )
+    },
+
+    updateMarketValueDomains(res) {
+      let fuelTechMarketValue = []
+      res.forEach(r => {
+        const objs = r.data.filter(d => d.type === 'market_value').map(d => {
+          return { id: d.id, fuelTech: d.fuel_tech, type: d.type }
+        })
+        fuelTechMarketValue = [...fuelTechMarketValue, ...objs]
+      })
+      // const marketValueDomainIds = this.getFuelTechOrder(fuelTechMarketValue)
+      // - assume each fuel tech has both energy/power and market value
+      this.marketValueDomains = this.getFuelTechObjs(
+        this.fuelTechEnergyOrder,
+        'market_value'
+      )
     },
 
     updateTemperatureDomains(res) {
@@ -683,13 +764,19 @@ export default {
       this.mergeResponses(
         this.responses,
         this.energyDomains,
+        this.marketValueDomains,
         this.temperatureDomains,
         this.priceDomains,
         this.range,
         interval
       ).then(dataset => {
         this.dataset = dataset
-        this.updateDatasetGroups(dataset)
+        if (this.groupDomains.length > 0) {
+          this.updateDatasetGroups(dataset, this.groupDomains)
+        }
+        if (this.groupMarketValueDomains.length > 0) {
+          this.updateDatasetGroups(dataset, this.groupMarketValueDomains)
+        }
         this.updatedFilteredDataset(dataset)
         this.ready = true
       })
@@ -739,6 +826,7 @@ export default {
     flatten(
       data,
       energyDomains,
+      marketValueDomains,
       temperatureDomains,
       priceDomains,
       range,
@@ -748,6 +836,7 @@ export default {
         DataTransformService.flattenAndInterpolate(
           data,
           energyDomains,
+          marketValueDomains,
           temperatureDomains,
           priceDomains
         ).then(res => {
@@ -789,11 +878,9 @@ export default {
       return dataset
     },
 
-    getFuelTechObjs() {
+    getFuelTechObjs(domainIds, type) {
       // create ft Objects that has the right id and meta data
-      const type = this.type
       const region = this.regionId
-      const domainIds = this.domainIds
       // clone so the original doesn't get reverse.
       return _cloneDeep(domainIds)
         .reverse()
@@ -809,19 +896,17 @@ export default {
         })
     },
 
-    getDomainIdsInOrder(fuelTechEnergy) {
+    getFuelTechOrder(fuelTechObjs) {
       // get the unique domains in the right order
       const order = this.fuelTechOrder
-      const uniqDomains = _uniqBy(fuelTechEnergy, 'fuelTech').map(
-        d => d.fuelTech
-      )
-      const domainIds = []
+      const uniq = _uniqBy(fuelTechObjs, 'fuelTech').map(d => d.fuelTech)
+      const fuelTechOrder = []
       order.forEach(o => {
-        if (_includes(uniqDomains, o)) {
-          domainIds.push(o)
+        if (_includes(uniq, o)) {
+          fuelTechOrder.push(o)
         }
       })
-      this.domainIds = domainIds
+      return fuelTechOrder
     },
 
     snapToClosestInterval(date) {
