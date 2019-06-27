@@ -207,7 +207,7 @@ import EventBus from '~/plugins/eventBus.js'
 import http from '~/services/HttpService.js'
 import DataTransformService from '~/services/DataTransformService.js'
 
-import DataOptionsBar from '~/components/Energy/DataOptionsBar'
+import DataOptionsBar from '~/components/ui/DataOptionsBar'
 import StackedAreaVis from '~/components/Vis/StackedArea.vue'
 import LineVis from '~/components/Vis/Line.vue'
 import SummaryTable from '~/components/SummaryTable'

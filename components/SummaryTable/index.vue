@@ -130,7 +130,7 @@
 import moment from 'moment'
 import _isEmpty from 'lodash.isempty'
 import _cloneDeep from 'lodash.clonedeep'
-import GroupSelector from '~/components/Energy/FuelTechGroupSelector'
+import GroupSelector from '~/components/ui/FuelTechGroupSelector'
 import Items from './Items'
 
 export default {
