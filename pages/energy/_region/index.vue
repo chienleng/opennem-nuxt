@@ -46,7 +46,9 @@
           
         </draggable> -->
 
-        <div class="chart">
+        <div
+          v-if="ready"
+          class="chart">
           <div
             v-if="step"
             class="chart-title">
@@ -66,7 +68,6 @@
             :hover-domain-colour="hoverDomainColour"
           />
           <stacked-area-vis
-            v-if="ready"
             :domains="stackedAreaDomains"
             :dataset="dataset"
             :dynamic-extent="dateFilter"
@@ -82,13 +83,14 @@
           />
         </div>
 
-        <div class="chart">
+        <div
+          v-if="ready && hasPriceData"
+          class="chart">
           <div class="chart-title">
             <strong>Price</strong>
             <small>$/MWh</small>
           </div>
           <line-vis
-            v-if="ready && hasPriceData"
             :domain-id="'price.above300'"
             :domain-colour="lineColour"
             :value-domain-id="priceDomains[0].id"
@@ -110,7 +112,6 @@
             @dateOver="handleDateOver"
           />
           <line-vis
-            v-if="ready && hasPriceData"
             :domain-id="priceDomains[0].id"
             :domain-colour="lineColour"
             :dataset="dataset"
@@ -132,7 +133,6 @@
             @dateOver="handleDateOver"
           />
           <line-vis
-            v-if="ready && hasPriceData"
             :domain-id="'price.below0'"
             :domain-colour="lineColour"
             :dataset="dataset"
@@ -156,13 +156,14 @@
           />
         </div>
 
-        <div class="chart">
+        <div
+          v-if="ready && hasTemperatureData"
+          class="chart">
           <div class="chart-title">
             <strong>Temperature</strong>
             <small>°C</small>
           </div>
           <line-vis
-            v-if="ready && hasTemperatureData"
             :domain-id="temperatureMeanId"
             :min-domain-id="temperatureMinId"
             :max-domain-id="temperatureMaxId"
