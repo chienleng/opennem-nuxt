@@ -417,9 +417,12 @@ export default {
         .attr('id', d => d.key)
         .attr('class', `${this.stackedAreaPathClass}`)
         .attr('d', this.area)
+        .attr('stroke-opacity', 0)
+        .attr('stroke-width', 1)
+        .attr('stroke', '#000')
+        .attr('fill', d => this.z(d.key))
         .style('clip-path', this.clipPathUrl)
         .style('-webkit-clip-path', this.clipPathUrl)
-        .style('fill', d => this.z(d.key))
 
       stackArea.exit().remove()
 
