@@ -146,6 +146,7 @@ export default {
 
     getAverageValue(index) {
       const id = this.marketValueOrder[index].id
+      // console.log(this.summary, id)
       return this.showPointSummary
         ? this.pointSummary[id] || ''
         : this.summary[id] || ''

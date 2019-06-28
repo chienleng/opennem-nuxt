@@ -428,13 +428,11 @@ export default {
 
   watch: {
     groupDomains(domains) {
-      console.log('energy', domains)
       if (domains) {
         this.updateDatasetGroups(this.dataset, domains)
       }
     },
     groupMarketValueDomains(domains) {
-      console.log('mv', domains)
       if (domains) {
         this.updateDatasetGroups(this.dataset, domains)
       }
@@ -618,7 +616,6 @@ export default {
         })
         return d
       })
-      console.log(this.dataset)
     },
 
     updateDomains(res) {

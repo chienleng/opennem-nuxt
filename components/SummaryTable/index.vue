@@ -301,14 +301,23 @@ export default {
       let totalSources = 0
       let totalLoads = 0
       let totalPriceMarketValue = 0
-      // const totalVolWeightPrice = data.reduce(
-      //   (prev, cur) => prev + cur[this.priceId],
-      //   0
-      // )
       this.summary = {}
       this.summarySources = {}
       this.summaryLoads = {}
-      // console.log(data, totalVolWeightPrice)
+
+      const energySummary = data.map(d => {
+        let p = 0
+        this.domains.forEach(ft => {
+          p += d[ft.id] || 0
+        })
+        return p
+      })
+      const energySummaryTotal = energySummary.reduce((a, b) => a + b, 0)
+      const volWeightPrice = energySummary.map((d, i) => {
+        const price = data[i][this.priceId]
+        return price * d
+      })
+      const volWeightPriceTotal = volWeightPrice.reduce((a, b) => a + b, 0)
 
       // Calculate Energy
       this.domains.forEach(ft => {
@@ -330,32 +339,68 @@ export default {
           (prev, cur) => prev + cur[ft.id],
           0
         )
+        let avValue = 0
+
+        // if (!this.isEnergy) {
+        //   const dataPowerTotal = data.reduce((a, b) => a + (b[ft.id] || 0), 0)
+        //   // calculate the price * ft total
+        //   const ftPrice = data.map((d, i) => {
+        //     const price = data[i][this.priceId] ? data[i][this.priceId] : 0
+        //     return Math.abs(d[ft.id]) * price
+        //   })
+        //   const ftPriceTotal = ftPrice.reduce((a, b) => a + b, 0)
+        //   console.log(ft.id, ftPriceTotal / Math.abs(dataPowerTotal))
+        //   avValue = ftPriceTotal / Math.abs(dataPowerTotal)
+        // }
+
         this.summary[ft.id] = dataEnergySum
+        // this.summary[`${ft.id}.market_value`] = avValue
         total += dataEnergySum
 
         if (category === 'source') {
           this.summarySources[ft.id] = dataEnergySum
+          // this.summarySources[`${ft.id}.market_value`] = avValue
           totalSources += dataEnergySum
         } else if (category === 'load') {
           this.summaryLoads[ft.id] = dataEnergySum
+          // this.summaryLoads[`${ft.id}.market_value`] = avValue
           totalLoads += dataEnergySum
         }
       })
 
-      // Calculate Market Value
+      console.log(this.domains, this.marketValueDomains)
+
+      // Calculate Market Value for Energy
       this.marketValueDomains.forEach((ft, index) => {
         const category = ft.category
-        const dataMarketValue = data.map(d => {
-          const marketValue = {}
-          marketValue[ft.id] = Math.abs(d[ft.id])
-          return marketValue
-        })
-        const dataMarketValueSum = dataMarketValue.reduce(
-          (prev, cur) => prev + cur[ft.id],
-          0
-        )
-        const ftTotal = Math.abs(this.summary[this.domains[index].id])
-        const avValue = dataMarketValueSum / ftTotal / 1000
+        let avValue = null
+        let dataMarketValueSum = 0
+
+        if (this.isEnergy) {
+          const dataMarketValue = data.map(d => {
+            const marketValue = {}
+            marketValue[ft.id] = Math.abs(d[ft.id])
+            return marketValue
+          })
+          dataMarketValueSum = dataMarketValue.reduce(
+            (prev, cur) => prev + cur[ft.id],
+            0
+          )
+          const ftTotal = Math.abs(this.summary[this.domains[index].id])
+          avValue = dataMarketValueSum / ftTotal / 1000
+        } else {
+          const ftId = this.domains[index].id
+          const dataPowerTotal = data.reduce((a, b) => a + (b[ftId] || 0), 0)
+          // calculate the price * ft total
+          const ftPrice = data.map((d, i) => {
+            const price = data[i][this.priceId] ? data[i][this.priceId] : 0
+            return Math.abs(d[ftId]) * price
+          })
+          const ftPriceTotal = ftPrice.reduce((a, b) => a + b, 0)
+          console.log(ft.id, ftPriceTotal, Math.abs(dataPowerTotal))
+          avValue = ftPriceTotal / Math.abs(dataPowerTotal)
+        }
+
         this.summary[ft.id] = avValue
         totalPriceMarketValue += dataMarketValueSum
 
@@ -366,8 +411,11 @@ export default {
         }
       })
 
+      const totalAverageValue = this.isEnergy
+        ? totalPriceMarketValue / energySummaryTotal / 1000
+        : volWeightPriceTotal / energySummaryTotal
       this.summary._totalEnergy = total
-      this.summary._totalAverageValue = totalPriceMarketValue / total / 1000
+      this.summary._totalAverageValue = totalAverageValue
       this.summarySources._totalEnergy = totalSources
       this.summaryLoads._totalEnergy = totalLoads
     },
