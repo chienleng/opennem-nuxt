@@ -42,7 +42,7 @@ export default {
 <style lang="scss" scoped>
 .tooltip {
   font-size: 0.7rem;
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 255, 255, 1);
   position: absolute;
   z-index: 9;
   top: 26px;

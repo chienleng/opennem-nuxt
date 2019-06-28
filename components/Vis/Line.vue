@@ -543,7 +543,7 @@ export default {
     positionTooltip(xDate, value, minValue, maxValue) {
       let text = `${value}`
       if (minValue && maxValue) {
-        text = `min: ${minValue} — av: ${value} — max: ${maxValue}`
+        text = `min: ${minValue} | av: ${value} | max: ${maxValue}`
       }
       const rectWidth = text.length * 6 + 15
       const $tooltipRect = this.$tooltipGroup.select(

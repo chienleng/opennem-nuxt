@@ -47,6 +47,18 @@
         </draggable> -->
 
         <div class="chart">
+          <div
+            v-if="step"
+            class="chart-title">
+            <strong>Energy</strong>
+            <small>GWh/{{ interval }}</small>
+          </div>
+          <div
+            v-else
+            class="chart-title">
+            <strong>Generation</strong>
+            <small>MW</small>
+          </div>
           <vis-tooltip
             :left-position="tooltipLeft"
             :hover-value="hoverValue"
@@ -70,7 +82,11 @@
           />
         </div>
 
-        <div class="chart">  
+        <div class="chart">
+          <div class="chart-title">
+            <strong>Price</strong>
+            <small>$/MWh</small>
+          </div>
           <line-vis
             v-if="ready && hasPriceData"
             :domain-id="'price.above300'"
@@ -141,6 +157,10 @@
         </div>
 
         <div class="chart">
+          <div class="chart-title">
+            <strong>Temperature</strong>
+            <small>°C</small>
+          </div>
           <line-vis
             v-if="ready && hasTemperatureData"
             :domain-id="temperatureMeanId"
@@ -319,7 +339,6 @@ export default {
     groupMarketValueDomains() {
       const groupDomains = []
       const group = this.fuelTechGroup
-      console.log(group)
       if (group) {
         const marketValueDomains = this.marketValueDomains
         const groupOrder = group.FUEL_TECH_ORDER
@@ -965,6 +984,12 @@ export default {
   }
   .chart {
     position: relative;
+
+    .chart-title {
+      font-size: 0.7em;
+      position: absolute;
+      left: 1rem;
+    }
   }
 }
 
