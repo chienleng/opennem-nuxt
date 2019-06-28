@@ -341,34 +341,17 @@ export default {
         )
         let avValue = 0
 
-        // if (!this.isEnergy) {
-        //   const dataPowerTotal = data.reduce((a, b) => a + (b[ft.id] || 0), 0)
-        //   // calculate the price * ft total
-        //   const ftPrice = data.map((d, i) => {
-        //     const price = data[i][this.priceId] ? data[i][this.priceId] : 0
-        //     return Math.abs(d[ft.id]) * price
-        //   })
-        //   const ftPriceTotal = ftPrice.reduce((a, b) => a + b, 0)
-        //   console.log(ft.id, ftPriceTotal / Math.abs(dataPowerTotal))
-        //   avValue = ftPriceTotal / Math.abs(dataPowerTotal)
-        // }
-
         this.summary[ft.id] = dataEnergySum
-        // this.summary[`${ft.id}.market_value`] = avValue
         total += dataEnergySum
 
         if (category === 'source') {
           this.summarySources[ft.id] = dataEnergySum
-          // this.summarySources[`${ft.id}.market_value`] = avValue
           totalSources += dataEnergySum
         } else if (category === 'load') {
           this.summaryLoads[ft.id] = dataEnergySum
-          // this.summaryLoads[`${ft.id}.market_value`] = avValue
           totalLoads += dataEnergySum
         }
       })
-
-      console.log(this.domains, this.marketValueDomains)
 
       // Calculate Market Value for Energy
       this.marketValueDomains.forEach((ft, index) => {
@@ -397,7 +380,6 @@ export default {
             return Math.abs(d[ftId]) * price
           })
           const ftPriceTotal = ftPrice.reduce((a, b) => a + b, 0)
-          console.log(ft.id, ftPriceTotal, Math.abs(dataPowerTotal))
           avValue = ftPriceTotal / Math.abs(dataPowerTotal)
         }
 

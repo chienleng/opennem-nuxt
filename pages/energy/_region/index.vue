@@ -514,6 +514,19 @@ export default {
     },
 
     handleResponses(responses) {
+      // !!! Removing Vol weighted Price after requesting ALL data
+      // - due to incorrect data
+      if (this.range === 'ALL') {
+        responses.forEach(r => {
+          const findIndex = r.data.findIndex(
+            d => d.type === 'volume_weighted_price'
+          )
+          if (findIndex) {
+            r.data.splice(findIndex, 1)
+          }
+        })
+      }
+
       this.responses = responses
       this.updateDomains(responses)
       this.mergeResponses(
