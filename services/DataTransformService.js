@@ -280,6 +280,8 @@ export default {
         resolve(rollUp1YWeek(domains, data))
       } else if (range === '1Y' && interval === 'Month') {
         resolve(rollUp1YMonth(domains, data))
+      } else if (range === 'ALL' && interval === 'Month') {
+        resolve(rollUp1YMonth(domains, data))
       } else if (range === 'ALL' && interval === 'Season') {
         resolve(rollUpAllSeason(domains, data))
       } else if (range === 'ALL' && interval === 'Quarter') {
