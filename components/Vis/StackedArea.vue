@@ -1,7 +1,7 @@
 <template>
   <div class="vis stacked-area-vis">
     <button
-      v-show="zoomed"
+      v-if="showZoomOut"
       class="button is-rounded is-small reset-btn"
       @click="handleReset"
     >
@@ -25,13 +25,16 @@
         :transform="gTransform"
         class="axis-line-group">
         <!-- x and y axis ticks/lines/text -->
-        <g 
+        <g
+          v-if="showXAxis"
           :transform="xAxisTransform" 
           :class="xAxisClass" />
+        
         <g :class="yAxisClass" />
 
         <!-- x axis layer to allow zoom in (brush) -->
         <g 
+          v-if="showXAxis"
           :transform="xAxisBrushTransform" 
           class="x-axis-brush-group" />
       </g>
@@ -131,6 +134,26 @@ export default {
     curve: {
       type: String,
       default: () => 'linear'
+    },
+    // OPTIONAL: specify minimum yaxis value
+    yMin: {
+      type: Number,
+      default: () => null
+    },
+    // OPTIONAL: specify maximum yaxis value
+    yMax: {
+      type: Number,
+      default: () => null
+    },
+    // OPTIONAL: whether to show xAxis
+    showXAxis: {
+      type: Boolean,
+      default: () => true
+    },
+    // OPTIONAL: whether to show zoom out button
+    showZoomOut: {
+      type: Boolean,
+      default: () => true
     }
   },
 
@@ -265,9 +288,12 @@ export default {
   methods: {
     setupWidthHeight() {
       const chartWidth = this.$el.offsetWidth
+      const height = this.showXAxis
+        ? this.svgHeight - this.margin.top - this.margin.bottom
+        : this.svgHeight
       this.svgWidth = chartWidth
       this.width = chartWidth - this.margin.left - this.margin.right
-      this.height = this.svgHeight - this.margin.top - this.margin.bottom
+      this.height = height
     },
 
     setup() {
@@ -298,7 +324,7 @@ export default {
         .tickFormat(d => axisTimeFormat(d))
       this.yAxis = axisRight(this.y)
         .tickSize(this.width)
-        // .ticks(10)
+        // .ticks(5)
         .tickFormat(d => d3Format(CONFIG.Y_AXIS_FORMAT_STRING)(d))
 
       // Setup the 'brush' area and event handler
@@ -388,13 +414,20 @@ export default {
       const xDomainExtent = this.dynamicExtent.length
         ? this.dynamicExtent
         : this.datasetDateExtent
+      const yMin =
+        this.yMin || this.yMin === 0
+          ? this.yMin
+          : min(this.dataset, d => d._min)
+      const yMax = this.yMax || max(this.dataset, d => d._total) + 5
+
       this.x.domain(xDomainExtent)
-      this.y
-        .domain([
-          min(this.dataset, d => d._min),
-          max(this.dataset, d => d._total)
-        ])
-        .nice()
+      // this.y
+      //   .domain([
+      //     min(this.dataset, d => d._min),
+      //     max(this.dataset, d => d._total)
+      //   ])
+      //   .nice()
+      this.y.domain([yMin, yMax])
       this.z.range(this.domainColours).domain(this.domainIds)
 
       this.$xAxisGroup.call(this.customXAxis)

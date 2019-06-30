@@ -7,8 +7,8 @@ export const state = () => ({
   fuelTechNames: null,
   fuelTechGroup: 'Default',
   fuelTechOrder: cloneDeep(FUEL_TECHS.DEFAULT_FUEL_TECH_ORDER),
-  range: '7D',
-  interval: '30m',
+  range: '30D',
+  interval: 'Day',
   exportData: []
 })
 

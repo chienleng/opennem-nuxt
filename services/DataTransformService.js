@@ -32,7 +32,8 @@ function transformData(
   domains,
   marketValueDomains,
   temperatureDomains,
-  priceDomains
+  priceDomains,
+  emissionDomains
 ) {
   const dataset = []
 
@@ -49,6 +50,7 @@ function transformData(
     const isMarketValueData = type === 'market_value'
     const isTemperatureType = checkTemperatureType(type)
     const isPriceData = type === 'price' || type === 'volume_weighted_price'
+    const isEmissionData = type === 'emissions'
 
     newHistory.forEach(r => {
       const findDate = dataset.find(f => f.date === r.date)
@@ -60,7 +62,8 @@ function transformData(
           isEnergyData ||
           isTemperatureType ||
           isPriceData ||
-          isMarketValueData
+          isMarketValueData ||
+          isEmissionData
         ) {
           // Add energy domains
           domains.forEach(domain => {
@@ -78,11 +81,20 @@ function transformData(
           priceDomains.forEach(domain => {
             newObj[domain.id] = null
           })
+          // Add price domains
+          emissionDomains.forEach(domain => {
+            newObj[domain.id] = null
+          })
           newObj[id] = r.value
           dataset.push(newObj)
         }
       } else {
-        if (isEnergyData || isTemperatureType || isMarketValueData) {
+        if (
+          isEnergyData ||
+          isTemperatureType ||
+          isMarketValueData ||
+          isEmissionData
+        ) {
           findDate[id] = r.value
         } else if (isPriceData) {
           findDate[id] = r.value
@@ -237,7 +249,8 @@ export default {
     energyDomains,
     marketValueDomains,
     temperatureDomains,
-    priceDomains
+    priceDomains,
+    emissionDomains
   ) {
     const promise = new Promise(resolve => {
       const interpolateSeriesTypes = findInterpolateSeriesTypes(data)
@@ -246,7 +259,8 @@ export default {
         energyDomains,
         marketValueDomains,
         temperatureDomains,
-        priceDomains
+        priceDomains,
+        emissionDomains
       )
       mutateDataForInterpolation(flatData, interpolateSeriesTypes)
 
@@ -262,6 +276,7 @@ export default {
     marketValueDomains,
     temperatureDomains,
     priceDomains,
+    emissionDomains,
     range,
     interval
   ) {
@@ -269,7 +284,8 @@ export default {
       ...energyDomains,
       ...marketValueDomains,
       ...priceDomains,
-      ...temperatureDomains
+      ...temperatureDomains,
+      ...emissionDomains
     ]
     const promise = new Promise(resolve => {
       if (interval === '30m') {

@@ -115,6 +115,10 @@ export default {
 
     hasPointSummary() {
       return !_isEmpty(this.pointSummary)
+    },
+
+    hasMarketValueOrder() {
+      return this.marketValueOrder.length > 0
     }
   },
 
@@ -145,7 +149,9 @@ export default {
     },
 
     getAverageValue(index) {
-      const id = this.marketValueOrder[index].id
+      const id = this.hasMarketValueOrder
+        ? this.marketValueOrder[index].id
+        : null
       // console.log(this.summary, id)
       return this.showPointSummary
         ? this.pointSummary[id] || ''

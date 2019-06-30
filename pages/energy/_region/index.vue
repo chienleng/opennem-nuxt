@@ -84,6 +84,36 @@
         </div>
 
         <div
+          v-if="ready && hasEmissionData"
+          class="chart">
+          <div class="chart-title">
+            <strong>Emissions Volume</strong>
+            <!-- <small>-</small> -->
+          </div>
+          <vis-tooltip
+            :left-position="tooltipLeft"
+            :hover-value="hoverEmissionValue"
+          />
+          <stacked-area-vis
+            :domains="emissionStackedAreaDomains"
+            :dataset="dataset"
+            :dynamic-extent="dateFilter"
+            :hover-date="hoverDate"
+            :range="range"
+            :interval="interval"
+            :mouse-loc="mouseLoc"
+            :curve="'step'"
+            :vis-height="200"
+            :show-x-axis="false"
+            :show-zoom-out="false"
+            :y-min="0"
+            :y-max="emissionsMax"
+            @eventChange="handleEventChange"
+            @dateOver="handleDateOver"
+          />
+        </div>
+
+        <div
           v-if="ready && hasPriceData"
           class="chart">
           <div class="chart-title">
@@ -213,7 +243,7 @@ import {
 } from 'd3-time'
 import { timeFormat as d3TimeFormat } from 'd3-time-format'
 import { mouse as d3Mouse } from 'd3-selection'
-import { extent as d3Extent } from 'd3-array'
+import { extent as d3Extent, max as d3Max } from 'd3-array'
 import _uniqBy from 'lodash.uniqby'
 import _includes from 'lodash.includes'
 import _cloneDeep from 'lodash.clonedeep'
@@ -254,12 +284,14 @@ export default {
       dataset: [],
       energyDomains: [],
       fuelTechEnergyOrder: [],
+      emissionsOrder: [],
       marketValueDomains: [],
       temperatureDomains: [],
       temperatureMeanId: '',
       temperatureMinId: '',
       temperatureMaxId: '',
       priceDomains: [],
+      emissionDomains: [],
       responses: [],
       dateFilter: [],
       hoverDate: null,
@@ -370,11 +402,49 @@ export default {
 
       return groupDomains.reverse()
     },
+
+    groupEmissionDomains() {
+      const groupDomains = []
+      const group = this.fuelTechGroup
+      if (group) {
+        const emissionDomains = this.emissionDomains
+        const groupOrder = group.FUEL_TECH_ORDER
+
+        groupOrder.forEach(groupId => {
+          const grouping = group.FUEL_TECH_GROUP[groupId]
+          const find = emissionDomains.find(d =>
+            _includes(grouping, d.fuelTech)
+          )
+
+          if (find) {
+            const domainIds = []
+            grouping.forEach(g => {
+              const domain = emissionDomains.find(d => d.fuelTech === g)
+              if (domain) domainIds.push(domain.id)
+            })
+            groupDomains.push({
+              id: `${groupId}.emissions`,
+              label: group.FUEL_TECH_LABEL[groupId],
+              colour: group.FUEL_TECH_GROUP_COLOUR[groupId],
+              category: group.FUEL_TECH_CATEGORY[groupId],
+              type: find.type,
+              domainIds
+            })
+          }
+        })
+      }
+
+      return groupDomains.reverse()
+    },
+
     hasTemperatureData() {
       return this.temperatureDomains.length > 0
     },
     hasPriceData() {
       return this.priceDomains.length > 0
+    },
+    hasEmissionData() {
+      return this.emissionDomains.length > 0
     },
     energyCurveType() {
       switch (this.range) {
@@ -406,8 +476,16 @@ export default {
         ? this.groupDomains
         : this.energyDomains
     },
+    emissionStackedAreaDomains() {
+      return this.groupEmissionDomains.length > 0
+        ? this.groupEmissionDomains
+        : this.emissionDomains
+    },
     stackedAreaHeight() {
       return this.regionId === 'nem' ? 578 : 400
+    },
+    emissionsMax() {
+      return d3Max(this.dataset, d => d._totalEmissionsVol)
     },
     hoverData() {
       const time = new Date(this.hoverDate).getTime()
@@ -424,6 +502,9 @@ export default {
     hoverTotal() {
       if (this.hoverData) return this.hoverData._total
       return 0
+    },
+    hoverEmissionValue() {
+      return this.hoverData ? this.hoverData[this.hoverDomain] : null
     }
   },
 
@@ -434,6 +515,11 @@ export default {
       }
     },
     groupMarketValueDomains(domains) {
+      if (domains) {
+        this.updateDatasetGroups(this.dataset, domains)
+      }
+    },
+    groupEmissionDomains(domains) {
       if (domains) {
         this.updateDatasetGroups(this.dataset, domains)
       }
@@ -536,15 +622,20 @@ export default {
         this.marketValueDomains,
         this.temperatureDomains,
         this.priceDomains,
+        this.emissionDomains,
         this.range,
         this.interval
       ).then(dataset => {
         this.dataset = dataset
+        console.log(dataset)
         if (this.groupDomains.length > 0) {
           this.updateDatasetGroups(dataset, this.groupDomains)
         }
         if (this.groupMarketValueDomains.length > 0) {
           this.updateDatasetGroups(dataset, this.groupMarketValueDomains)
+        }
+        if (this.groupEmissionDomains.length > 0) {
+          this.updateDatasetGroups(dataset, this.groupEmissionDomains)
         }
         this.updatedFilteredDataset(dataset)
         this.dateFilter = d3Extent(this.dataset, d => d.date)
@@ -558,6 +649,7 @@ export default {
       marketValueDomains,
       temperatureDomains,
       priceDomains,
+      emissionDomains,
       range,
       interval
     ) {
@@ -574,6 +666,7 @@ export default {
               marketValueDomains,
               temperatureDomains,
               priceDomains,
+              emissionDomains,
               range,
               interval
             )
@@ -608,6 +701,7 @@ export default {
             marketValueDomains,
             temperatureDomains,
             priceDomains,
+            emissionDomains,
             range,
             interval
           ).then(rolledUpData => {
@@ -635,6 +729,7 @@ export default {
     updateDomains(res) {
       // Find out about available domains first before flattening data
       this.updateEnergyDomains(res)
+      this.updateEmissionDomains(res)
       this.updateMarketValueDomains(res)
       this.updateTemperatureDomains(res)
       this.updatePriceDomains(res)
@@ -665,11 +760,27 @@ export default {
         })
         fuelTechMarketValue = [...fuelTechMarketValue, ...objs]
       })
-      // const marketValueDomainIds = this.getFuelTechOrder(fuelTechMarketValue)
-      // - assume each fuel tech has both energy/power and market value
+
       this.marketValueDomains = this.getFuelTechObjs(
         this.fuelTechEnergyOrder,
         'market_value'
+      )
+    },
+
+    updateEmissionDomains(res) {
+      let emissionDomains = []
+
+      res.forEach(r => {
+        const objs = r.data.filter(d => d.type === 'emissions').map(d => {
+          return { id: d.id, fuelTech: d.fuel_tech, type: d.type }
+        })
+        emissionDomains = [...emissionDomains, ...objs]
+      })
+
+      this.emissionsOrder = this.getFuelTechOrder(emissionDomains)
+      this.emissionDomains = this.getFuelTechObjs(
+        this.emissionsOrder,
+        'emissions'
       )
     },
 
@@ -797,6 +908,7 @@ export default {
         this.marketValueDomains,
         this.temperatureDomains,
         this.priceDomains,
+        this.emissionDomains,
         this.range,
         interval
       ).then(dataset => {
@@ -806,6 +918,9 @@ export default {
         }
         if (this.groupMarketValueDomains.length > 0) {
           this.updateDatasetGroups(dataset, this.groupMarketValueDomains)
+        }
+        if (this.groupEmissionDomains.length > 0) {
+          this.updateDatasetGroups(dataset, this.groupEmissionDomains)
         }
         this.updatedFilteredDataset(dataset)
         this.ready = true
@@ -859,6 +974,7 @@ export default {
       marketValueDomains,
       temperatureDomains,
       priceDomains,
+      emissionDomains,
       range,
       interval
     ) {
@@ -868,7 +984,8 @@ export default {
           energyDomains,
           marketValueDomains,
           temperatureDomains,
-          priceDomains
+          priceDomains,
+          emissionDomains
         ).then(res => {
           if (interval === '5m' || interval === '30m') {
             const start = res[0].date
@@ -888,8 +1005,9 @@ export default {
     calculateMinTotal(dataset, energyDomains) {
       // Calculate total, min, reverse value for imports and load types
       dataset.forEach((d, i) => {
-        let total = 0
-        let min = 0
+        let total = 0,
+          min = 0,
+          totalEmissionsVol = 0
         energyDomains.forEach(domain => {
           const id = domain.id
 
@@ -902,8 +1020,13 @@ export default {
             min += d[id] || 0
           }
         })
+
+        this.emissionDomains.forEach(domain => {
+          totalEmissionsVol += d[domain.id] || 0
+        })
         dataset[i]._total = total
         dataset[i]._min = min
+        dataset[i]._totalEmissionsVol = totalEmissionsVol
       })
       return dataset
     },

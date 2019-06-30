@@ -37,10 +37,11 @@ export default function(domains, data) {
         const isMarketValueType = type === 'market_value'
         const isTemperatureType = checkTemperatureType(type)
         const isPriceType = type === 'price' || type === 'volume_weighted_price'
+        const isEmissionsType = type === 'emissions'
         const isOriginalPrice =
           isPriceType && id !== PRICE_ABOVE_300 && id !== PRICE_BELOW_0
 
-        if (isEnergyType || isMarketValueType) {
+        if (isEnergyType || isMarketValueType || isEmissionsType) {
           obj[id] = d3Sum(a, d => d[id] || 0)
         } else if (isPriceType) {
           obj[id] = d3Mean(a, d => d[id] || 0)

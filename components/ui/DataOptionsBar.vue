@@ -42,15 +42,15 @@ export default {
   data() {
     return {
       ranges: RANGE_INTERVAL,
-      selectedRange: '7D',
-      selectedInterval: '30m'
+      selectedRange: '',
+      selectedInterval: ''
     }
   },
 
   computed: {
     selectedRangeIntervals() {
       const range = this.ranges.find(r => r.range === this.selectedRange)
-      return range.intervals
+      return range ? range.intervals : null
     }
   },
 
