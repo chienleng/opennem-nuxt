@@ -223,7 +223,7 @@ export default {
       return `url(#${this.id}-clip)`
     },
     gTransform() {
-      return `translate(${this.margin.left},${this.margin.top})`
+      return `translate(${this.margin.left},0)`
     },
     xAxisTransform() {
       return `translate(0, ${this.height})`
@@ -427,7 +427,7 @@ export default {
       //     max(this.dataset, d => d._total)
       //   ])
       //   .nice()
-      this.y.domain([yMin, yMax])
+      this.y.domain([yMin, yMax]).nice()
       this.z.range(this.domainColours).domain(this.domainIds)
 
       this.$xAxisGroup.call(this.customXAxis)
@@ -552,12 +552,12 @@ export default {
       // Cursor line/rect/text to follow mouse
       $cursorLineRect
         .attr('x', xDate - rectWidth / 2)
-        .attr('y', -20)
+        .attr('y', 0)
         .attr('width', rectWidth)
         .attr('opacity', 1)
       $cursorLineText
         .attr('x', xDate)
-        .attr('y', -6)
+        .attr('y', 14)
         .text(time)
       // Position and draw the line
       $cursorLine.attr('d', () => {

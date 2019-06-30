@@ -85,7 +85,8 @@
 
         <div
           v-if="ready && hasEmissionData"
-          class="chart">
+          class="chart"
+          style="margin-bottom: 1rem;">
           <div class="chart-title">
             <strong>Emissions Volume</strong>
             <!-- <small>-</small> -->
@@ -482,7 +483,7 @@ export default {
         : this.emissionDomains
     },
     stackedAreaHeight() {
-      return this.regionId === 'nem' ? 578 : 400
+      return this.regionId === 'nem' ? 578 : 380
     },
     emissionsMax() {
       return d3Max(this.dataset, d => d._totalEmissionsVol)
@@ -1123,6 +1124,7 @@ export default {
       font-size: 0.7em;
       position: absolute;
       left: 1rem;
+      top: -1rem;
     }
   }
 }
