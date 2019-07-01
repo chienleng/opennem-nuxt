@@ -2,7 +2,7 @@
   <header>
     <div class="header-dropdowns">
       <logo class="header-logo" />
-      <h1>Energy</h1>
+      <view-dropdown />
       <region-dropdown />
     </div>
 
@@ -23,12 +23,14 @@
 <script>
 import DownloadCsv from 'vue-json-csv'
 import Logo from '~/components/ui/Logo'
+import ViewDropdown from '~/components/ui/ViewDropdown'
 import RegionDropdown from '~/components/ui/RegionDropdown'
 
 export default {
   components: {
     DownloadCsv,
     Logo,
+    ViewDropdown,
     RegionDropdown
   },
 

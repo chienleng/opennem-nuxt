@@ -2,6 +2,7 @@ import cloneDeep from 'lodash.clonedeep'
 import * as FUEL_TECHS from '~/constants/fuelTech.js'
 
 export const state = () => ({
+  currentView: 'energy', // energy, facilities
   nem: [],
   fuelTechMeta: null,
   fuelTechNames: null,
@@ -13,6 +14,9 @@ export const state = () => ({
 })
 
 export const mutations = {
+  currentView(state, data) {
+    state.currentView = data
+  },
   nem(state, data) {
     state.nem = data
   },
@@ -40,6 +44,7 @@ export const mutations = {
 }
 
 export const getters = {
+  currentView: state => state.currentView,
   nemLength: state => state.nem.length,
   nemData: state => state.nem,
   fuelTechMeta: state => state.fuelTechMeta,
@@ -52,6 +57,9 @@ export const getters = {
 }
 
 export const actions = {
+  currentView({ commit }, data) {
+    commit('currentView', data)
+  },
   fuelTechMeta({ commit }, data) {
     commit('fuelTechMeta', data)
   },

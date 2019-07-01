@@ -530,6 +530,10 @@ export default {
     }
   },
 
+  created() {
+    this.$store.dispatch('currentView', 'energy')
+  },
+
   mounted() {
     EventBus.$on('dataset.filter', this.handleDatasetFilter)
     EventBus.$on('vis.mousemove', this.handleVisMouseMove)

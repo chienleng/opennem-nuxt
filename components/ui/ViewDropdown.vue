@@ -6,7 +6,7 @@
       class="dropdown-trigger"
       @click="handleClick">
       <span>
-        <strong>{{ regionLabel }}</strong>
+        <strong>{{ viewLabel }}</strong>
         <!-- <font-awesome-icon class="fal" :icon="iconDown" /> -->
       </span>          
     </a>
@@ -17,13 +17,13 @@
         class="dropdown-menu">
         <div class="dropdown-content">
           <nuxt-link
-            v-for="region in regions" 
-            :key="region.id" 
-            :class="{ selected: isCurrentSelection(region.id)}"
-            :to="`/${currentView}/${region.id}`"
+            v-for="view in views" 
+            :key="view.id" 
+            :class="{ selected: isCurrentSelection(view)}"
+            :to="`/${view.id}/${regionId}`"
             class="dropdown-item"
             @click.native="handleClick">
-            {{ region.label }}
+            {{ view.label }}
           </nuxt-link>
         </div>
       </div>
@@ -36,30 +36,14 @@ export default {
   data() {
     return {
       dropdownActive: false,
-      regions: [
+      views: [
         {
-          id: 'nem',
-          label: 'All Regions'
+          id: 'energy',
+          label: 'Energy'
         },
         {
-          id: 'nsw1',
-          label: 'New South Wales'
-        },
-        {
-          id: 'qld1',
-          label: 'Queensland'
-        },
-        {
-          id: 'sa1',
-          label: 'South Australia'
-        },
-        {
-          id: 'tas1',
-          label: 'Tasmania'
-        },
-        {
-          id: 'vic1',
-          label: 'Victoria'
+          id: 'facilities',
+          label: 'Facilities'
         }
       ]
     }
@@ -69,12 +53,12 @@ export default {
     regionId() {
       return this.$route.params.region
     },
-    regionLabel() {
-      const region = this.regions.find(d => d.id === this.regionId)
-      return region ? region.label : ''
-    },
     currentView() {
       return this.$store.getters.currentView
+    },
+    viewLabel() {
+      const view = this.views.find(d => d.id === this.currentView)
+      return view ? view.label : ''
     }
   },
 
