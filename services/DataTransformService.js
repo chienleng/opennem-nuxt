@@ -27,7 +27,7 @@ function checkTemperatureType(type) {
  *
  * @param {*} data: response data from API
  */
-function transformData(
+function transformEnergyData(
   data,
   domains,
   marketValueDomains,
@@ -237,7 +237,7 @@ function mutateDataForInterpolation(data, interpolateSeriesTypes) {
 export default {
   flatten(data) {
     const promise = new Promise(resolve => {
-      let flatData = transformData(data)
+      let flatData = transformEnergyData(data)
       resolve(flatData)
     })
 
@@ -254,7 +254,7 @@ export default {
   ) {
     const promise = new Promise(resolve => {
       const interpolateSeriesTypes = findInterpolateSeriesTypes(data)
-      let flatData = transformData(
+      let flatData = transformEnergyData(
         data,
         energyDomains,
         marketValueDomains,

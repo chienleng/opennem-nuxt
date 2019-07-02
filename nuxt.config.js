@@ -18,7 +18,13 @@ module.exports = {
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { hid: 'description', name: 'description', content: pkg.description }
     ],
-    link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+    link: [
+      {
+        rel: 'stylesheet',
+        href: 'https://unpkg.com/leaflet@1.2.0/dist/leaflet.css'
+      },
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+    ],
     script: [
       { src: 'https://cdn.polyfill.io/v2/polyfill.min.js?features=default' }
     ]
@@ -41,7 +47,13 @@ module.exports = {
       '/energy/qld1',
       '/energy/sa1',
       '/energy/tas1',
-      '/energy/vic1'
+      '/energy/vic1',
+      '/facilities/nem',
+      '/facilities/nsw1',
+      '/facilities/qld1',
+      '/facilities/sa1',
+      '/facilities/tas1',
+      '/facilities/vic1'
     ]
   },
 
@@ -52,7 +64,7 @@ module.exports = {
   /*
   ** Plugins to load before mounting the App
   */
-  plugins: ['~plugins/filters.js'],
+  plugins: ['~plugins/filters.js', { src: '~/plugins/leaflet', ssr: false }],
 
   /*
   ** Nuxt.js modules
