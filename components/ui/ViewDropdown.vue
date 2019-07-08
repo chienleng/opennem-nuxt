@@ -20,7 +20,6 @@
           <nuxt-link
             v-for="view in views" 
             :key="view.id" 
-            :class="{ selected: isCurrentSelection(view)}"
             :to="`/${view.id}/${regionId}`"
             class="dropdown-item"
             @click.native="handleClick">
@@ -34,6 +33,7 @@
 
 <script>
 import { mixin as clickaway } from 'vue-clickaway'
+import VIEWS from '~/constants/views.js'
 
 export default {
   mixins: [clickaway],
@@ -41,16 +41,7 @@ export default {
   data() {
     return {
       dropdownActive: false,
-      views: [
-        {
-          id: 'energy',
-          label: 'Energy'
-        },
-        {
-          id: 'facilities',
-          label: 'Facilities'
-        }
-      ]
+      views: VIEWS
     }
   },
 
@@ -68,9 +59,6 @@ export default {
   },
 
   methods: {
-    isCurrentSelection() {
-      return false
-    },
     handleClick() {
       this.dropdownActive = !this.dropdownActive
     },
@@ -80,17 +68,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-@import '~/assets/scss/variables.scss';
-
-.dropdown-trigger {
-  font-family: $header-font-family;
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin-right: $app-padding;
-  padding-right: $app-padding;
-  border-right: $border-style;
-  color: #000;
-}
-</style>

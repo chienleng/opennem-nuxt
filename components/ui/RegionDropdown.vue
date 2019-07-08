@@ -20,7 +20,6 @@
           <nuxt-link
             v-for="region in regions" 
             :key="region.id" 
-            :class="{ selected: isCurrentSelection(region.id)}"
             :to="`/${currentView}/${region.id}`"
             class="dropdown-item"
             @click.native="handleClick">
@@ -34,6 +33,7 @@
 
 <script>
 import { mixin as clickaway } from 'vue-clickaway'
+import REGIONS from '~/constants/regions.js'
 
 export default {
   mixins: [clickaway],
@@ -41,32 +41,7 @@ export default {
   data() {
     return {
       dropdownActive: false,
-      regions: [
-        {
-          id: 'nem',
-          label: 'All Regions'
-        },
-        {
-          id: 'nsw1',
-          label: 'New South Wales'
-        },
-        {
-          id: 'qld1',
-          label: 'Queensland'
-        },
-        {
-          id: 'sa1',
-          label: 'South Australia'
-        },
-        {
-          id: 'tas1',
-          label: 'Tasmania'
-        },
-        {
-          id: 'vic1',
-          label: 'Victoria'
-        }
-      ]
+      regions: REGIONS
     }
   },
 
@@ -84,9 +59,6 @@ export default {
   },
 
   methods: {
-    isCurrentSelection() {
-      return false
-    },
     handleClick() {
       this.dropdownActive = !this.dropdownActive
     },
@@ -96,17 +68,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-@import '~/assets/scss/variables.scss';
-
-.dropdown-trigger {
-  font-family: $header-font-family;
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin-right: $app-padding;
-  padding-right: $app-padding;
-  border-right: $border-style;
-  color: #000;
-}
-</style>

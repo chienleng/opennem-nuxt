@@ -10,7 +10,8 @@ export const state = () => ({
   fuelTechOrder: cloneDeep(FUEL_TECHS.DEFAULT_FUEL_TECH_ORDER),
   range: '30D',
   interval: 'Day',
-  exportData: []
+  exportData: [],
+  responsiveBreakWidth: 769
 })
 
 export const mutations = {
@@ -40,6 +41,9 @@ export const mutations = {
   },
   exportData(state, data) {
     state.exportData = data
+  },
+  responsiveBreakWidth(state, data) {
+    state.responsiveBreakWidth = data
   }
 }
 
@@ -53,7 +57,8 @@ export const getters = {
   fuelTechOrder: state => state.fuelTechOrder,
   range: state => state.range,
   interval: state => state.interval,
-  exportData: state => state.exportData
+  exportData: state => state.exportData,
+  responsiveBreakWidth: state => state.responsiveBreakWidth
 }
 
 export const actions = {
@@ -80,5 +85,8 @@ export const actions = {
   },
   exportData({ commit }, data) {
     commit('exportData', data)
+  },
+  responsiveBreakWidth({ commit }, data) {
+    commit('responsiveBreakWidth', data)
   }
 }
