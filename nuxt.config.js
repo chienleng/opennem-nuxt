@@ -10,6 +10,9 @@ module.exports = {
 
   /*
   ** Headers of the page
+  <link href="/your-path-to-fontawesome/css/fontawesome.css" rel="stylesheet">
+  <link href="/your-path-to-fontawesome/css/brands.css" rel="stylesheet">
+  <link href="/your-path-to-fontawesome/css/solid.css" rel="stylesheet">
   */
   head: {
     title: pkg.name,
@@ -22,6 +25,18 @@ module.exports = {
       {
         rel: 'stylesheet',
         href: 'https://unpkg.com/leaflet@1.2.0/dist/leaflet.css'
+      },
+      {
+        rel: 'stylesheet',
+        href: '/css/fontawesome.min.css'
+      },
+      {
+        rel: 'stylesheet',
+        href: '/css/brands.min.css'
+      },
+      {
+        rel: 'stylesheet',
+        href: '/css/light.min.css'
       },
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
     ],
