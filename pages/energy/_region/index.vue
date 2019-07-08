@@ -85,8 +85,7 @@
 
         <div
           v-if="ready && hasEmissionData"
-          class="chart"
-          style="margin-bottom: 1rem;">
+          class="chart">
           <div class="chart-title">
             <strong>Emissions Volume</strong>
             <!-- <small>-</small> -->
@@ -109,6 +108,32 @@
             :show-zoom-out="false"
             :y-min="0"
             :y-max="emissionsMax"
+            class="emissions-volume-vis"
+            @eventChange="handleEventChange"
+            @dateOver="handleDateOver"
+          />
+        </div>
+
+        <div
+          v-if="ready && hasEmissionData"
+          class="chart"
+          style="margin-bottom: 1rem; margin-top: 1rem;">
+          <div class="chart-title">
+            <strong>Emissions Intensity</strong>
+            <!-- <small>-</small> -->
+          </div>
+          <line-vis
+            :domain-id="'_emissionsIntensity'"
+            :domain-colour="lineColour"
+            :dataset="dataset"
+            :dynamic-extent="dateFilter"
+            :hover-date="hoverDate"
+            :mouse-loc="mouseLoc"
+            :show-x-axis="false"
+            :vis-height="80"
+            :y-min="0"
+            :show-zoom-out="false"
+            class="emissions-intensity-vis"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
           />
@@ -1032,6 +1057,7 @@ export default {
         dataset[i]._total = total
         dataset[i]._min = min
         dataset[i]._totalEmissionsVol = totalEmissionsVol
+        dataset[i]._emissionsIntensity = totalEmissionsVol / total || 0
       })
       return dataset
     },
