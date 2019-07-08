@@ -3,11 +3,12 @@
     :class="{'is-active': dropdownActive}"
     class="dropdown">
     <a
+      v-on-clickaway="handleClickAway"
       class="dropdown-trigger"
       @click="handleClick">
       <span>
         <strong>{{ viewLabel }}</strong>
-        <!-- <font-awesome-icon class="fal" :icon="iconDown" /> -->
+        <i class="fal fa-chevron-down" />
       </span>          
     </a>
 
@@ -32,7 +33,11 @@
 </template>
 
 <script>
+import { mixin as clickaway } from 'vue-clickaway'
+
 export default {
+  mixins: [clickaway],
+
   data() {
     return {
       dropdownActive: false,
@@ -68,6 +73,9 @@ export default {
     },
     handleClick() {
       this.dropdownActive = !this.dropdownActive
+    },
+    handleClickAway() {
+      this.dropdownActive = false
     }
   }
 }

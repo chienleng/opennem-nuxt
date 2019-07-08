@@ -2,8 +2,6 @@
   <header>
     <div class="header-dropdowns">
       <logo class="header-logo" />
-      <i class="fal fa-user" />
-      <i class="fab fa-github" />
       <view-dropdown />
       <region-dropdown />
     </div>
