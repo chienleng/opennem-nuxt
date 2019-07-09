@@ -84,8 +84,11 @@ export default {
 @import '~/assets/scss/variables.scss';
 
 .data-options-bar {
+  .buttons {
+    background-color: rgba(255, 255, 255, 0.5);
+  }
   @include tablet {
-    padding: $app-padding;
+    padding: $app-padding / 2 $app-padding;
     display: flex;
     align-items: center;
   }
@@ -93,13 +96,15 @@ export default {
 .button {
   font-size: 11px;
 
+  &.is-rounded {
+    min-width: 55px;
+  }
+
   @include mobile {
     border-radius: 0 !important;
   }
 }
 .range-buttons {
-  margin-bottom: $app-padding / 2;
-
   @include tablet {
     margin-bottom: 0;
     margin-right: $app-padding;
