@@ -5,10 +5,10 @@
     @click="close">
     <div class="drawer">
       <div
-        class="drawer-buttons"
+        class="drawer-header"
         @click="close">
         <logo class="header-logo" />
-        <span>
+        <span class="close-button">
           <i class="fal fa-times" />
         </span>
       </div>
@@ -111,6 +111,17 @@ export default {
     transition: all 0.2s ease-in-out;
   }
 
+  .drawer-header {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .close-button {
+    padding: 0.7rem 1.5rem;
+    font-size: 1.5rem;
+    color: $opennem-link-color;
+  }
+
   &.open {
     left: 0;
     right: 0;
@@ -127,7 +138,8 @@ export default {
   max-height: 2.3rem;
   margin: 0.2rem $app-padding / 2;
   position: relative;
-  top: 3px;
+  top: 10px;
+  left: 10px;
 }
 
 .menu {

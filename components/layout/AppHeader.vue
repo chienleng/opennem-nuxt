@@ -1,15 +1,15 @@
 <template>
   <header>
     <div class="header-dropdowns">
-      <i
-        v-if="ready && widthBreak"
-        class="fal fa-ellipsis-v" />
       <div
         class="logo-wrapper"
         @click="toggleDrawer">
+        <i
+          v-if="ready && widthBreak"
+          class="fal fa-ellipsis-v" />
         <logo class="header-logo" />
+        <h1 v-if="ready && widthBreak"> {{ regionLabel }}</h1>
       </div>
-      <h1 v-if="ready && widthBreak"> {{ regionLabel }}</h1>
       <view-dropdown
         v-if="!widthBreak"
         class="selection" />
@@ -139,6 +139,11 @@ header {
     margin: 0.2rem $app-padding / 2;
     position: relative;
     top: 3px;
+  }
+
+  .logo-wrapper {
+    display: flex;
+    align-items: center;
   }
 
   .fa-ellipsis-v {
