@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section style="margin-top: 0.5rem;">
     <data-options-bar
       :range="range"
       :interval="interval"
@@ -270,6 +270,7 @@ import {
 import { timeFormat as d3TimeFormat } from 'd3-time-format'
 import { mouse as d3Mouse } from 'd3-selection'
 import { extent as d3Extent, max as d3Max } from 'd3-array'
+import _debounce from 'lodash.debounce'
 import _uniqBy from 'lodash.uniqby'
 import _includes from 'lodash.includes'
 import _cloneDeep from 'lodash.clonedeep'
@@ -327,11 +328,18 @@ export default {
       filteredDataset: [],
       visHeight: 0,
       hoverOn: false,
-      lineColour: '#e34a33'
+      lineColour: '#e34a33',
+      windowWidth: 0
     }
   },
 
   computed: {
+    responsiveBreakWidth() {
+      return this.$store.getters.responsiveBreakWidth
+    },
+    widthBreak() {
+      return this.windowWidth < 1024
+    },
     regionId() {
       return this.$route.params.region
     },
@@ -508,7 +516,11 @@ export default {
         : this.emissionDomains
     },
     stackedAreaHeight() {
-      return this.regionId === 'nem' ? 578 : 380
+      let height = 380
+      if (this.regionId === 'nem' && !this.widthBreak) {
+        height = 528
+      }
+      return height
     },
     emissionsMax() {
       return d3Max(this.dataset, d => d._totalEmissionsVol)
@@ -565,11 +577,16 @@ export default {
     EventBus.$on('vis.mouseenter', this.handleVisEnter)
     EventBus.$on('vis.mouseleave', this.handleVisLeave)
 
-    this.visHeight = window.innerWidth > 768 ? 578 : 350
+    this.windowWidth = window.innerWidth
+    this.visHeight = this.widthBreak ? 578 : 350
     this.$nextTick(() => {
-      window.addEventListener('resize', () => {
-        this.visHeight = window.innerWidth > 768 ? 578 : 350
-      })
+      window.addEventListener(
+        'resize',
+        _debounce(() => {
+          this.windowWidth = window.innerWidth
+          this.visHeight = this.widthBreak ? 578 : 350
+        }, 200)
+      )
     })
 
     this.fetchData(this.regionId, this.range)
@@ -1130,12 +1147,13 @@ export default {
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
+  margin-top: 1rem;
 
   .vis-container {
     width: 100%;
     padding: 1rem;
 
-    @include tablet {
+    @include desktop {
       width: 70%;
     }
   }
@@ -1143,7 +1161,7 @@ export default {
     width: 100%;
     height: 700px;
 
-    @include tablet {
+    @include desktop {
       width: 30%;
     }
   }

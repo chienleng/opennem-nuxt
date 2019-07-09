@@ -493,12 +493,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '~/assets/scss/responsive-mixins.scss';
 @import '~/assets/scss/variables.scss';
 
 .summary-table {
   margin-right: $app-padding;
-  font-size: 13px;
   color: #333;
+  font-size: 11px;
 
   header {
     text-align: right;
@@ -535,7 +536,8 @@ export default {
     width: 50%;
   }
   .summary-col-energy,
-  .summary-col-contribution {
+  .summary-col-contribution,
+  .summary-col-av-value {
     width: 25%;
     text-align: right;
   }

@@ -86,6 +86,10 @@ export default {
 .data-options-bar {
   .buttons {
     background-color: rgba(255, 255, 255, 0.5);
+
+    @include tablet {
+      background-color: transparent;
+    }
   }
   @include tablet {
     padding: $app-padding / 2 $app-padding;
