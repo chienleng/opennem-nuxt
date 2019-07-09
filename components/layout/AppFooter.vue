@@ -1,7 +1,31 @@
 <template>
-  <footer>
-    <p>v3</p>
-    <nuxt-link to="/about">About</nuxt-link> 
+  <footer class="has-background-warning">
+    <div class="left">
+      <span class="version">v3</span>
+      <div class="sources">
+        Sources:
+        <a
+          href="https://www.aemo.com.au/"
+          title="Link to AEMO">AEMO</a>,
+        <a
+          href="http://www.bom.gov.au/"
+          title="Link to BoM">BoM</a>
+      </div>
+    </div>
+
+    <div class="right">
+      <a
+        class="icon-link"
+        href="https://twitter.com/opennem">
+        <i class="fab fa-twitter" />
+      </a>
+      <a
+        class="icon-link"
+        href="https://github.com/opennem">
+        <i class="fab fa-github" />
+      </a>
+      <nuxt-link to="/about">About OpenNEM</nuxt-link> 
+    </div>
   </footer>
 </template>
 
@@ -10,8 +34,34 @@
 @import '~/assets/scss/variables.scss';
 
 footer {
-  background: lightgrey;
   padding: $app-padding / 4 $app-padding;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+
+  .left,
+  .right {
+    display: flex;
+    align-items: center;
+  }
+
+  a {
+    border-bottom: 1px dashed $opennem-link-color;
+    &:hover {
+      border-bottom-style: solid;
+    }
+
+    &.icon-link {
+      border-bottom-style: none;
+      padding-right: 0.5rem;
+      font-size: 13px;
+    }
+  }
+
+  .version {
+    font-weight: bold;
+    margin-right: 2rem;
+  }
 
   @include tablet {
     position: absolute;
