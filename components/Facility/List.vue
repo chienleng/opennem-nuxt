@@ -180,13 +180,6 @@ export default {
     Totals
   },
 
-  filters: {
-    formatDate(value) {
-      // return formatDateForDisplay(value)
-      return value
-    }
-  },
-
   props: {
     filteredFacilities: {
       type: Array,

@@ -11,7 +11,8 @@ export const state = () => ({
   range: '30D',
   interval: 'Day',
   exportData: [],
-  responsiveBreakWidth: 769
+  responsiveBreakWidth: 769,
+  facilitySelectedTechs: []
 })
 
 export const mutations = {
@@ -44,6 +45,9 @@ export const mutations = {
   },
   responsiveBreakWidth(state, data) {
     state.responsiveBreakWidth = data
+  },
+  facilitySelectedTechs(state, data) {
+    state.facilitySelectedTechs = data
   }
 }
 
@@ -58,7 +62,8 @@ export const getters = {
   range: state => state.range,
   interval: state => state.interval,
   exportData: state => state.exportData,
-  responsiveBreakWidth: state => state.responsiveBreakWidth
+  responsiveBreakWidth: state => state.responsiveBreakWidth,
+  facilitySelectedTechs: state => state.facilitySelectedTechs
 }
 
 export const actions = {
@@ -88,5 +93,8 @@ export const actions = {
   },
   responsiveBreakWidth({ commit }, data) {
     commit('responsiveBreakWidth', data)
+  },
+  facilitySelectedTechs({ commit }, data) {
+    commit('facilitySelectedTechs', data)
   }
 }

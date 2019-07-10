@@ -1,6 +1,12 @@
 <template>
   <div>
-    {{ regionId }}
+    <facility-filters
+      :selected-techs="selectedTechs"
+      :selected-statuses="selectedStatuses"
+      @techsSelect="handleTechsSelected"
+      @selectedStatuses="handleStatusesSelected"
+      @facilityNameFilter="handleFacilityNameFilter"
+    />
 
     <div class="facility-container">
       <facility-list
@@ -34,6 +40,7 @@ import _orderBy from 'lodash.orderby'
 import * as FUEL_TECHS from '~/constants/fuelTech.js'
 import http from '~/services/HttpService.js'
 import FacilityDataTransformService from '~/services/FacilityDataTransformService.js'
+import FacilityFilters from '~/components/Facility/Filters.vue'
 import FacilityList from '~/components/Facility/List.vue'
 import FacilityMap from '~/components/Facility/Map.vue'
 
@@ -44,6 +51,7 @@ export default {
   layout: 'main',
 
   components: {
+    FacilityFilters,
     FacilityList,
     FacilityMap
   },
@@ -77,16 +85,19 @@ export default {
     facilityData() {
       this.updateFacilitiesData()
     },
-    // selectedTechs() {
-    //   this.updateFacilitiesData()
-    // },
-    // selectedStatuses() {
-    //   this.updateFacilitiesData()
-    // },
+    selectedTechs() {
+      this.updateFacilitiesData()
+    },
+    selectedStatuses() {
+      this.updateFacilitiesData()
+    },
     sortBy() {
       this.updateFacilitiesData()
     },
     orderBy() {
+      this.updateFacilitiesData()
+    },
+    filterString() {
       this.updateFacilitiesData()
     }
   },
@@ -189,6 +200,14 @@ export default {
       return order === ASCENDING ? DESCENDING : ASCENDING
     },
 
+    setFilterString(string) {
+      this.filterString = string
+      this.updateFacilitiesData()
+    },
+
+    handleFacilityNameFilter(string) {
+      this.filterString = string
+    },
     handleOrderChange(orderName) {
       if (this.sortBy === orderName) {
         this.orderBy = this.toggleOrder(this.orderBy)
@@ -197,9 +216,23 @@ export default {
       }
       this.sortBy = orderName
     },
-    handleFacilitySelect() {},
-    handleFacilityHover() {},
-    handleFacilityOut() {}
+    handleFacilitySelect(facility, shouldZoom) {
+      this.selectedFacility = facility
+      this.shouldZoomWhenSelected = shouldZoom
+    },
+    handleFacilityHover(facility, shouldZoom) {
+      this.hoveredFacility = facility
+      this.shouldZoomWhenSelected = shouldZoom
+    },
+    handleFacilityOut() {
+      this.hoveredFacility = null
+    },
+    handleTechsSelected(techs) {
+      this.selectedTechs = techs
+    },
+    handleStatusesSelected(statuses) {
+      this.selectedStatuses = statuses
+    }
   }
 }
 </script>
