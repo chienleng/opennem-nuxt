@@ -26,6 +26,11 @@ Vue.filter('formatValue', value => {
   return f(value)
 })
 
+Vue.filter('customFormatValue', (value, { formatter = ',.1f' }) => {
+  const f = d3Format(formatter)
+  return f(value)
+})
+
 Vue.filter('formatCurrency', value => {
   const f = d3Format('$,.2f')
   const fValue = f(value)

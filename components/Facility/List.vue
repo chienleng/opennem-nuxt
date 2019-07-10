@@ -7,11 +7,10 @@
         @click="sort('displayName')"
       >
         Name
-        <!-- <font-awesome-icon
-          class="fal"
+        <i
           v-if="sortBy === 'displayName'"
-          :icon="getColumnIcon('displayName')"
-        /> -->
+          :class="getColumnIcon('displayName')"
+          class="fal" />
       </div>
 
       <div 
@@ -20,11 +19,10 @@
       >
         <span @click="sort('regionId')">
           Region
-          <!-- <font-awesome-icon
-            class="fal"
+          <i
             v-if="sortBy === 'regionId'"
-            :icon="getColumnIcon('regionId')"
-          /> -->
+            :class="getColumnIcon('regionId')"
+            class="fal" />
         </span>
       </div>
 
@@ -33,11 +31,10 @@
       >
         <span @click="sort('fuelTechs')">
           {{ techHeaderName }}
-          <!-- <font-awesome-icon
-            class="fal"
+          <i
             v-if="sortBy === 'fuelTechs'"
-            :icon="getColumnIcon('fuelTechs')"
-          /> -->
+            :class="getColumnIcon('fuelTechs')"
+            class="fal" />
         </span>
       </div>
 
@@ -46,11 +43,10 @@
         @click="sort('generatorCap')"
       >
         Gen. Capacity
-        <!-- <font-awesome-icon
-          class="fal"
+        <i
           v-if="sortBy === 'generatorCap'"
-          :icon="getColumnIcon('generatorCap')"
-        /> -->
+          :class="getColumnIcon('generatorCap')"
+          class="fal" />
       </div>
     </div>
     
@@ -103,7 +99,7 @@
               :style="{ opacity: getOpacity(ft) }"
             >
               {{ getFtLabel(ft) }}
-              <small v-if="facility.genFuelTechs.length > 1">({{ facility.fuelTechRegisteredCap[ft] | formatValue }}MW)</small>
+              <small v-if="facility.genFuelTechs.length > 1">({{ facility.fuelTechRegisteredCap[ft] | customFormatValue({ formatter: ',.0f'}) }}MW)</small>
               <span v-if="genFtIndex !== facility.genFuelTechs.length - 1"><br></span>
             </span>
           </div>
@@ -116,7 +112,7 @@
               :style="{ opacity: getOpacity(ft) }"
             >
               {{ getFtLabel(ft) }}
-              <small>({{ facility.fuelTechRegisteredCap[ft] | formatValue }}MW)</small>
+              <small>({{ facility.fuelTechRegisteredCap[ft] | customFormatValue({ formatter: ',.0f'}) }}MW)</small>
               <span v-if="loadFtIndex !== facility.loadFuelTechs.length - 1"><br></span>
             </em>
           </div>
@@ -126,7 +122,7 @@
           <div
             v-show="facility.generatorCap"
             class="stat-value has-text-right">
-            {{ getGeneratorCap(facility) | formatValue }}
+            {{ getGeneratorCap(facility) | customFormatValue({ formatter: ',.0f'}) }}
             <span
               v-if="getGeneratorCap(facility) !== 0"
               class="unit">MW</span>
@@ -153,11 +149,6 @@
 <script>
 import _debounce from 'lodash.debounce'
 import _includes from 'lodash.includes'
-// import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
-// import { faSortUp, faSortDown } from '@fortawesome/fontawesome-pro-light'
-// import { GraphDomains } from '@/domains/graphs'
-// import { getRegionAbbrByCode } from '@/domains/regions'
-// import { formatDateForDisplay } from '@/lib/formatter'
 import * as FUEL_TECHS from '~/constants/fuelTech.js'
 import Totals from './Totals'
 
@@ -186,7 +177,6 @@ const colHeaders = [
 
 export default {
   components: {
-    // FontAwesomeIcon,
     Totals
   },
 
@@ -241,12 +231,6 @@ export default {
     totalsPosition() {
       return this.divHeight > this.windowHeight ? 'fixed' : 'static'
     },
-    // iconSortUp() {
-    //   return faSortUp
-    // },
-    // iconSortDown() {
-    //   return faSortDown
-    // },
     facilitySelectedTechs() {
       // return this.$store.getters.facilitySelectedTechs
       return []
@@ -348,9 +332,9 @@ export default {
     getColumnIcon(colHeaderId) {
       if (colHeaderId === this.sortBy) {
         if (this.orderBy === 'asc') {
-          return this.iconSortUp
+          return 'fa-sort-up'
         }
-        return this.iconSortDown
+        return 'fa-sort-down'
       }
       return ''
     },

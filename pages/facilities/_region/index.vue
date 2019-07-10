@@ -185,7 +185,18 @@ export default {
       })
     },
 
-    handleOrderChange() {},
+    toggleOrder(order) {
+      return order === ASCENDING ? DESCENDING : ASCENDING
+    },
+
+    handleOrderChange(orderName) {
+      if (this.sortBy === orderName) {
+        this.orderBy = this.toggleOrder(this.orderBy)
+      } else {
+        this.orderBy = ASCENDING
+      }
+      this.sortBy = orderName
+    },
     handleFacilitySelect() {},
     handleFacilityHover() {},
     handleFacilityOut() {}
