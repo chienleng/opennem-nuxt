@@ -269,7 +269,7 @@ export default {
   position: sticky;
   top: 0;
   background-color: $beige-lighter;
-  z-index: 9999;
+  z-index: 99;
 }
 
 .facility-list-map-container {
