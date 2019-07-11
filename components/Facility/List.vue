@@ -141,8 +141,8 @@
       :div-width="divWidth"
       :total-facilities="totalFacilities"
       :total-cap="totalCap"
+      class="facilities-total"
     />
-
   </div>
 </template>
 
@@ -189,6 +189,10 @@ export default {
       type: Object,
       default: () => null
     },
+    selectedTechs: {
+      type: Array,
+      default: () => []
+    },
     sortBy: {
       type: String,
       default: () => ''
@@ -224,20 +228,16 @@ export default {
     totalsPosition() {
       return this.divHeight > this.windowHeight ? 'fixed' : 'static'
     },
-    facilitySelectedTechs() {
-      // return this.$store.getters.facilitySelectedTechs
-      return []
-    },
     totalFacilities() {
       return this.filteredFacilities.length
     },
     totalCap() {
       let total = 0
       this.filteredFacilities.forEach(facility => {
-        if (this.facilitySelectedTechs.length === 0) {
+        if (this.selectedTechs.length === 0) {
           total += facility.generatorCap
         } else {
-          this.facilitySelectedTechs.forEach(ft => {
+          this.selectedTechs.forEach(ft => {
             if (facility.fuelTechRegisteredCap[ft]) {
               total += facility.fuelTechRegisteredCap[ft]
             }
@@ -273,14 +273,14 @@ export default {
   },
 
   mounted() {
-    this.divWidth = this.$el.offsetWidth
+    this.divWidth = this.$el.offsetWidth - 13
     this.windowWidth = window.innerWidth
     this.windowHeight = window.innerHeight
 
     window.addEventListener(
       'resize',
       _debounce(() => {
-        this.divWidth = this.$el.offsetWidth
+        this.divWidth = this.$el.offsetWidth - 13
         this.windowWidth = window.innerWidth
         this.windowHeight = window.innerHeight
       }, 200)
@@ -353,18 +353,18 @@ export default {
       return ftColour || 'transparent'
     },
     getOpacity(fuelTech) {
-      if (this.facilitySelectedTechs.length === 0) {
+      if (this.selectedTechs.length === 0) {
         return 1
       }
-      return _includes(this.facilitySelectedTechs, fuelTech) ? 1 : 0.3
+      return _includes(this.selectedTechs, fuelTech) ? 1 : 0.3
     },
     getGeneratorCap(facility) {
-      if (this.facilitySelectedTechs.length === 0) {
+      if (this.selectedTechs.length === 0) {
         return facility.generatorCap
       }
 
       let cap = 0
-      this.facilitySelectedTechs.forEach(d => {
+      this.selectedTechs.forEach(d => {
         if (
           FUEL_TECHS.FUEL_TECH_CATEGORY[d] !== 'load' &&
           facility.fuelTechRegisteredCap[d]

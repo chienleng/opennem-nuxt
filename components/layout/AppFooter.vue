@@ -1,7 +1,7 @@
 <template>
   <footer class="has-background-warning">
     <div class="left">
-      <span class="version">v3</span>
+      <span class="version">v3 beta</span>
       <div class="sources">
         Sources:
         <a
@@ -35,9 +35,9 @@
 
 footer {
   padding: $app-padding / 4 $app-padding;
-  display: flex;
   justify-content: space-between;
   font-size: 11px;
+  display: none;
 
   .left,
   .right {
@@ -64,9 +64,12 @@ footer {
   }
 
   @include tablet {
-    position: absolute;
+    display: flex;
+    position: fixed;
     left: 0;
     right: 0;
+    bottom: 0;
+    z-index: 999;
   }
 }
 </style>

@@ -3,15 +3,17 @@
     <facility-filters
       :selected-techs="selectedTechs"
       :selected-statuses="selectedStatuses"
+      class="facility-filters"
       @techsSelect="handleTechsSelected"
       @selectedStatuses="handleStatusesSelected"
       @facilityNameFilter="handleFacilityNameFilter"
     />
 
-    <div class="facility-container">
+    <div class="facility-list-map-container">
       <facility-list
         :filtered-facilities="filteredFacilities"
         :selected-facility="selectedFacility"
+        :selected-techs="selectedTechs"
         :sort-by="sortBy"
         :order-by="orderBy"
         :hide-region-column="!isNemRegion"
@@ -238,17 +240,30 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.facility-container {
-  display: flex;
-  padding: 1rem;
+@import '~/assets/scss/responsive-mixins.scss';
+
+.facility-list-map-container {
+  @include tablet {
+    padding: 1rem;
+    display: flex;
+  }
 
   .facility-list {
-    width: 50%;
-    padding: 1rem;
-    padding-left: 0;
+    @include tablet {
+      width: 50%;
+      padding: 1rem;
+      padding-left: 0;
+    }
   }
   .facility-map {
-    width: 50%;
+    padding: 1rem;
+
+    @include tablet {
+      width: 50%;
+      position: fixed;
+      right: 0;
+      padding: 0 1rem 0 0;
+    }
   }
 }
 </style>

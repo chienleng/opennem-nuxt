@@ -66,11 +66,10 @@ export default {
   .total-facilities {
     margin-left: 9px;
   }
-
   @include tablet {
     left: auto;
     right: auto;
-    bottom: 29px;
+    bottom: 26px;
   }
 }
 </style>
