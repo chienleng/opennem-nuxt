@@ -36,6 +36,15 @@
         class="facility-map"
         @facilitySelect="handleFacilitySelect"
       />
+
+      <transition name="slide-up-fade">
+        <facility-card
+          v-if="selectedFacility && widthBreak"
+          :selected-techs="selectedTechs"
+          :facility="selectedFacility"
+          @close="handleCloseDetail"
+        />
+      </transition>
     </div>
   </div>
 </template>
@@ -50,6 +59,7 @@ import FacilityDataTransformService from '~/services/FacilityDataTransformServic
 import FacilityFilters from '~/components/Facility/Filters.vue'
 import FacilityList from '~/components/Facility/List.vue'
 import FacilityMap from '~/components/Facility/Map.vue'
+import FacilityCard from '~/components/Facility/Card.vue'
 
 const ASCENDING = 'asc'
 const DESCENDING = 'desc'
@@ -60,7 +70,8 @@ export default {
   components: {
     FacilityFilters,
     FacilityList,
-    FacilityMap
+    FacilityMap,
+    FacilityCard
   },
 
   data() {
@@ -256,6 +267,9 @@ export default {
     },
     handleViewSelect(view) {
       this.selectedView = view
+    },
+    handleCloseDetail() {
+      this.selectedFacility = null
     }
   }
 }
