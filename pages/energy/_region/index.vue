@@ -362,15 +362,23 @@ export default {
       visHeight: 0,
       hoverOn: false,
       lineColour: '#e34a33',
-      windowWidth: 0,
-      chartEmissionsVolume: true,
-      chartEmissionsIntensity: true,
-      chartPrice: true,
-      chartTemperature: true
+      windowWidth: 0
     }
   },
 
   computed: {
+    chartEmissionsVolume() {
+      return this.$store.getters.chartEmissionsVolume
+    },
+    chartEmissionsIntensity() {
+      return this.$store.getters.chartEmissionsIntensity
+    },
+    chartPrice() {
+      return this.$store.getters.chartPrice
+    },
+    chartTemperature() {
+      return this.$store.getters.chartTemperature
+    },
     responsiveBreakWidth() {
       return this.$store.getters.responsiveBreakWidth
     },
@@ -1175,7 +1183,7 @@ export default {
     },
 
     toggleChart(chartName) {
-      this[chartName] = !this[chartName]
+      this.$store.dispatch(chartName, !this[chartName])
     }
   }
 }

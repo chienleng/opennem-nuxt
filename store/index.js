@@ -11,7 +11,11 @@ export const state = () => ({
   range: '30D',
   interval: 'Day',
   exportData: [],
-  responsiveBreakWidth: 769
+  responsiveBreakWidth: 769,
+  chartEmissionsVolume: true,
+  chartEmissionsIntensity: true,
+  chartPrice: true,
+  chartTemperature: true
 })
 
 export const mutations = {
@@ -44,6 +48,18 @@ export const mutations = {
   },
   responsiveBreakWidth(state, data) {
     state.responsiveBreakWidth = data
+  },
+  chartEmissionsVolume(state, data) {
+    state.chartEmissionsVolume = data
+  },
+  chartEmissionsIntensity(state, data) {
+    state.chartEmissionsIntensity = data
+  },
+  chartPrice(state, data) {
+    state.chartPrice = data
+  },
+  chartTemperature(state, data) {
+    state.chartTemperature = data
   }
 }
 
@@ -58,7 +74,11 @@ export const getters = {
   range: state => state.range,
   interval: state => state.interval,
   exportData: state => state.exportData,
-  responsiveBreakWidth: state => state.responsiveBreakWidth
+  responsiveBreakWidth: state => state.responsiveBreakWidth,
+  chartEmissionsVolume: state => state.chartEmissionsVolume,
+  chartEmissionsIntensity: state => state.chartEmissionsIntensity,
+  chartPrice: state => state.chartPrice,
+  chartTemperature: state => state.chartTemperature
 }
 
 export const actions = {
@@ -88,5 +108,17 @@ export const actions = {
   },
   responsiveBreakWidth({ commit }, data) {
     commit('responsiveBreakWidth', data)
+  },
+  chartEmissionsVolume({ commit }, data) {
+    commit('chartEmissionsVolume', data)
+  },
+  chartEmissionsIntensity({ commit }, data) {
+    commit('chartEmissionsIntensity', data)
+  },
+  chartPrice({ commit }, data) {
+    commit('chartPrice', data)
+  },
+  chartTemperature({ commit }, data) {
+    commit('chartTemperature', data)
   }
 }
