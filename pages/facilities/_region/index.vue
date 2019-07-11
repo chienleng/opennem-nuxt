@@ -1,16 +1,19 @@
 <template>
   <div>
     <facility-filters
+      :selected-view="selectedView"
       :selected-techs="selectedTechs"
       :selected-statuses="selectedStatuses"
       class="facility-filters"
       @techsSelect="handleTechsSelected"
       @selectedStatuses="handleStatusesSelected"
       @facilityNameFilter="handleFacilityNameFilter"
+      @viewSelect="handleViewSelect"
     />
 
     <div class="facility-list-map-container">
       <facility-list
+        v-if="!widthBreak || (widthBreak && selectedView === 'list')"
         :filtered-facilities="filteredFacilities"
         :selected-facility="selectedFacility"
         :selected-techs="selectedTechs"
@@ -25,6 +28,7 @@
       />
 
       <facility-map
+        v-if="!widthBreak || (widthBreak && selectedView === 'map')"
         :data="filteredFacilities"
         :selected-facility="selectedFacility"
         :hovered-facility="hoveredFacility"
@@ -37,6 +41,7 @@
 </template>
 
 <script>
+import _debounce from 'lodash.debounce'
 import _includes from 'lodash.includes'
 import _orderBy from 'lodash.orderby'
 import * as FUEL_TECHS from '~/constants/fuelTech.js'
@@ -67,10 +72,12 @@ export default {
       hoveredFacility: null,
       selectedStatuses: ['Commissioned'],
       selectedTechs: [],
+      selectedView: 'list',
       sortBy: 'displayName',
       orderBy: ASCENDING,
       totalFacilities: 0,
-      shouldZoomWhenSelected: false
+      shouldZoomWhenSelected: false,
+      windowWidth: 0
     }
   },
 
@@ -80,6 +87,9 @@ export default {
     },
     isNemRegion() {
       return this.$route.params.region === 'nem'
+    },
+    widthBreak() {
+      return this.windowWidth < 769
     }
   },
 
@@ -109,6 +119,15 @@ export default {
   },
 
   mounted() {
+    this.windowWidth = window.innerWidth
+    this.$nextTick(() => {
+      window.addEventListener(
+        'resize',
+        _debounce(() => {
+          this.windowWidth = window.innerWidth
+        }, 200)
+      )
+    })
     this.fetchData()
   },
 
@@ -234,6 +253,9 @@ export default {
     },
     handleStatusesSelected(statuses) {
       this.selectedStatuses = statuses
+    },
+    handleViewSelect(view) {
+      this.selectedView = view
     }
   }
 }
@@ -241,6 +263,14 @@ export default {
 
 <style lang="scss" scoped>
 @import '~/assets/scss/responsive-mixins.scss';
+@import '~/assets/scss/variables.scss';
+
+.facility-filters {
+  position: sticky;
+  top: 0;
+  background-color: $beige-lighter;
+  z-index: 9999;
+}
 
 .facility-list-map-container {
   @include tablet {
@@ -251,7 +281,7 @@ export default {
   .facility-list {
     @include tablet {
       width: 50%;
-      padding: 1rem;
+      padding: 0 1rem;
       padding-left: 0;
     }
   }
@@ -262,6 +292,7 @@ export default {
       width: 50%;
       position: fixed;
       right: 0;
+      bottom: 3rem;
       padding: 0 1rem 0 0;
     }
   }

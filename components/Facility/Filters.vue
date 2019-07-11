@@ -33,7 +33,7 @@
             class="close-button button is-rounded is-small is-dark is-inverted"
             @click="widthBreak ? toggleSearch() : clearFilter()"
           >
-            <i class="fal fa-times-circle" />
+            <i class="fal fa-times" />
           </button>
         </p>
       </div>
@@ -132,8 +132,15 @@
         class="filter-status"
         @selectedStatuses="handleStatusesSelected"
       />
+
+      <facility-view-toggle
+        v-if="widthBreak"
+        :view="selectedView"
+        class="facility-view-toggle"
+        @viewSelect="handleViewSelect"
+      />
     </div>
-  </div>  
+  </div>
 </template>
 
 <script>
@@ -144,6 +151,7 @@ import { mixin as clickaway } from 'vue-clickaway'
 import EventBus from '~/plugins/eventBus'
 import * as FUEL_TECHS from '~/constants/fuelTech.js'
 import StatusFilter from '~/components/Facility/StatusFilter'
+import FacilityViewToggle from '~/components/Facility/ViewToggle'
 
 const simpleGroups = [
   {
@@ -215,17 +223,30 @@ const simpleGroups = [
     type: 'sources',
     colour: '#131313',
     fields: ['black_coal', 'brown_coal']
+  },
+
+  {
+    id: 'pumps',
+    label: 'Pumps',
+    type: 'loads',
+    colour: '#88AFD0',
+    fields: ['pumps']
   }
 ]
 
 export default {
   components: {
-    StatusFilter
+    StatusFilter,
+    FacilityViewToggle
   },
 
   mixins: [clickaway],
 
   props: {
+    selectedView: {
+      type: String,
+      default: () => 'list'
+    },
     selectedTechs: {
       type: Array,
       default: () => []
@@ -254,15 +275,6 @@ export default {
     widthBreak() {
       return this.windowWidth < 769
     }
-  },
-
-  // watch: {
-  //   selectedTechs() {
-  //   }
-  // },
-
-  created() {
-    // this.selectedTechs = _cloneDeep(this.facilitySelectedTechs)
   },
 
   mounted() {
@@ -303,14 +315,13 @@ export default {
       })
     })
 
-    this.allTechs.reverse()
+    // this.allTechs.reverse()
   },
   beforeDestroy() {
     EventBus.$off('facilities.filter.clear')
   },
   methods: {
     handleKeyup() {
-      // EventBus.$emit('facilities.name.filter', this.filterFacilityName)
       this.$emit('facilityNameFilter', this.filterFacilityName)
     },
     onClickAway() {
@@ -416,6 +427,10 @@ export default {
     },
     handleStatusesSelected(selectedStatuses) {
       this.$emit('selectedStatuses', selectedStatuses)
+    },
+
+    handleViewSelect(view) {
+      this.$emit('viewSelect', view)
     }
   }
 }
@@ -427,6 +442,7 @@ export default {
 
 .facilities-options {
   width: 100%;
+  padding: 1rem 1rem 1rem;
 }
 .dropdown-label {
   font-family: $family-primary;
@@ -471,6 +487,7 @@ export default {
 .filter-bar {
   display: flex;
   margin: 5px 0 5px 10px;
+  align-items: center;
 
   @include tablet {
     margin: 0;
@@ -478,10 +495,11 @@ export default {
 
   .filter-station {
     position: relative;
+    margin: 0;
   }
 
   .filter-station-input {
-    width: 185px;
+    width: 200px;
 
     @include tablet {
       width: 230px;
@@ -503,7 +521,8 @@ export default {
     padding: 3px 6px 2px;
     width: 20px;
     height: 20px;
-    color: $opennem-primary;
+    color: $opennem-link-color;
+    min-width: 0;
   }
 
   .search-button {
@@ -511,7 +530,7 @@ export default {
     padding: 2px 6px;
     width: 28px;
     height: 28px;
-    color: $opennem-primary;
+    color: $opennem-link-color;
   }
 
   .buttons {
@@ -526,6 +545,7 @@ export default {
       font-size: 10px;
       margin-left: 0;
       margin-left: 0.7rem;
+      border: 1px solid #eee;
     }
   }
 }
@@ -555,12 +575,24 @@ export default {
     color: #fff;
   }
 }
-.control.has-icons-right {
-  margin-bottom: 0.8rem;
-
-  .input {
-    margin-right: 0;
-    padding-right: 2.25em;
+.control {
+  &.has-icons-left {
+    .icon.is-small {
+      font-size: 13px;
+    }
   }
+  &.has-icons-right {
+    .input {
+      margin-right: 0;
+      padding-right: 2.25em;
+      font-size: 12px;
+    }
+  }
+}
+
+.facility-view-toggle {
+  position: absolute;
+  right: 1rem;
+  top: 10px;
 }
 </style>

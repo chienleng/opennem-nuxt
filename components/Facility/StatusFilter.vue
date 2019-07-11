@@ -190,6 +190,7 @@ export default {
   .button {
     font-size: 10px;
     margin-left: 0;
+    border: 1px solid #eee;
   }
 }
 </style>

@@ -273,16 +273,16 @@ export default {
   },
 
   mounted() {
-    this.divWidth = this.$el.offsetWidth - 13
     this.windowWidth = window.innerWidth
     this.windowHeight = window.innerHeight
+    this.divWidth = this.calculateDivWidth()
 
     window.addEventListener(
       'resize',
       _debounce(() => {
-        this.divWidth = this.$el.offsetWidth - 13
         this.windowWidth = window.innerWidth
         this.windowHeight = window.innerHeight
+        this.divWidth = this.calculateDivWidth()
       }, 200)
     )
   },
@@ -294,6 +294,12 @@ export default {
   },
 
   methods: {
+    calculateDivWidth() {
+      if (this.widthBreak) {
+        return this.windowWidth
+      }
+      return this.$el.offsetWidth - 13
+    },
     active(status) {
       return status === 'Commissioned'
     },
@@ -494,14 +500,14 @@ export default {
   align-items: center;
   margin-bottom: 5px;
   position: sticky;
-  top: 0;
-  // background-color: $background-alpha;
+  top: 60px;
+  background-color: $beige-lighter;
   padding-bottom: 5px;
   z-index: 11;
   border-bottom: 1px solid #333;
 
   @include tablet {
-    top: 59px;
+    top: 50px;
     margin-left: -7px;
     margin-right: -7px;
     padding-left: 7px;

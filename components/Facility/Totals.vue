@@ -50,6 +50,12 @@ export default {
   justify-content: space-between;
   align-items: center;
 
+  @include tablet {
+    left: auto;
+    right: auto;
+    bottom: 26px;
+  }
+
   strong {
     color: #fff;
     font-size: 13px;
@@ -65,11 +71,6 @@ export default {
 
   .total-facilities {
     margin-left: 9px;
-  }
-  @include tablet {
-    left: auto;
-    right: auto;
-    bottom: 26px;
   }
 }
 </style>
