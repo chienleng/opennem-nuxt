@@ -25,7 +25,7 @@
           }"
           class="colour-square" />
 
-        <div class="label">{{ ft.label }}</div>
+        <div class="ft-label">{{ ft.label }}</div>
       </div>
 
       <div class="summary-col-energy">
@@ -181,7 +181,7 @@ export default {
   .summary-col-label {
     display: flex;
     align-items: center;
-    .label {
+    .ft-label {
       padding-left: 5px;
     }
   }

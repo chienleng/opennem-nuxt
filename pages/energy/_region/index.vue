@@ -86,15 +86,20 @@
         <div
           v-if="ready && hasEmissionData"
           class="chart">
-          <div class="chart-title">
+          <div
+            class="chart-title"
+            @click="toggleChart('chartEmissionsVolume')">
+            <i
+              :class="{
+                'fa-caret-down': chartEmissionsVolume,
+                'fa-caret-right': !chartEmissionsVolume
+              }"
+              class="fal fa-fw" />
             <strong>Emissions Volume</strong>
             <!-- <small>-</small> -->
           </div>
-          <vis-tooltip
-            :left-position="tooltipLeft"
-            :hover-value="hoverEmissionValue"
-          />
           <stacked-area-vis
+            v-if="chartEmissionsVolume"
             :domains="emissionStackedAreaDomains"
             :dataset="dataset"
             :dynamic-extent="dateFilter"
@@ -116,13 +121,21 @@
 
         <div
           v-if="ready && hasEmissionData"
-          class="chart"
-          style="margin-bottom: 1rem; margin-top: 1rem;">
-          <div class="chart-title">
+          class="chart">
+          <div
+            class="chart-title"
+            @click="toggleChart('chartEmissionsIntensity')">
+            <i
+              :class="{
+                'fa-caret-down': chartEmissionsIntensity,
+                'fa-caret-right': !chartEmissionsIntensity
+              }"
+              class="fal fa-fw" />
             <strong>Emissions Intensity</strong>
             <!-- <small>-</small> -->
           </div>
           <line-vis
+            v-if="chartEmissionsIntensity"
             :domain-id="'_emissionsIntensity'"
             :domain-colour="lineColour"
             :dataset="dataset"
@@ -142,11 +155,20 @@
         <div
           v-if="ready && hasPriceData"
           class="chart">
-          <div class="chart-title">
+          <div
+            class="chart-title"
+            @click="toggleChart('chartPrice')">
+            <i
+              :class="{
+                'fa-caret-down': chartPrice,
+                'fa-caret-right': !chartPrice
+              }"
+              class="fal fa-fw" />
             <strong>Price</strong>
             <small>$/MWh</small>
           </div>
           <line-vis
+            v-if="chartPrice"
             :domain-id="'price.above300'"
             :domain-colour="lineColour"
             :value-domain-id="priceDomains[0].id"
@@ -168,6 +190,7 @@
             @dateOver="handleDateOver"
           />
           <line-vis
+            v-if="chartPrice"
             :domain-id="priceDomains[0].id"
             :domain-colour="lineColour"
             :dataset="dataset"
@@ -189,6 +212,7 @@
             @dateOver="handleDateOver"
           />
           <line-vis
+            v-if="chartPrice"
             :domain-id="'price.below0'"
             :domain-colour="lineColour"
             :dataset="dataset"
@@ -215,11 +239,20 @@
         <div
           v-if="ready && hasTemperatureData"
           class="chart">
-          <div class="chart-title">
+          <div
+            class="chart-title"
+            @click="toggleChart('chartTemperature')">
+            <i
+              :class="{
+                'fa-caret-down': chartTemperature,
+                'fa-caret-right': !chartTemperature
+              }"
+              class="fal fa-fw" />
             <strong>Temperature</strong>
             <small>°C</small>
           </div>
           <line-vis
+            v-if="chartTemperature"
             :domain-id="temperatureMeanId"
             :min-domain-id="temperatureMinId"
             :max-domain-id="temperatureMaxId"
@@ -329,7 +362,11 @@ export default {
       visHeight: 0,
       hoverOn: false,
       lineColour: '#e34a33',
-      windowWidth: 0
+      windowWidth: 0,
+      chartEmissionsVolume: true,
+      chartEmissionsIntensity: true,
+      chartPrice: true,
+      chartTemperature: true
     }
   },
 
@@ -1135,6 +1172,10 @@ export default {
         default:
           return date
       }
+    },
+
+    toggleChart(chartName) {
+      this[chartName] = !this[chartName]
     }
   }
 }
@@ -1167,12 +1208,20 @@ export default {
   }
   .chart {
     position: relative;
+    border-bottom: 1px solid #333;
 
     .chart-title {
-      font-size: 0.7em;
-      position: absolute;
-      left: 1rem;
-      top: -1rem;
+      font-size: 0.8em;
+      padding: 0.2rem 0 0.2rem 1rem;
+      cursor: pointer;
+      user-select: none;
+      // position: absolute;
+      // left: 1rem;
+      // top: -1rem;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.5);
+      }
     }
   }
 }
