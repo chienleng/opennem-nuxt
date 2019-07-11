@@ -52,21 +52,37 @@
           <div
             v-if="step"
             class="chart-title">
-            <strong>Energy</strong>
-            <small>GWh/{{ interval }}</small>
+            <div>
+              <strong>Energy</strong>
+              <small>GWh/{{ interval }}</small>
+            </div>
+            <div>
+              <span>
+                Total:
+                <strong>{{ hoverTotal | formatValue }}</strong>
+              </span>
+            </div>
           </div>
           <div
             v-else
             class="chart-title">
-            <strong>Generation</strong>
-            <small>MW</small>
+            <div>
+              <strong>Generation</strong>
+              <small>MW</small>
+            </div>
+            <div>
+              <span>
+                Total:
+                <strong>{{ hoverTotal | formatValue }}</strong>
+              </span>
+            </div>
           </div>
-          <vis-tooltip
-            :left-position="tooltipLeft"
+          <!-- :left-position="tooltipLeft" -->
+          <!-- <vis-tooltip
             :hover-value="hoverValue"
             :hover-total="hoverTotal"
             :hover-domain-colour="hoverDomainColour"
-          />
+          /> -->
           <stacked-area-vis
             :domains="stackedAreaDomains"
             :dataset="dataset"
@@ -89,14 +105,22 @@
           <div
             class="chart-title"
             @click="toggleChart('chartEmissionsVolume')">
-            <i
-              :class="{
-                'fa-caret-down': chartEmissionsVolume,
-                'fa-caret-right': !chartEmissionsVolume
-              }"
-              class="fal fa-fw" />
-            <strong>Emissions Volume</strong>
-            <!-- <small>-</small> -->
+            <div>
+              <i
+                :class="{
+                  'fa-caret-down': chartEmissionsVolume,
+                  'fa-caret-right': !chartEmissionsVolume
+                }"
+                class="fal fa-fw" />
+              <strong>Emissions Volume</strong>
+              <small>tCO2e</small>
+            </div>
+            <div>
+              <span>
+                Total:
+                <strong>{{ hoverEmissionVolumeTotal | formatValue }}</strong>
+              </span>
+            </div>
           </div>
           <stacked-area-vis
             v-if="chartEmissionsVolume"
@@ -125,14 +149,21 @@
           <div
             class="chart-title"
             @click="toggleChart('chartEmissionsIntensity')">
-            <i
-              :class="{
-                'fa-caret-down': chartEmissionsIntensity,
-                'fa-caret-right': !chartEmissionsIntensity
-              }"
-              class="fal fa-fw" />
-            <strong>Emissions Intensity</strong>
-            <!-- <small>-</small> -->
+            <div>
+              <i
+                :class="{
+                  'fa-caret-down': chartEmissionsIntensity,
+                  'fa-caret-right': !chartEmissionsIntensity
+                }"
+                class="fal fa-fw" />
+              <strong>Emissions Intensity</strong>
+              <!-- <small>-</small> -->
+            </div>
+            <div>
+              <span>
+                <strong>{{ hoverEmissionsIntensity | formatValue }}</strong>
+              </span>
+            </div>
           </div>
           <line-vis
             v-if="chartEmissionsIntensity"
@@ -158,14 +189,21 @@
           <div
             class="chart-title"
             @click="toggleChart('chartPrice')">
-            <i
-              :class="{
-                'fa-caret-down': chartPrice,
-                'fa-caret-right': !chartPrice
-              }"
-              class="fal fa-fw" />
-            <strong>Price</strong>
-            <small>$/MWh</small>
+            <div>
+              <i
+                :class="{
+                  'fa-caret-down': chartPrice,
+                  'fa-caret-right': !chartPrice
+                }"
+                class="fal fa-fw" />
+              <strong>Price</strong>
+              <small>$/MWh</small>
+            </div>
+            <div>
+              <span>
+                <strong>{{ hoverPrice | formatValue }}</strong>
+              </span>
+            </div>
           </div>
           <line-vis
             v-if="chartPrice"
@@ -242,14 +280,16 @@
           <div
             class="chart-title"
             @click="toggleChart('chartTemperature')">
-            <i
-              :class="{
-                'fa-caret-down': chartTemperature,
-                'fa-caret-right': !chartTemperature
-              }"
-              class="fal fa-fw" />
-            <strong>Temperature</strong>
-            <small>°C</small>
+            <div>
+              <i
+                :class="{
+                  'fa-caret-down': chartTemperature,
+                  'fa-caret-right': !chartTemperature
+                }"
+                class="fal fa-fw" />
+              <strong>Temperature</strong>
+              <small>°C</small>
+            </div>
           </div>
           <line-vis
             v-if="chartTemperature"
@@ -586,8 +626,19 @@ export default {
       if (this.hoverData) return this.hoverData._total
       return 0
     },
-    hoverEmissionValue() {
-      return this.hoverData ? this.hoverData[this.hoverDomain] : null
+    hoverEmissionVolumeTotal() {
+      if (this.hoverData) return this.hoverData._totalEmissionsVol
+      return 0
+    },
+    hoverEmissionsIntensity() {
+      if (this.hoverData) return this.hoverData._emissionsIntensity
+      return 0
+    },
+    hoverPrice() {
+      if (this.hoverData && this.priceDomains.length > 0) {
+        return this.hoverData[this.priceDomains[0].id]
+      }
+      return 0
     }
   },
 
@@ -1223,9 +1274,11 @@ export default {
 
     .chart-title {
       font-size: 0.8em;
-      padding: 0.2rem 0 0.2rem 1rem;
+      padding: 0.2rem 1rem 0.2rem 1rem;
       cursor: pointer;
       user-select: none;
+      display: flex;
+      justify-content: space-between;
       // position: absolute;
       // left: 1rem;
       // top: -1rem;

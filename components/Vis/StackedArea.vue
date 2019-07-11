@@ -1,7 +1,7 @@
 <template>
   <div class="vis stacked-area-vis">
     <button
-      v-if="showZoomOut"
+      v-show="zoomed"
       class="button is-rounded is-small reset-btn"
       @click="handleReset"
     >
@@ -153,7 +153,7 @@ export default {
     // OPTIONAL: whether to show zoom out button
     showZoomOut: {
       type: Boolean,
-      default: () => true
+      default: () => false
     }
   },
 
@@ -246,7 +246,7 @@ export default {
 
   watch: {
     dataset() {
-      this.zoomed = false
+      // this.zoomed = false
       this.update()
       this.resizeRedraw()
     },
@@ -257,7 +257,7 @@ export default {
     dynamicExtent(newExtent) {
       if (newExtent && newExtent.length) {
         this.x.domain(newExtent)
-        this.zoomed = true
+        // this.zoomed = true
         this.zoomRedraw()
       }
     },
@@ -552,12 +552,12 @@ export default {
       // Cursor line/rect/text to follow mouse
       $cursorLineRect
         .attr('x', xDate - rectWidth / 2)
-        .attr('y', 0)
+        .attr('y', this.height - this.timeRectHeight)
         .attr('width', rectWidth)
         .attr('opacity', 1)
       $cursorLineText
         .attr('x', xDate)
-        .attr('y', 14)
+        .attr('y', this.height - this.timeRectHeight + 14)
         .text(time)
       // Position and draw the line
       $cursorLine.attr('d', () => {
@@ -709,6 +709,6 @@ export default {
 .reset-btn {
   position: absolute;
   right: 1rem;
-  top: 2.5rem;
+  top: 1rem;
 }
 </style>

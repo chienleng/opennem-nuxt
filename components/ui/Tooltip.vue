@@ -45,11 +45,13 @@ export default {
   background-color: rgba(255, 255, 255, 1);
   position: absolute;
   z-index: 9;
-  top: 26px;
-  left: 30px;
-  margin-left: 10px;
-  padding: 5px 6px 2px;
+  // top: 26px;
+  // left: 30px;
+  // margin-left: 10px;
   text-align: right;
+  bottom: 0;
+  right: 0;
+  padding: 5px 6px 2px;
 }
 .colour-square {
   display: inline-block;
