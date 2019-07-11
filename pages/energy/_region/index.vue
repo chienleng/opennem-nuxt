@@ -1216,7 +1216,10 @@ export default {
   }
   .chart {
     position: relative;
-    border-bottom: 1px solid #333;
+
+    &:not(:first-child) {
+      border-bottom: 1px solid #666;
+    }
 
     .chart-title {
       font-size: 0.8em;
