@@ -20,8 +20,8 @@
       <div class="summary-col-label">
         <div
           :style="{
-            'background-color': isHidden(ft.fuelTech) ? 'transparent' : ft.colour,
-            'border-color': isHidden(ft.fuelTech) ? '#bbb' : ft.colour,
+            'background-color': ft.hidden ? 'transparent' : ft.colour,
+            'border-color': ft.hidden ? '#bbb' : ft.colour,
           }"
           class="colour-square" />
 
@@ -44,13 +44,13 @@
       </div>
     </div>
   </div>
-    
   <!-- </draggable> -->
 </template>
 
 <script>
 import _isEmpty from 'lodash.isempty'
 import _includes from 'lodash.includes'
+import _remove from 'lodash.remove'
 // import Draggable from 'vuedraggable'
 
 export default {
@@ -99,19 +99,20 @@ export default {
 
   data() {
     return {
+      order: [],
       hiddenFuelTechs: []
     }
   },
 
   computed: {
-    order: {
-      get() {
-        return this.originalOrder
-      },
-      set(newOrder) {
-        this.$emit('update', newOrder)
-      }
-    },
+    // order: {
+    //   get() {
+    //     return this.originalOrder
+    //   },
+    //   set(newOrder) {
+    //     this.$emit('update', newOrder)
+    //   }
+    // },
 
     hasPointSummary() {
       return !_isEmpty(this.pointSummary)
@@ -122,9 +123,43 @@ export default {
     }
   },
 
+  watch: {
+    originalOrder(newOrder) {
+      this.order = this.updateOrder(newOrder)
+    }
+  },
+
+  created() {
+    this.order = this.updateOrder(this.originalOrder)
+  },
+
   methods: {
     handleRowClick(fuelTech) {
-      this.hiddenFuelTechs.push(fuelTech)
+      if (_includes(this.hiddenFuelTechs, fuelTech)) {
+        _remove(this.hiddenFuelTechs, d => d === fuelTech)
+      } else {
+        this.hiddenFuelTechs.push(fuelTech)
+      }
+      this.order = this.updateOrder(this.originalOrder)
+      this.$emit(
+        'fuelTechsHidden',
+        this.hiddenFuelTechs.length,
+        this.hiddenFuelTechs
+      )
+    },
+
+    updateOrder(order) {
+      return order.map(d => {
+        return {
+          category: d.category,
+          colour: d.colour,
+          fuelTech: d.fuelTech,
+          id: d.id,
+          label: d.label,
+          type: d.type,
+          hidden: this.isHidden(d.fuelTech)
+        }
+      })
     },
 
     isHidden(fuelTech) {

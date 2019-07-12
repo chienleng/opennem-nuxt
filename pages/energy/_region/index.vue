@@ -353,7 +353,7 @@
       <div class="table-container">
         <summary-table
           v-if="ready"
-          :domains="stackedAreaDomains"
+          :domains="summaryDomains"
           :price-id="priceDomains.length > 0 ? priceDomains[0].id : null"
           :market-value-domains="mvDomains"
           :dataset="filteredDataset"
@@ -362,6 +362,7 @@
           :range="range"
           :interval="interval"
           :is-energy="step"
+          @fuelTechsHidden="handleFuelTechsHidden"
         />
       </div>
     </div>
@@ -420,6 +421,8 @@ export default {
       dataset: [],
       energyDomains: [],
       fuelTechEnergyOrder: [],
+      hiddenFuelTechs: [],
+      hiddenLength: 0,
       emissionsOrder: [],
       marketValueDomains: [],
       temperatureDomains: [],
@@ -627,6 +630,13 @@ export default {
         : this.marketValueDomains
     },
     stackedAreaDomains() {
+      console.log(this.hiddenLength, this.hiddenFuelTechs)
+      const hidden = this.hiddenFuelTechs
+      let domains =
+        this.groupDomains.length > 0 ? this.groupDomains : this.energyDomains
+      return domains.filter(d => !_includes(hidden, d.fuelTech))
+    },
+    summaryDomains() {
       return this.groupDomains.length > 0
         ? this.groupDomains
         : this.energyDomains
@@ -659,8 +669,13 @@ export default {
       return null
     },
     hoverTotal() {
-      if (this.hoverData) return this.hoverData._total
-      return 0
+      let total = 0
+      if (this.hoverData) {
+        this.stackedAreaDomains.forEach(d => {
+          total += this.hoverData[d.id]
+        })
+      }
+      return total
     },
     hoverEmissionVolumeTotal() {
       if (this.hoverData) return this.hoverData._totalEmissionsVol
@@ -1289,6 +1304,11 @@ export default {
 
     toggleChart(chartName) {
       this.$store.dispatch(chartName, !this[chartName])
+    },
+
+    handleFuelTechsHidden(hiddenLength, hidden) {
+      this.hiddenFuelTechs = hidden
+      this.hiddenLength = hiddenLength
     }
   }
 }

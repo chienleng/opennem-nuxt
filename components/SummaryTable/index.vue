@@ -75,6 +75,7 @@
       :summary-total="summary._totalEnergy"
       :show-percent-column="true"
       @update="handleSourcesOrderUpdate"
+      @fuelTechsHidden="handleSourceFuelTechsHidden"
     />
     
     <div class="summary-column-headers">
@@ -487,6 +488,11 @@ export default {
       const sourcesOrder = sources.map(d => d.fuelTech)
       const order = [...sourcesOrder, ...loadsOrder]
       this.$store.dispatch('fuelTechOrder', order.reverse())
+    },
+
+    handleSourceFuelTechsHidden(hiddenLength, hiddenSources) {
+      this.hiddenFuelTechs = hiddenSources
+      this.$emit('fuelTechsHidden', hiddenLength, this.hiddenFuelTechs)
     }
   }
 }
