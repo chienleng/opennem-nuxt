@@ -107,6 +107,7 @@
       :summary-total="summary._totalEnergy"
       :show-percent-column="true"
       @update="handleLoadsOrderUpdate"
+      @fuelTechsHidden="handleLoadFuelTechsHidden"
     />
 
     <div class="summary-column-headers">
@@ -202,6 +203,8 @@ export default {
       pointSummarySources: {},
       pointSummaryLoads: {},
       hiddenFuelTechs: [],
+      hiddenSources: [],
+      hiddenLoads: [],
       hoveredTemperature: 0
     }
   },
@@ -490,9 +493,19 @@ export default {
       this.$store.dispatch('fuelTechOrder', order.reverse())
     },
 
-    handleSourceFuelTechsHidden(hiddenLength, hiddenSources) {
-      this.hiddenFuelTechs = hiddenSources
-      this.$emit('fuelTechsHidden', hiddenLength, this.hiddenFuelTechs)
+    emitHiddenFuelTechs() {
+      this.hiddenFuelTechs = [...this.hiddenSources, ...this.hiddenLoads]
+      this.$emit('fuelTechsHidden', this.hiddenFuelTechs)
+    },
+
+    handleSourceFuelTechsHidden(hidden) {
+      this.hiddenSources = hidden
+      this.emitHiddenFuelTechs()
+    },
+
+    handleLoadFuelTechsHidden(hidden) {
+      this.hiddenLoads = hidden
+      this.emitHiddenFuelTechs()
     }
   }
 }

@@ -141,11 +141,7 @@ export default {
         this.hiddenFuelTechs.push(fuelTech)
       }
       this.order = this.updateOrder(this.originalOrder)
-      this.$emit(
-        'fuelTechsHidden',
-        this.hiddenFuelTechs.length,
-        this.hiddenFuelTechs
-      )
+      this.$emit('fuelTechsHidden', this.hiddenFuelTechs)
     },
 
     updateOrder(order) {

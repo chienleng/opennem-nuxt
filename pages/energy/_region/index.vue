@@ -422,7 +422,6 @@ export default {
       energyDomains: [],
       fuelTechEnergyOrder: [],
       hiddenFuelTechs: [],
-      hiddenLength: 0,
       emissionsOrder: [],
       marketValueDomains: [],
       temperatureDomains: [],
@@ -630,7 +629,6 @@ export default {
         : this.marketValueDomains
     },
     stackedAreaDomains() {
-      console.log(this.hiddenLength, this.hiddenFuelTechs)
       const hidden = this.hiddenFuelTechs
       let domains =
         this.groupDomains.length > 0 ? this.groupDomains : this.energyDomains
@@ -1306,9 +1304,8 @@ export default {
       this.$store.dispatch(chartName, !this[chartName])
     },
 
-    handleFuelTechsHidden(hiddenLength, hidden) {
+    handleFuelTechsHidden(hidden) {
       this.hiddenFuelTechs = hidden
-      this.hiddenLength = hiddenLength
     }
   }
 }
