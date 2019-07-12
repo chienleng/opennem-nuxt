@@ -48,7 +48,7 @@
 
         <div
           v-if="ready"
-          :class="{ 'is-hovered': hoverData }"
+          :class="{ 'is-hovered': hoverOn }"
           class="chart">
           <div
             v-if="step"
@@ -89,6 +89,7 @@
             :dataset="dataset"
             :dynamic-extent="dateFilter"
             :hover-date="hoverDate"
+            :hover-on="hoverOn"
             :range="range"
             :interval="interval"
             :mouse-loc="mouseLoc"
@@ -102,7 +103,7 @@
 
         <div
           v-if="ready && hasEmissionData"
-          :class="{ 'is-hovered': hoverData }"
+          :class="{ 'is-hovered': hoverOn }"
           class="chart">
           <div
             class="chart-title"
@@ -130,6 +131,7 @@
             :dataset="dataset"
             :dynamic-extent="dateFilter"
             :hover-date="hoverDate"
+            :hover-on="hoverOn"
             :range="range"
             :interval="interval"
             :mouse-loc="mouseLoc"
@@ -147,7 +149,7 @@
 
         <div
           v-if="ready && hasEmissionData"
-          :class="{ 'is-hovered': hoverData }"
+          :class="{ 'is-hovered': hoverOn }"
           class="chart">
           <div
             class="chart-title"
@@ -175,6 +177,7 @@
             :dataset="dataset"
             :dynamic-extent="dateFilter"
             :hover-date="hoverDate"
+            :hover-on="hoverOn"
             :range="range"
             :interval="interval"
             :mouse-loc="mouseLoc"
@@ -190,7 +193,7 @@
 
         <div
           v-if="ready && hasPriceData"
-          :class="{ 'is-hovered': hoverData }"
+          :class="{ 'is-hovered': hoverOn }"
           class="chart">
           <div
             class="chart-title"
@@ -219,6 +222,7 @@
             :dataset="dataset"
             :dynamic-extent="dateFilter"
             :hover-date="hoverDate"
+            :hover-on="hoverOn"
             :range="range"
             :interval="interval"
             :mouse-loc="mouseLoc"
@@ -243,6 +247,7 @@
             :dataset="dataset"
             :dynamic-extent="dateFilter"
             :hover-date="hoverDate"
+            :hover-on="hoverOn"
             :range="range"
             :interval="interval"
             :mouse-loc="mouseLoc"
@@ -267,6 +272,7 @@
             :dataset="dataset"
             :dynamic-extent="dateFilter"
             :hover-date="hoverDate"
+            :hover-on="hoverOn"
             :range="range"
             :interval="interval"
             :mouse-loc="mouseLoc"
@@ -288,7 +294,7 @@
 
         <div
           v-if="ready && hasTemperatureData"
-          :class="{ 'is-hovered': hoverData }"
+          :class="{ 'is-hovered': hoverOn }"
           class="chart">
           <div
             class="chart-title"
@@ -327,6 +333,7 @@
             :dataset="dataset"
             :dynamic-extent="dateFilter"
             :hover-date="hoverDate"
+            :hover-on="hoverOn"
             :range="range"
             :interval="interval"
             :mouse-loc="mouseLoc"
@@ -1326,22 +1333,22 @@ export default {
       user-select: none;
       display: flex;
       justify-content: space-between;
-      // position: absolute;
-      // left: 1rem;
-      // top: -1rem;
 
       &:hover {
         background-color: rgba(255, 255, 255, 0.5);
       }
 
       .hover-values {
+        opacity: 0;
         padding: 0 1rem;
         border-radius: 4px;
       }
     }
 
     &.is-hovered .hover-values {
+      opacity: 1;
       background: rgba(255, 255, 255, 0.5);
+      transition: all 0.2s ease-in-out;
     }
   }
 }

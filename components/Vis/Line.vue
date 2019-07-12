@@ -53,7 +53,9 @@
         <g class="line-group" />
 
         <!-- cursor line and tooltip -->
-        <g class="cursor-group">
+        <g
+          v-show="hoverOn"
+          class="cursor-group">
           <g :class="cursorLineGroupClass" />
         </g> 
 
@@ -137,6 +139,10 @@ export default {
     hoverDate: {
       type: Date,
       default: () => null
+    },
+    hoverOn: {
+      type: Boolean,
+      default: () => false
     },
     range: {
       type: String,
