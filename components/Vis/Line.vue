@@ -52,6 +52,11 @@
         <!-- where the line path will show -->
         <g class="line-group" />
 
+        <!-- cursor line and tooltip -->
+        <g class="cursor-group">
+          <g :class="cursorLineGroupClass" />
+        </g> 
+
         <!-- hover layer to read interaction movements -->
         <g :class="hoverLayerClass">
           <rect
@@ -66,14 +71,7 @@
         :transform="gTransform"
         class="axis-text-group">
         <g :class="yAxisTickClass" />
-      </g>
-
-      <!-- cursor line and tooltip -->
-      <g
-        :transform="gTransform"
-        class="cursor-group">
-        <g :class="cursorLineGroupClass" />
-      </g>    
+      </g>   
     </svg>
   </div>
 </template>
@@ -100,6 +98,7 @@ import * as CONFIG from './shared/config.js'
 import axisTimeFormat from './shared/timeFormat.js'
 import axisSecondaryTimeFormat from './shared/secondaryTimeFormat.js'
 import axisTimeTicks from './shared/timeTicks.js'
+import dateDisplayService from '~/services/DateDisplayService.js'
 
 export default {
   props: {
@@ -138,6 +137,14 @@ export default {
     hoverDate: {
       type: Date,
       default: () => null
+    },
+    range: {
+      type: String,
+      default: () => ''
+    },
+    interval: {
+      type: String,
+      default: () => ''
     },
     // OPTIONAL: height for the chart
     visHeight: {
@@ -238,7 +245,7 @@ export default {
       cursorLineClass: CONFIG.CURSOR_LINE_CLASS,
       cursorLineTextClass: CONFIG.CURSOR_LINE_TEXT_CLASS,
       cursorLineRectClass: CONFIG.CURSOR_LINE_RECT_CLASS,
-      tooltipRectHeight: 23,
+      tooltipRectHeight: 20,
       tooltipGroupClass: CONFIG.TOOLTIP_GROUP_CLASS,
       tooltipRectClass: CONFIG.TOOLTIP_RECT_CLASS,
       tooltipTextClass: CONFIG.TOOLTIP_TEXT_CLASS
@@ -510,6 +517,13 @@ export default {
 
     updateCursorLineTooltip(date) {
       const xDate = this.x(date)
+      const fTime = dateDisplayService(
+        new Date(date).getTime(),
+        this.range,
+        this.interval,
+        false,
+        true
+      )
 
       const valueFormat = d3Format(',.1f')
       const time = new Date(date).getTime()
@@ -526,7 +540,7 @@ export default {
       }
 
       if (this.showTooltip) {
-        this.positionTooltip(xDate, value, minValue, maxValue)
+        this.positionTooltip(xDate, fTime)
       }
 
       const $cursorLine = this.$cursorLineGroup.select(
@@ -540,12 +554,8 @@ export default {
       })
     },
 
-    positionTooltip(xDate, value, minValue, maxValue) {
-      let text = `${value}`
-      if (minValue && maxValue) {
-        text = `min: ${minValue} | av: ${value} | max: ${maxValue}`
-      }
-      const rectWidth = text.length * 6 + 15
+    positionTooltip(xDate, time) {
+      const rectWidth = time.length * 5 + 15
       const $tooltipRect = this.$tooltipGroup.select(
         `.${this.tooltipRectClass}`
       )
@@ -555,13 +565,13 @@ export default {
 
       $tooltipRect
         .attr('x', xDate - rectWidth / 2)
-        .attr('y', 0)
+        .attr('y', this.height - this.tooltipRectHeight)
         .attr('width', rectWidth)
         .attr('opacity', 1)
       $tooltipText
         .attr('x', xDate)
-        .attr('y', 15)
-        .text(text)
+        .attr('y', this.height - this.tooltipRectHeight + 14)
+        .text(time)
 
       // Tooltips to stick to left or right corners when close to the edge
       // - check for value tooltip
@@ -582,6 +592,49 @@ export default {
         }
       }
     },
+
+    // positionTooltip(xDate, value, minValue, maxValue) {
+    //   let text = `${value}`
+    //   if (minValue && maxValue) {
+    //     text = `min: ${minValue} | av: ${value} | max: ${maxValue}`
+    //   }
+    //   const rectWidth = text.length * 6 + 15
+    //   const $tooltipRect = this.$tooltipGroup.select(
+    //     `.${this.tooltipRectClass}`
+    //   )
+    //   const $tooltipText = this.$tooltipGroup.select(
+    //     `.${this.tooltipTextClass}`
+    //   )
+
+    //   $tooltipRect
+    //     .attr('x', xDate - rectWidth / 2)
+    //     .attr('y', 0)
+    //     .attr('width', rectWidth)
+    //     .attr('opacity', 1)
+    //   $tooltipText
+    //     .attr('x', xDate)
+    //     .attr('y', 15)
+    //     .text(text)
+
+    //   // Tooltips to stick to left or right corners when close to the edge
+    //   // - check for value tooltip
+    //   if (this.mouseLoc) {
+    //     const xMouse = this.mouseLoc[0]
+    //     const yMouse = this.mouseLoc[1]
+    //     const leftCutoff = rectWidth / 2
+    //     const rightCutoff = this.width - rectWidth / 2
+
+    //     if (xMouse >= rightCutoff) {
+    //       $tooltipRect.attr('x', rightCutoff - rectWidth / 2)
+    //       $tooltipText.attr('x', rightCutoff)
+    //       $tooltipText.select('tspan').attr('x', rightCutoff)
+    //     } else if (xMouse <= leftCutoff) {
+    //       $tooltipRect.attr('x', 0)
+    //       $tooltipText.attr('x', rectWidth / 2)
+    //       $tooltipText.select('tspan').attr('x', rectWidth / 2)
+    //     }
+    //   }
+    // },
 
     // Update vis when container is resized
     handleResize() {

@@ -48,6 +48,7 @@
 
         <div
           v-if="ready"
+          :class="{ 'is-hovered': hoverData }"
           class="chart">
           <div
             v-if="step"
@@ -56,7 +57,7 @@
               <strong>Energy</strong>
               <small>GWh/{{ interval }}</small>
             </div>
-            <div>
+            <div class="hover-values">
               <span>
                 Total:
                 <strong>{{ hoverTotal | formatValue }}</strong>
@@ -70,7 +71,7 @@
               <strong>Generation</strong>
               <small>MW</small>
             </div>
-            <div>
+            <div class="hover-values">
               <span>
                 Total:
                 <strong>{{ hoverTotal | formatValue }}</strong>
@@ -101,6 +102,7 @@
 
         <div
           v-if="ready && hasEmissionData"
+          :class="{ 'is-hovered': hoverData }"
           class="chart">
           <div
             class="chart-title"
@@ -115,7 +117,7 @@
               <strong>Emissions Volume</strong>
               <small>tCO2e</small>
             </div>
-            <div>
+            <div class="hover-values">
               <span>
                 Total:
                 <strong>{{ hoverEmissionVolumeTotal | formatValue }}</strong>
@@ -145,6 +147,7 @@
 
         <div
           v-if="ready && hasEmissionData"
+          :class="{ 'is-hovered': hoverData }"
           class="chart">
           <div
             class="chart-title"
@@ -159,7 +162,7 @@
               <strong>Emissions Intensity</strong>
               <!-- <small>-</small> -->
             </div>
-            <div>
+            <div class="hover-values">
               <span>
                 <strong>{{ hoverEmissionsIntensity | formatValue }}</strong>
               </span>
@@ -172,6 +175,8 @@
             :dataset="dataset"
             :dynamic-extent="dateFilter"
             :hover-date="hoverDate"
+            :range="range"
+            :interval="interval"
             :mouse-loc="mouseLoc"
             :show-x-axis="false"
             :vis-height="80"
@@ -185,6 +190,7 @@
 
         <div
           v-if="ready && hasPriceData"
+          :class="{ 'is-hovered': hoverData }"
           class="chart">
           <div
             class="chart-title"
@@ -199,9 +205,9 @@
               <strong>Price</strong>
               <small>$/MWh</small>
             </div>
-            <div>
+            <div class="hover-values">
               <span>
-                <strong>{{ hoverPrice | formatValue }}</strong>
+                <strong>{{ hoverPrice | formatCurrency }}</strong>
               </span>
             </div>
           </div>
@@ -213,7 +219,10 @@
             :dataset="dataset"
             :dynamic-extent="dateFilter"
             :hover-date="hoverDate"
+            :range="range"
+            :interval="interval"
             :mouse-loc="mouseLoc"
+            :show-tooltip="false"
             :curve="'step'"
             :show-y-axis="false"
             :y-axis-log="true"
@@ -234,6 +243,8 @@
             :dataset="dataset"
             :dynamic-extent="dateFilter"
             :hover-date="hoverDate"
+            :range="range"
+            :interval="interval"
             :mouse-loc="mouseLoc"
             :show-tooltip="false"
             :curve="'step'"
@@ -256,8 +267,9 @@
             :dataset="dataset"
             :dynamic-extent="dateFilter"
             :hover-date="hoverDate"
+            :range="range"
+            :interval="interval"
             :mouse-loc="mouseLoc"
-            :show-tooltip="false"
             :curve="'step'"
             :show-y-axis="false"
             :y-axis-log="true"
@@ -276,6 +288,7 @@
 
         <div
           v-if="ready && hasTemperatureData"
+          :class="{ 'is-hovered': hoverData }"
           class="chart">
           <div
             class="chart-title"
@@ -290,6 +303,20 @@
               <strong>Temperature</strong>
               <small>°C</small>
             </div>
+            <div class="hover-values">
+              <span v-if="hoverMinTemperature">
+                Min:
+                <strong>{{ hoverMinTemperature | formatValue }}</strong>
+                | Av:
+              </span>
+              <span>
+                <strong>{{ hoverMeanTemperature | formatValue }}</strong>
+              </span>
+              <span v-if="hoverMaxTemperature">
+                | Max:
+                <strong>{{ hoverMaxTemperature | formatValue }}</strong>
+              </span>
+            </div>
           </div>
           <line-vis
             v-if="chartTemperature"
@@ -300,6 +327,8 @@
             :dataset="dataset"
             :dynamic-extent="dateFilter"
             :hover-date="hoverDate"
+            :range="range"
+            :interval="interval"
             :mouse-loc="mouseLoc"
             :curve="'smooth'"
             :y-axis-log="false"
@@ -637,6 +666,24 @@ export default {
     hoverPrice() {
       if (this.hoverData && this.priceDomains.length > 0) {
         return this.hoverData[this.priceDomains[0].id]
+      }
+      return 0
+    },
+    hoverMeanTemperature() {
+      if (this.hoverData && this.temperatureDomains.length > 0) {
+        return this.hoverData[this.temperatureMeanId]
+      }
+      return 0
+    },
+    hoverMinTemperature() {
+      if (this.hoverData && this.temperatureDomains.length > 0) {
+        return this.hoverData[this.temperatureMinId]
+      }
+      return 0
+    },
+    hoverMaxTemperature() {
+      if (this.hoverData && this.temperatureDomains.length > 0) {
+        return this.hoverData[this.temperatureMaxId]
       }
       return 0
     }
@@ -1286,6 +1333,15 @@ export default {
       &:hover {
         background-color: rgba(255, 255, 255, 0.5);
       }
+
+      .hover-values {
+        padding: 0 1rem;
+        border-radius: 4px;
+      }
+    }
+
+    &.is-hovered .hover-values {
+      background: rgba(255, 255, 255, 0.5);
     }
   }
 }

@@ -1,5 +1,5 @@
 export const DEFAULT_SVG_HEIGHT = 250
-export const DEFAULT_MARGINS = { left: 10, right: 10, top: 25, bottom: 40 }
+export const DEFAULT_MARGINS = { left: 10, right: 10, top: 25, bottom: 10 }
 
 export const DEBOUNCE_MILLISECONDS = 10
 
