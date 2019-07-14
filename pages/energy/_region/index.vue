@@ -837,7 +837,7 @@ export default {
         this.interval
       ).then(dataset => {
         this.dataset = dataset
-        console.log(dataset)
+        // this.dateFilter = d3Extent(this.dataset, d => d.date)
         if (this.groupDomains.length > 0) {
           this.updateDatasetGroups(dataset, this.groupDomains)
         }
@@ -848,7 +848,6 @@ export default {
           this.updateDatasetGroups(dataset, this.groupEmissionDomains)
         }
         this.updatedFilteredDataset(dataset)
-        this.dateFilter = d3Extent(this.dataset, d => d.date)
         this.ready = true
       })
     },
@@ -1123,6 +1122,7 @@ export default {
         interval
       ).then(dataset => {
         this.dataset = dataset
+        this.dateFilter = d3Extent(this.dataset, d => d.date)
         if (this.groupDomains.length > 0) {
           this.updateDatasetGroups(dataset, this.groupDomains)
         }
@@ -1140,7 +1140,8 @@ export default {
     handleDatasetFilter(dateRange) {
       if (dateRange && dateRange.length > 0) {
         const startTime = this.snapToClosestInterval(dateRange[0])
-        const endTime = this.snapToClosestInterval(dateRange[1])
+        // const endTime = this.snapToClosestInterval(dateRange[1])
+        const endTime = dateRange[1]
         this.filteredDataset = DataTransformService.filterDataByStartEndDates(
           this.dataset,
           startTime,

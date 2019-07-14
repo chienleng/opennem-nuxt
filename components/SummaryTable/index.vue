@@ -3,10 +3,12 @@
     <header>
       <span v-if="!hoverOn">
         <time :datetime="startDateTime">
+          <!-- {{ startDate | formatDate }} -->
           {{ startDate | customFormatDate({ range, interval }) }}
         </time>
         –
         <time :datetime="endDateTime">
+          <!-- {{ endDate | formatDate }} -->
           {{ endDate | customFormatDate({ range, interval, showYear: true }) }}
         </time>
       </span>
@@ -265,9 +267,9 @@ export default {
     },
 
     startDateTime() {
-      const dataLength = this.dataset.length
-      const startDate = dataLength > 0 ? this.dataset[0].date : null
-      return startDate ? new Date(startDate).toISOString() : ''
+      // const dataLength = this.dataset.length
+      // const startDate = dataLength > 0 ? this.dataset[0].date : null
+      return this.startDate ? new Date(this.startDate).toISOString() : ''
     },
 
     endDate() {
@@ -277,9 +279,9 @@ export default {
     },
 
     endDateTime() {
-      const dataLength = this.dataset.length
-      const endDate = dataLength > 0 ? this.dataset[dataLength - 1].date : null
-      return endDate ? new Date(endDate).toISOString() : ''
+      // const dataLength = this.dataset.length
+      // const endDate = dataLength > 0 ? this.dataset[dataLength - 1].date : null
+      return this.endDate ? new Date(this.endDate).toISOString() : ''
     }
   },
 
