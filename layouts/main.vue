@@ -18,3 +18,15 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+@import '~/assets/scss/responsive-mixins.scss';
+@import '~/assets/scss/variables.scss';
+
+.container-fluid {
+  margin-bottom: 1rem;
+  @include tablet {
+    margin-bottom: 3rem;
+  }
+}
+</style>

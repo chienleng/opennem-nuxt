@@ -15,7 +15,8 @@
       v-for="(ft, index) in order"
       :key="ft.id"
       class="item summary-row"
-      @click="handleRowClick(ft)">
+      @click.exact="handleRowClick(ft)"
+      @click.shift.exact="handleRowShiftClicked(ft)">
 
       <div class="summary-col-label">
         <div
@@ -131,7 +132,7 @@ export default {
     originalOrder(newOrder) {
       this.order = this.updateOrder(newOrder)
     },
-    hiddenFuelTechs() {
+    hiddenFuelTechs(fts) {
       this.order = this.updateOrder(this.originalOrder)
     }
   },
@@ -150,7 +151,15 @@ export default {
         hidden.push(fuelTech)
       }
       this.order = this.updateOrder(this.originalOrder)
-      this.$emit('fuelTechsHidden', hidden)
+      this.$emit('fuelTechsHidden', hidden, false)
+    },
+
+    handleRowShiftClicked(ft) {
+      const property = ft.fuelTech ? 'fuelTech' : 'id'
+      const hiddenObjs = this.order.filter(d => d[property] !== ft[property])
+      const hidden = hiddenObjs.map(d => d[property])
+      this.order = this.updateOrder(this.originalOrder)
+      this.$emit('fuelTechsHidden', hidden, true)
     },
 
     updateOrder(order) {

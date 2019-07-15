@@ -220,6 +220,12 @@ export default {
       return this.$store.getters.fuelTechGroup
     },
 
+    sourcesOrderLength() {
+      return this.domains.filter(
+        d => d.category === 'source' || d.category === 'load'
+      ).length
+    },
+
     sourcesOrder() {
       return this.domains.filter(d => d.category === 'source')
     },
@@ -511,16 +517,31 @@ export default {
 
     emitHiddenFuelTechs() {
       this.hiddenFuelTechs = [...this.hiddenSources, ...this.hiddenLoads]
+
+      // if all is hidden, then unhide all
+      if (this.hiddenFuelTechs.length === this.sourcesOrderLength) {
+        this.hiddenSources = []
+        this.hiddenLoads = []
+        this.hiddenFuelTechs = []
+      }
       this.$emit('fuelTechsHidden', this.hiddenFuelTechs)
     },
 
-    handleSourceFuelTechsHidden(hidden) {
+    handleSourceFuelTechsHidden(hidden, hideOthers) {
+      const property = this.fuelTechGroup === 'Default' ? 'fuelTech' : 'id'
       this.hiddenSources = hidden
+      if (hideOthers) {
+        this.hiddenLoads = this.loadsOrder.map(d => d[property])
+      }
       this.emitHiddenFuelTechs()
     },
 
-    handleLoadFuelTechsHidden(hidden) {
+    handleLoadFuelTechsHidden(hidden, hideOthers) {
+      const property = this.fuelTechGroup === 'Default' ? 'fuelTech' : 'id'
       this.hiddenLoads = hidden
+      if (hideOthers) {
+        this.hiddenSources = this.sourcesOrder.map(d => d[property])
+      }
       this.emitHiddenFuelTechs()
     }
   }

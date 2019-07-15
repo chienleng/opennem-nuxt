@@ -663,7 +663,7 @@ export default {
         : this.emissionDomains
     },
     stackedAreaHeight() {
-      let height = 380
+      let height = 330
       if (this.regionId === 'nem' && !this.widthBreak) {
         height = 528
       }
@@ -1353,7 +1353,6 @@ export default {
   }
   .table-container {
     width: 100%;
-    height: 700px;
 
     @include desktop {
       width: 30%;
