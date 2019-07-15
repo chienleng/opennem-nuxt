@@ -58,6 +58,14 @@
               <small>GWh/{{ interval }}</small>
             </div>
             <div class="hover-values">
+              <span v-if="hoverValue">
+                <em
+                  :style="{ 'background-color': hoverDomainColour }"
+                  class="colour-square" />
+                {{ hoverDomainLabel }}:
+                <strong>{{ hoverValue | formatValue }}</strong>
+                |
+              </span>
               <span>
                 Total:
                 <strong>{{ hoverTotal | formatValue }}</strong>
@@ -72,6 +80,14 @@
               <small>MW</small>
             </div>
             <div class="hover-values">
+              <span v-if="hoverValue">
+                <em
+                  :style="{ 'background-color': hoverDomainColour }"
+                  class="colour-square" />
+                {{ hoverDomainLabel }}:
+                <strong>{{ hoverValue | formatValue }}</strong>
+                |
+              </span>
               <span>
                 Total:
                 <strong>{{ hoverTotal | formatValue }}</strong>
@@ -630,7 +646,6 @@ export default {
     },
     stackedAreaDomains() {
       const hidden = this.hiddenFuelTechs
-      console.log(this.fuelTechGroup)
       let domains =
         this.groupDomains.length > 0 ? this.groupDomains : this.energyDomains
       return this.fuelTechGroup
@@ -660,6 +675,10 @@ export default {
     hoverData() {
       const time = new Date(this.hoverDate).getTime()
       return this.dataset.find(d => d.date === time)
+    },
+    hoverDomainLabel() {
+      const find = this.summaryDomains.find(d => d.id === this.hoverDomain)
+      return find ? find.label : '—'
     },
     hoverValue() {
       return this.hoverData ? this.hoverData[this.hoverDomain] : null
@@ -1361,8 +1380,18 @@ export default {
 
       .hover-values {
         opacity: 0;
-        padding: 0 1rem;
+        padding: 2px 1rem 1px;
         border-radius: 4px;
+      }
+
+      .colour-square {
+        display: inline-block;
+        border: 1px solid transparent;
+        width: 11px;
+        height: 11px;
+        border-radius: 1px;
+        position: relative;
+        top: 1px;
       }
     }
 
