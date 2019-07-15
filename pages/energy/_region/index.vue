@@ -630,9 +630,12 @@ export default {
     },
     stackedAreaDomains() {
       const hidden = this.hiddenFuelTechs
+      console.log(this.fuelTechGroup)
       let domains =
         this.groupDomains.length > 0 ? this.groupDomains : this.energyDomains
-      return domains.filter(d => !_includes(hidden, d.fuelTech))
+      return this.fuelTechGroup
+        ? domains.filter(d => !_includes(hidden, d.id))
+        : domains.filter(d => !_includes(hidden, d.fuelTech))
     },
     summaryDomains() {
       return this.groupDomains.length > 0

@@ -68,6 +68,7 @@
 
     <items
       :group="'ft-sources'"
+      :hidden-fuel-techs="hiddenSources"
       :original-order="sourcesOrder"
       :market-value-order="sourcesMarketValueOrder"
       :show-point-summary="hoverOn"
@@ -100,6 +101,7 @@
 
     <items
       :group="'ft-loads'"
+      :hidden-fuel-techs="hiddenLoads"
       :original-order="loadsOrder"
       :market-value-order="loadsMarketValueOrder"
       :show-point-summary="hoverOn"
@@ -214,6 +216,10 @@ export default {
   },
 
   computed: {
+    fuelTechGroup() {
+      return this.$store.getters.fuelTechGroup
+    },
+
     sourcesOrder() {
       return this.domains.filter(d => d.category === 'source')
     },
@@ -288,6 +294,12 @@ export default {
   },
 
   watch: {
+    fuelTechGroup(updated) {
+      // clear hidden fuel techs when grouping is changed
+      this.hiddenSources = []
+      this.hiddenLoads = []
+      this.emitHiddenFuelTechs()
+    },
     dataset(updated) {
       this.calculateSummary(updated)
     },

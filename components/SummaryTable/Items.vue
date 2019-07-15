@@ -15,7 +15,7 @@
       v-for="(ft, index) in order"
       :key="ft.id"
       class="item summary-row"
-      @click="handleRowClick(ft.fuelTech)">
+      @click="handleRowClick(ft)">
 
       <div class="summary-col-label">
         <div
@@ -51,6 +51,7 @@
 import _isEmpty from 'lodash.isempty'
 import _includes from 'lodash.includes'
 import _remove from 'lodash.remove'
+import _cloneDeep from 'lodash.clonedeep'
 // import Draggable from 'vuedraggable'
 
 export default {
@@ -64,6 +65,10 @@ export default {
       default: () => []
     },
     marketValueOrder: {
+      type: Array,
+      default: () => []
+    },
+    hiddenFuelTechs: {
       type: Array,
       default: () => []
     },
@@ -99,8 +104,7 @@ export default {
 
   data() {
     return {
-      order: [],
-      hiddenFuelTechs: []
+      order: []
     }
   },
 
@@ -126,6 +130,9 @@ export default {
   watch: {
     originalOrder(newOrder) {
       this.order = this.updateOrder(newOrder)
+    },
+    hiddenFuelTechs() {
+      this.order = this.updateOrder(this.originalOrder)
     }
   },
 
@@ -134,14 +141,16 @@ export default {
   },
 
   methods: {
-    handleRowClick(fuelTech) {
-      if (_includes(this.hiddenFuelTechs, fuelTech)) {
-        _remove(this.hiddenFuelTechs, d => d === fuelTech)
+    handleRowClick(ft) {
+      const fuelTech = ft.fuelTech || ft.id
+      const hidden = _cloneDeep(this.hiddenFuelTechs)
+      if (_includes(hidden, fuelTech)) {
+        _remove(hidden, d => d === fuelTech)
       } else {
-        this.hiddenFuelTechs.push(fuelTech)
+        hidden.push(fuelTech)
       }
       this.order = this.updateOrder(this.originalOrder)
-      this.$emit('fuelTechsHidden', this.hiddenFuelTechs)
+      this.$emit('fuelTechsHidden', hidden)
     },
 
     updateOrder(order) {
@@ -153,12 +162,13 @@ export default {
           id: d.id,
           label: d.label,
           type: d.type,
-          hidden: this.isHidden(d.fuelTech)
+          hidden: this.isHidden(d)
         }
       })
     },
 
-    isHidden(fuelTech) {
+    isHidden(ft) {
+      const fuelTech = ft.fuelTech || ft.id
       return _includes(this.hiddenFuelTechs, fuelTech)
     },
 
