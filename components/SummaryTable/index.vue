@@ -125,6 +125,8 @@
           class="summary-col-energy cell-value">
           {{ pointSummary._total | formatValue }}
         </div>
+        <div class="summary-col-contribution cell-value" />
+        <div class="summary-col-av-value cell-value" />
       </div>
     </div>
   </div>
