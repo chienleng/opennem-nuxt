@@ -1,23 +1,9 @@
 <template>
-  <div class="container-fluid">
-    <app-nav />
+  <div class="container">
     <nuxt/>
   </div>
 </template>
 
 <script>
-import AppNav from '~/components/layout/Nav'
-
-export default {
-  middleware: 'meta',
-  components: {
-    AppNav
-  }
-}
+export default {}
 </script>
-
-<style lang="scss">
-.container-fluid {
-  margin-bottom: 2rem;
-}
-</style>

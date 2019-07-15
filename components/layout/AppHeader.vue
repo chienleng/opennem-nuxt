@@ -7,7 +7,7 @@
         <i
           v-if="ready && widthBreak"
           class="fal fa-ellipsis-v" />
-        <logo class="header-logo" />
+        <app-logo class="header-logo" />
         <h1 v-if="ready && widthBreak"> {{ regionLabel }}</h1>
       </div>
       <view-dropdown
@@ -45,7 +45,7 @@
 import _debounce from 'lodash.debounce'
 import DownloadCsv from 'vue-json-csv'
 import REGIONS from '~/constants/regions.js'
-import Logo from '~/components/ui/Logo'
+import AppLogo from '~/components/ui/Logo'
 import ViewDropdown from '~/components/ui/ViewDropdown'
 import RegionDropdown from '~/components/ui/RegionDropdown'
 import AppDrawer from '~/components/layout/Drawer'
@@ -53,7 +53,7 @@ import AppDrawer from '~/components/layout/Drawer'
 export default {
   components: {
     DownloadCsv,
-    Logo,
+    AppLogo,
     ViewDropdown,
     RegionDropdown,
     AppDrawer
