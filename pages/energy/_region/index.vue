@@ -1381,6 +1381,7 @@ export default {
         opacity: 0;
         padding: 2px 1rem 1px;
         border-radius: 4px;
+        white-space: nowrap;
       }
 
       .colour-square {
