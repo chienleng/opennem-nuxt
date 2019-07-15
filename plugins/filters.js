@@ -5,11 +5,23 @@ import dateDisplayService from '~/services/DateDisplayService.js'
 
 Vue.filter(
   'customFormatDate',
-  (time, { range, interval, showYear = false, showIntervalRange = false }) => {
+  (
+    time,
+    {
+      range,
+      interval,
+      isStart = false,
+      isEnd = false,
+      showYear = false,
+      showIntervalRange = false
+    }
+  ) => {
     return dateDisplayService(
       time,
       range,
       interval,
+      isStart,
+      isEnd,
       showYear,
       showIntervalRange
     )

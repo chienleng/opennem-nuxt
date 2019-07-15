@@ -528,6 +528,8 @@ export default {
         this.range,
         this.interval,
         false,
+        false,
+        false,
         true
       )
 

@@ -4,12 +4,12 @@
       <span v-if="!hoverOn">
         <time :datetime="startDateTime">
           <!-- {{ startDate | formatDate }} -->
-          {{ startDate | customFormatDate({ range, interval }) }}
+          {{ startDate | customFormatDate({ range, interval, isStart: true }) }}
         </time>
         –
         <time :datetime="endDateTime">
           <!-- {{ endDate | formatDate }} -->
-          {{ endDate | customFormatDate({ range, interval, showYear: true }) }}
+          {{ endDate | customFormatDate({ range, interval, showYear: true, isEnd: true }) }}
         </time>
       </span>
       

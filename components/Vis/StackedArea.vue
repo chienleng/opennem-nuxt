@@ -485,6 +485,8 @@ export default {
         this.range,
         this.interval,
         false,
+        false,
+        false,
         true
       )
       const valueFormat = d3Format(',.1f')

@@ -30,7 +30,15 @@ function getQuarterLabel(month) {
   }
 }
 
-export default function(time, range, interval, showYear, showIntervalRange) {
+export default function(
+  time,
+  range,
+  interval,
+  isStart,
+  isEnd,
+  showYear,
+  showIntervalRange
+) {
   const now = Date.now()
   const today = d3TimeFormat('%d/%m/%Y')(now)
   const fDate = d3TimeFormat('%d/%m/%Y')(time)
@@ -50,12 +58,22 @@ export default function(time, range, interval, showYear, showIntervalRange) {
       if (interval === 'Day') {
         formatString = getFormatStringDay(sYear)
         display = d3TimeFormat(formatString)(time)
-      } else if (interval === 'Week' && showIntervalRange) {
-        const sixDayslater = time + 518400000
+      } else if (interval === 'Week') {
         formatString = getFormatStringDay(true)
-        display = `${d3TimeFormat('%-d')(time)} – ${d3TimeFormat(formatString)(
-          sixDayslater
-        )}`
+
+        if (showIntervalRange) {
+          const sixDayslater = time + 518400000
+          const sDate = d3TimeFormat('%-d')(time)
+          const eDate = d3TimeFormat(formatString)(sixDayslater)
+          display = `${sDate} – ${eDate}`
+        } else {
+          if (isStart) {
+            display = d3TimeFormat(formatString)(time)
+          } else {
+            const sixDayslater = time + 518400000
+            display = d3TimeFormat(formatString)(sixDayslater)
+          }
+        }
       } else {
         display = d3TimeFormat('%b %Y')(time)
       }
