@@ -895,6 +895,7 @@ export default {
           this.updateDatasetGroups(dataset, this.groupEmissionDomains)
         }
         this.updatedFilteredDataset(dataset)
+        this.updateEnergyMinMax()
         this.ready = true
       })
     },
