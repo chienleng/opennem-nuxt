@@ -1,12 +1,16 @@
 import cloneDeep from 'lodash.clonedeep'
 import * as FUEL_TECHS from '~/constants/fuelTech.js'
+import * as SimplifiedGroup from '~/constants/group-simplified.js'
+import * as FlexibilityGroup from '~/constants/group-flexibility.js'
+import * as RenewableFossilGroup from '~/constants/group-renewable-fossil.js'
+import * as SolarResidualGroup from '~/constants/group-solar-residual.js'
 
 export const state = () => ({
   currentView: 'energy', // energy, facilities
   nem: [],
   fuelTechMeta: null,
   fuelTechNames: null,
-  fuelTechGroup: 'Default',
+  fuelTechGroupName: 'Default',
   fuelTechOrder: cloneDeep(FUEL_TECHS.DEFAULT_FUEL_TECH_ORDER),
   range: '30D',
   interval: 'Day',
@@ -31,8 +35,8 @@ export const mutations = {
   fuelTechNames(state, data) {
     state.fuelTechNames = cloneDeep(data)
   },
-  fuelTechGroup(state, data) {
-    state.fuelTechGroup = cloneDeep(data)
+  fuelTechGroupName(state, data) {
+    state.fuelTechGroupName = data
   },
   fuelTechOrder(state, data) {
     state.fuelTechOrder = data
@@ -69,9 +73,59 @@ export const getters = {
   nemData: state => state.nem,
   fuelTechMeta: state => state.fuelTechMeta,
   fuelTechNames: state => state.fuelTechNames,
-  fuelTechGroup: state => state.fuelTechGroup,
+  fuelTechGroupName: state => state.fuelTechGroupName,
+  fuelTechGroup: state => {
+    const fuelTechGroupName = state.fuelTechGroupName
+    let group = null
+    switch (fuelTechGroupName) {
+      case 'Simplified':
+        group = SimplifiedGroup
+        break
+      case 'Flexibility':
+        group = FlexibilityGroup
+        break
+      case 'Renewable/Fossil':
+        group = RenewableFossilGroup
+        break
+      case 'Solar/Residual':
+        group = SolarResidualGroup
+        break
+      default:
+    }
+    return group
+  },
   fuelTechOrder: state => state.fuelTechOrder,
   range: state => state.range,
+  energyCurveType: state => {
+    switch (state.range) {
+      case '1D':
+      case '3D':
+      case '7D':
+        return 'linear'
+      default:
+        return 'step'
+    }
+  },
+  step: state => {
+    switch (state.range) {
+      case '1D':
+      case '3D':
+      case '7D':
+        return false
+      default:
+        return true
+    }
+  },
+  energyChartType: state => {
+    switch (state.range) {
+      case '1D':
+      case '3D':
+      case '7D':
+        return 'power'
+      default:
+        return 'energy'
+    }
+  },
   interval: state => state.interval,
   exportData: state => state.exportData,
   responsiveBreakWidth: state => state.responsiveBreakWidth,
@@ -91,8 +145,8 @@ export const actions = {
   fuelTechNames({ commit }, data) {
     commit('fuelTechNames', data)
   },
-  fuelTechGroup({ commit }, data) {
-    commit('fuelTechGroup', data)
+  fuelTechGroupName({ commit }, data) {
+    commit('fuelTechGroupName', data)
   },
   fuelTechOrder({ commit }, data) {
     commit('fuelTechOrder', data)

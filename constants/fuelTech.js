@@ -19,26 +19,47 @@ export const SOLAR = 'solar'
 export const ROOFTOP_SOLAR = 'rooftop_solar'
 
 // Fuel tech default order
+// export const DEFAULT_FUEL_TECH_ORDER = [
+//   BATTERY_CHARGING,
+//   PUMPS,
+//   EXPORTS,
+//   IMPORTS,
+//   BROWN_COAL,
+//   BLACK_COAL,
+//   BIOMASS,
+//   DISTILLATE,
+//   GAS_STEAM,
+//   GAS_CCGT,
+//   GAS_OCGT,
+//   GAS_RECIP,
+//   GAS_LFG,
+//   GAS_WCMG,
+//   BATTERY_DISCHARGING,
+//   HYDRO,
+//   WIND,
+//   SOLAR,
+//   ROOFTOP_SOLAR
+// ]
 export const DEFAULT_FUEL_TECH_ORDER = [
-  BATTERY_CHARGING,
-  PUMPS,
-  EXPORTS,
-  IMPORTS,
-  BROWN_COAL,
-  BLACK_COAL,
-  BIOMASS,
-  DISTILLATE,
-  GAS_STEAM,
-  GAS_CCGT,
-  GAS_OCGT,
-  GAS_RECIP,
-  GAS_LFG,
-  GAS_WCMG,
-  BATTERY_DISCHARGING,
-  HYDRO,
-  WIND,
+  ROOFTOP_SOLAR,
   SOLAR,
-  ROOFTOP_SOLAR
+  WIND,
+  HYDRO,
+  BATTERY_DISCHARGING,
+  GAS_WCMG,
+  GAS_LFG,
+  GAS_RECIP,
+  GAS_OCGT,
+  GAS_CCGT,
+  GAS_STEAM,
+  DISTILLATE,
+  BIOMASS,
+  BLACK_COAL,
+  BROWN_COAL,
+  IMPORTS,
+  EXPORTS,
+  PUMPS,
+  BATTERY_CHARGING
 ]
 
 // Fuel tech colour

@@ -54,8 +54,8 @@ import _debounce from 'lodash.debounce'
 import _includes from 'lodash.includes'
 import _orderBy from 'lodash.orderby'
 import * as FUEL_TECHS from '~/constants/fuelTech.js'
-import http from '~/services/HttpService.js'
-import FacilityDataTransformService from '~/services/FacilityDataTransformService.js'
+import Http from '~/services/Http.js'
+import FacilityDataTransformService from '~/services/dataTransform/Facility.js'
 import FacilityFilters from '~/components/Facility/Filters.vue'
 import FacilityList from '~/components/Facility/List.vue'
 import FacilityMap from '~/components/Facility/Map.vue'
@@ -147,7 +147,7 @@ export default {
       const urls = ['/facility/facility_registry.json']
 
       if (urls.length > 0) {
-        http(urls)
+        Http(urls)
           .then(responses => {
             this.handleResponses(responses)
           })

@@ -27,14 +27,17 @@
     <div
       v-if="!widthBreak"
       class="share-buttons buttons has-addons">
-      <!-- <span class="button is-rounded">Image</span> -->
+      <button class="button is-rounded">
+        <i class="fal fa-fw fa-chart-bar" />
+        <span class="label-image">Image</span>
+      </button>
       <button class="button is-rounded">
         <download-csv
           :data="exportData"
           :name="`test.csv`"
         >
           <i class="fal fa-fw fa-table" />
-          <span class="csv-label">Data</span>
+          <span class="label-csv">Data</span>
         </download-csv>
       </button>
     </div>
@@ -166,6 +169,14 @@ header {
   .share-buttons {
     .button {
       font-size: 0.9rem;
+    }
+
+    .label-image {
+      margin-left: 3px;
+    }
+    .fa-chart-bar {
+      position: relative;
+      top: 1px;
     }
   }
 }

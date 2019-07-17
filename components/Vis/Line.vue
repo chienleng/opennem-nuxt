@@ -100,7 +100,7 @@ import * as CONFIG from './shared/config.js'
 import axisTimeFormat from './shared/timeFormat.js'
 import axisSecondaryTimeFormat from './shared/secondaryTimeFormat.js'
 import axisTimeTicks from './shared/timeTicks.js'
-import dateDisplayService from '~/services/DateDisplayService.js'
+import DateDisplay from '~/services/DateDisplay.js'
 
 export default {
   props: {
@@ -523,7 +523,7 @@ export default {
 
     updateCursorLineTooltip(date) {
       const xDate = this.x(date)
-      const fTime = dateDisplayService(
+      const fTime = DateDisplay.specialDateFormats(
         new Date(date).getTime(),
         this.range,
         this.interval,

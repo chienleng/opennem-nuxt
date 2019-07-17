@@ -29,8 +29,8 @@ export default {
   },
 
   computed: {
-    fuelTechGroup() {
-      return this.$store.getters.fuelTechGroup
+    fuelTechGroupName() {
+      return this.$store.getters.fuelTechGroupName
     }
   },
 
@@ -38,18 +38,18 @@ export default {
     selected(newValue) {
       this.triggerGroupChange()
     },
-    fuelTechGroup(group) {
+    fuelTechGroupName(group) {
       this.selected = group
     }
   },
 
   mounted() {
-    this.selected = this.fuelTechGroup
+    this.selected = this.fuelTechGroupName
   },
 
   methods: {
     triggerGroupChange() {
-      this.$store.dispatch('fuelTechGroup', this.selected)
+      this.$store.dispatch('fuelTechGroupName', this.selected)
     }
   }
 }

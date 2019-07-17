@@ -2,14 +2,14 @@ import moment from 'moment'
 import _sortBy from 'lodash.sortby'
 import parseInterval from '~/plugins/intervalParser.js'
 
-import rollUp30m from './rollUpModules/ru-30m.js'
-import rollUp1YDay from './rollUpModules/ru-1y-day.js'
-import rollUp1YWeek from './rollUpModules/ru-1y-week.js'
-import rollUp1YMonth from './rollUpModules/ru-1y-month.js'
-import rollUpAllSeason from './rollUpModules/ru-all-season.js'
-import rollUpAllQuarter from './rollUpModules/ru-all-quarter.js'
-import rollUpAllFinYear from './rollUpModules/ru-all-financial-year.js'
-import rollUpAllYear from './rollUpModules/ru-all-year.js'
+import rollUp30m from '../rollUpModules/ru-30m.js'
+import rollUp1YDay from '../rollUpModules/ru-1y-day.js'
+import rollUp1YWeek from '../rollUpModules/ru-1y-week.js'
+import rollUp1YMonth from '../rollUpModules/ru-1y-month.js'
+import rollUpAllSeason from '../rollUpModules/ru-all-season.js'
+import rollUpAllQuarter from '../rollUpModules/ru-all-quarter.js'
+import rollUpAllFinYear from '../rollUpModules/ru-all-financial-year.js'
+import rollUpAllYear from '../rollUpModules/ru-all-year.js'
 
 const PRICE_ABOVE_300 = 'price.above300'
 const PRICE_BELOW_0 = 'price.below0'
@@ -270,6 +270,109 @@ export default {
     return promise
   },
 
+  mergeResponses(
+    res,
+    energyDomains,
+    marketValueDomains,
+    temperatureDomains,
+    priceDomains,
+    emissionDomains,
+    range,
+    interval
+  ) {
+    return new Promise(resolve => {
+      let data = []
+      const promises = []
+
+      // flatten data for vis and summary
+      res.forEach(r => {
+        promises.push(
+          this.flattenAndInterpolate(
+            r.data,
+            energyDomains,
+            marketValueDomains,
+            temperatureDomains,
+            priceDomains,
+            emissionDomains
+          )
+        )
+      })
+
+      // return flatten data and merge
+      Promise.all(promises).then(values => {
+        values.forEach(v => {
+          data = [...data, ...v]
+        })
+
+        // If 1D or 3D, use 7D data and filter the data here, so the chart takes doesn't zoom
+        if (range === '1D' || range === '3D') {
+          const now = new Date().getTime()
+          const roundedEndDate =
+            interval === '5m'
+              ? d3TimeMinute.every(5).round(now)
+              : d3TimeMinute.every(30).round(now)
+          const diff = range === '1D' ? 86400000 : 259200000
+          data = this.filterDataByStartEndDates(
+            data,
+            roundedEndDate - diff,
+            roundedEndDate
+          )
+        } else if (range === '1Y') {
+          const now = new Date().getTime()
+          const aYearAgo = now - 31557600000
+          data = data.filter(d => d.date >= aYearAgo && d.date <= now)
+        }
+
+        // Roll up based on interval
+        this.rollUp(
+          data,
+          energyDomains,
+          marketValueDomains,
+          temperatureDomains,
+          priceDomains,
+          emissionDomains,
+          range,
+          interval
+        ).then(rolledUpData => {
+          // Then calculate min and total for each point for the chart
+          resolve(
+            this.calculateMinTotal(rolledUpData, energyDomains, emissionDomains)
+          )
+        })
+      })
+    })
+  },
+
+  calculateMinTotal(dataset, energyDomains, emissionDomains) {
+    // Calculate total, min, reverse value for imports and load types
+    dataset.forEach((d, i) => {
+      let total = 0,
+        min = 0,
+        totalEmissionsVol = 0
+      energyDomains.forEach(domain => {
+        const id = domain.id
+
+        if (domain.category === 'load' || domain.fuelTech === 'imports') {
+          const negValue = -d[id]
+          d[id] = negValue
+        }
+        total += d[id] || 0
+        if (d[id] < 0) {
+          min += d[id] || 0
+        }
+      })
+
+      emissionDomains.forEach(domain => {
+        totalEmissionsVol += d[domain.id] || 0
+      })
+      dataset[i]._total = total
+      dataset[i]._min = min
+      dataset[i]._totalEmissionsVol = totalEmissionsVol
+      dataset[i]._emissionsIntensity = totalEmissionsVol / total || 0
+    })
+    return dataset
+  },
+
   rollUp(
     data,
     energyDomains,
@@ -310,19 +413,6 @@ export default {
       resolve(data)
     })
     return promise
-  },
-
-  getColumns(data) {
-    const columns = {
-      date: 'Date'
-    }
-
-    data.forEach(d => {
-      const fuelTech = d.fuel_tech || '*'
-      columns[d.id] = `${fuelTech} ${d.type}` || d.id
-    })
-
-    return columns
   },
 
   filterDataByStartEndDates(data, startDate, endDate) {

@@ -216,8 +216,8 @@ export default {
   },
 
   computed: {
-    fuelTechGroup() {
-      return this.$store.getters.fuelTechGroup
+    fuelTechGroupName() {
+      return this.$store.getters.fuelTechGroupName
     },
 
     sourcesOrderLength() {
@@ -300,7 +300,7 @@ export default {
   },
 
   watch: {
-    fuelTechGroup(updated) {
+    fuelTechGroupName() {
       // clear hidden fuel techs when grouping is changed
       this.hiddenSources = []
       this.hiddenLoads = []
@@ -528,7 +528,7 @@ export default {
     },
 
     handleSourceFuelTechsHidden(hidden, hideOthers) {
-      const property = this.fuelTechGroup === 'Default' ? 'fuelTech' : 'id'
+      const property = this.fuelTechGroupName === 'Default' ? 'fuelTech' : 'id'
       this.hiddenSources = hidden
       if (hideOthers) {
         this.hiddenLoads = this.loadsOrder.map(d => d[property])
@@ -537,7 +537,7 @@ export default {
     },
 
     handleLoadFuelTechsHidden(hidden, hideOthers) {
-      const property = this.fuelTechGroup === 'Default' ? 'fuelTech' : 'id'
+      const property = this.fuelTechGroupName === 'Default' ? 'fuelTech' : 'id'
       this.hiddenLoads = hidden
       if (hideOthers) {
         this.hiddenSources = this.sourcesOrder.map(d => d[property])

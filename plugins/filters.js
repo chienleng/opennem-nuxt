@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import { timeFormat as d3TimeFormat } from 'd3-time-format'
 import { format as d3Format } from 'd3-format'
-import dateDisplayService from '~/services/DateDisplayService.js'
+import DateDisplay from '~/services/DateDisplay.js'
 
 Vue.filter(
   'customFormatDate',
@@ -16,7 +16,7 @@ Vue.filter(
       showIntervalRange = false
     }
   ) => {
-    return dateDisplayService(
+    return DateDisplay.specialDateFormats(
       time,
       range,
       interval,
