@@ -239,7 +239,7 @@ export default {
     curveType() {
       switch (this.curve) {
         case 'step':
-          return curveMonotoneX
+          return curveStep
         case 'smooth':
           return curveMonotoneX
         case 'linear':
