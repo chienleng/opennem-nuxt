@@ -115,7 +115,7 @@
               :mouse-loc="mouseLoc"
               :show-x-axis="false"
               :vis-height="80"
-              :y-min="0"
+              :curve="'smooth'"
               :show-zoom-out="false"
               class="emissions-intensity-vis"
               @eventChange="handleEventChange"

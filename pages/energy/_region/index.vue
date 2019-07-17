@@ -96,12 +96,6 @@
               </span>
             </div>
           </div>
-          <!-- :left-position="tooltipLeft" -->
-          <!-- <vis-tooltip
-            :hover-value="hoverValue"
-            :hover-total="hoverTotal"
-            :hover-domain-colour="hoverDomainColour"
-          /> -->
           <stacked-area-vis
             :domains="stackedAreaDomains"
             :dataset="dataset"
@@ -201,7 +195,7 @@
             :mouse-loc="mouseLoc"
             :show-x-axis="false"
             :vis-height="80"
-            :y-min="0"
+            :curve="'smooth'"
             :show-zoom-out="false"
             class="emissions-intensity-vis"
             @eventChange="handleEventChange"

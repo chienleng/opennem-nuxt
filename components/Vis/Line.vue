@@ -86,7 +86,7 @@ import {
   line,
   curveStep,
   curveLinear,
-  curveNatural
+  curveMonotoneX
 } from 'd3-shape'
 import { extent, min, max } from 'd3-array'
 import { format as d3Format } from 'd3-format'
@@ -288,7 +288,7 @@ export default {
         case 'step':
           return curveStep
         case 'smooth':
-          return curveNatural
+          return curveMonotoneX
         case 'linear':
         default:
           return curveLinear
