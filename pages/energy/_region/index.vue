@@ -426,7 +426,6 @@ export default {
     return {
       mounted: false,
       ready: false,
-      // type: 'power', // power, energy
       dataset: [],
       energyDomains: [],
       fuelTechEnergyOrder: [],
@@ -955,9 +954,11 @@ export default {
   }
   .table-container {
     width: 100%;
+    padding: 1rem;
 
     @include desktop {
       width: 30%;
+      padding: 0 1rem 0 0;
     }
   }
   .chart {

@@ -1,5 +1,6 @@
 import moment from 'moment'
 import _sortBy from 'lodash.sortby'
+import { timeMinute as d3TimeMinute } from 'd3-time'
 import parseInterval from '~/plugins/intervalParser.js'
 
 import rollUp30m from '../rollUpModules/ru-30m.js'

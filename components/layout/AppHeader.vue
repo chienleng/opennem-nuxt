@@ -27,7 +27,9 @@
     <div
       v-if="!widthBreak"
       class="share-buttons buttons has-addons">
-      <button class="button is-rounded">
+      <button
+        class="button is-rounded"
+        @click="handleExportImage">
         <i class="fal fa-fw fa-chart-bar" />
         <span class="label-image">Image</span>
       </button>
@@ -75,6 +77,12 @@ export default {
     responsiveBreakWidth() {
       return this.$store.getters.responsiveBreakWidth
     },
+    range() {
+      return this.$store.getters.range
+    },
+    interval() {
+      return this.$store.getters.interval
+    },
     widthBreak() {
       return this.windowWidth < this.responsiveBreakWidth
     },
@@ -104,6 +112,15 @@ export default {
   methods: {
     toggleDrawer() {
       this.openDrawer = !this.openDrawer
+    },
+    handleExportImage() {
+      this.$router.push({
+        path: `/energy/${this.regionId}/image`,
+        query: {
+          range: this.range,
+          interval: this.interval
+        }
+      })
     }
   }
 }

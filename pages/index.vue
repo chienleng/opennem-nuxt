@@ -7,14 +7,15 @@
 <script>
 export default {
   layout: 'default',
-  middleware: 'root-redirect',
+  // middleware: 'root-redirect',
 
   mounted() {
     // TODO: redirect from Hash
-    console.log(this.$route.hash)
-    if (this.$route.hash === `#/datacheck/${this.$route.params.region}`) {
-      console.log('redirect from hash')
-      this.$router.push({ path: `datacheck/${this.$route.params.region}` })
+    console.log(this.$route.hash, this.$route.params.region)
+    if (this.$route.hash === `#/region/qld1/energy`) {
+      this.$router.push({ path: `energy/qld1` })
+    } else {
+      this.$router.push({ path: `energy/nem` })
     }
   }
 }

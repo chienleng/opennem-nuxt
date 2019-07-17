@@ -553,7 +553,6 @@ export default {
 @import '~/assets/scss/variables.scss';
 
 .summary-table {
-  margin-right: $app-padding;
   color: #333;
   font-size: 11px;
 
