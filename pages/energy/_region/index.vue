@@ -106,6 +106,8 @@
             :interval="interval"
             :mouse-loc="mouseLoc"
             :curve="energyCurveType"
+            :y-min="energyMin"
+            :y-max="energyMax"
             :vis-height="stackedAreaHeight"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
@@ -365,6 +367,7 @@
       <div class="table-container">
         <summary-table
           v-if="ready"
+          id="summary-table"
           :domains="summaryDomains"
           :price-id="priceDomains.length > 0 ? priceDomains[0].id : null"
           :market-value-domains="mvDomains"
@@ -396,7 +399,6 @@ import DateDisplay from '~/services/DateDisplay.js'
 import Data from '~/services/Data.js'
 import EnergyDataTransform from '~/services/dataTransform/Energy.js'
 import Domain from '~/services/Domain.js'
-import domToImage from '~/services/DomToImage.js'
 
 import DataOptionsBar from '~/components/ui/DataOptionsBar'
 import StackedAreaVis from '~/components/Vis/StackedArea.vue'
@@ -442,7 +444,9 @@ export default {
       visHeight: 0,
       hoverOn: false,
       lineColour: '#e34a33',
-      windowWidth: 0
+      windowWidth: 0,
+      energyMin: 0,
+      energyMax: 1000
     }
   },
 
@@ -625,6 +629,9 @@ export default {
     },
     filteredDataset(updated) {
       this.$store.dispatch('exportData', updated)
+    },
+    hiddenFuelTechs() {
+      this.updateEnergyMinMax()
     }
   },
 
@@ -716,6 +723,7 @@ export default {
           this.updateDatasetGroups(dataset, this.groupEmissionDomains)
         }
         this.updatedFilteredDataset(dataset)
+        this.updateEnergyMinMax()
         this.ready = true
       })
     },
@@ -802,6 +810,32 @@ export default {
       } else {
         this.filteredDataset = dataset
       }
+    },
+
+    updateEnergyMinMax() {
+      let min = 0,
+        max = 0
+      this.dataset.forEach((d, i) => {
+        let dMin = 0,
+          dMax = 0
+
+        this.stackedAreaDomains.forEach(domain => {
+          const id = domain.id
+          dMax += d[id] || 0
+          if (d[id] < 0) {
+            dMin += d[id] || 0
+          }
+        })
+
+        if (dMax > max) {
+          max = dMax
+        }
+        if (dMin < min) {
+          min = dMin
+        }
+      })
+      this.energyMin = min
+      this.energyMax = max
     },
 
     handleRangeChange(range) {
@@ -916,14 +950,6 @@ export default {
 
     handleFuelTechsHidden(hidden) {
       this.hiddenFuelTechs = hidden
-    },
-
-    handleExportClick() {
-      domToImage
-        .toBlob(document.getElementById('export-container'))
-        .then(blob => {
-          saveAs(blob, `export.png`)
-        })
     }
   }
 }

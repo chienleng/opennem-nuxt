@@ -1,6 +1,6 @@
 <template>
   <section>
-    <h1>nothing here</h1>
+    <h1>Loading</h1>
   </section>
 </template>
 
@@ -9,7 +9,7 @@ export default {
   layout: 'default',
   // middleware: 'root-redirect',
 
-  mounted() {
+  created() {
     // TODO: redirect from Hash
     console.log(this.$route.hash, this.$route.params.region)
     if (this.$route.hash === `#/region/qld1/energy`) {

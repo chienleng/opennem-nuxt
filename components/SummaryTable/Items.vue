@@ -218,6 +218,7 @@ export default {
   .item {
     // cursor: move;
     cursor: pointer;
+    user-select: none;
 
     &.drag-placeholder {
       opacity: 0.1;

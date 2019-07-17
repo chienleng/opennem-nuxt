@@ -422,11 +422,15 @@ export default {
       const xDomainExtent = this.dynamicExtent.length
         ? this.dynamicExtent
         : this.datasetDateExtent
+
       const yMin =
         this.yMin || this.yMin === 0
           ? this.yMin
           : min(this.dataset, d => d._min)
-      const yMax = this.yMax || max(this.dataset, d => d._total) + 5
+      const yMax =
+        this.yMax || this.yMax === 0
+          ? this.yMax
+          : max(this.dataset, d => d._total) + 5
 
       this.x.domain(xDomainExtent)
       // this.y
