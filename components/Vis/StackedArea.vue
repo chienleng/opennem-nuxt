@@ -78,7 +78,7 @@ import {
   stack,
   curveStep,
   curveLinear,
-  curveNatural
+  curveMonotoneX
 } from 'd3-shape'
 import { extent, min, max } from 'd3-array'
 import { format as d3Format } from 'd3-format'
@@ -239,9 +239,9 @@ export default {
     curveType() {
       switch (this.curve) {
         case 'step':
-          return curveStep
+          return curveMonotoneX
         case 'smooth':
-          return curveNatural
+          return curveMonotoneX
         case 'linear':
         default:
           return curveLinear

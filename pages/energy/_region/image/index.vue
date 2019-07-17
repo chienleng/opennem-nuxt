@@ -371,7 +371,7 @@ export default {
       return this.$route.query.range || '7D'
     },
     interval() {
-      return this.$route.query.interval || '30min'
+      return this.$route.query.interval || '30m'
     },
     fuelTechOrder() {
       return this.$store.getters.fuelTechOrder

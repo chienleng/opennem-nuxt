@@ -84,7 +84,7 @@ import { axisBottom, axisRight } from 'd3-axis'
 import {
   area as d3Area,
   line,
-  curveStep,
+  curveStepAfter,
   curveLinear,
   curveMonotoneX
 } from 'd3-shape'
@@ -286,7 +286,7 @@ export default {
     curveType() {
       switch (this.curve) {
         case 'step':
-          return curveStep
+          return curveStepAfter
         case 'smooth':
           return curveMonotoneX
         case 'linear':
