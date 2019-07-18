@@ -80,6 +80,16 @@ import {
   curveLinear,
   curveMonotoneX
 } from 'd3-shape'
+import {
+  timeSecond,
+  timeMinute,
+  timeHour,
+  timeDay,
+  timeWeek,
+  timeMonth,
+  timeMonday,
+  timeYear
+} from 'd3-time'
 import { extent, min, max } from 'd3-array'
 import { format as d3Format } from 'd3-format'
 import { select, selectAll, mouse, event } from 'd3-selection'
@@ -689,7 +699,20 @@ export default {
 
     customXAxis(g) {
       const ticks = axisTimeTicks(this.dynamicExtent[1] - this.dynamicExtent[0])
-      this.xAxis.ticks(ticks)
+      let tickLength = null
+      console.log(ticks, this.interval, this.zoomed)
+      if (!this.zoomed) {
+        if (
+          this.interval === 'Month' ||
+          this.interval === 'Season' ||
+          this.interval === 'Quarter' ||
+          this.interval === 'Fin Year' ||
+          this.interval === 'Year'
+        ) {
+          tickLength = timeYear.every(1)
+        }
+      }
+      this.xAxis.ticks(tickLength)
 
       // add secondary x axis tick label here
       const insertSecondaryAxisTick = function(d) {
