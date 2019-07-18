@@ -195,7 +195,8 @@
             :interval="interval"
             :mouse-loc="mouseLoc"
             :show-x-axis="false"
-            :vis-height="80"
+            :vis-height="120"
+            :y-min="emissionsIntensityMin"
             :curve="'smooth'"
             :show-zoom-out="false"
             class="emissions-intensity-vis"
@@ -447,7 +448,8 @@ export default {
       lineColour: '#e34a33',
       windowWidth: 0,
       energyMin: 0,
-      energyMax: 1000
+      energyMax: 1000,
+      emissionsIntensityMin: 0
     }
   },
 
@@ -814,29 +816,41 @@ export default {
     },
 
     updateEnergyMinMax() {
-      let min = 0,
-        max = 0
+      let energyMinAll = 0,
+        energyMaxAll = 0,
+        emissionsIntensityMinAll = 0
       this.dataset.forEach((d, i) => {
-        let dMin = 0,
-          dMax = 0
+        let energyMin = 0,
+          energyMax = 0
 
         this.stackedAreaDomains.forEach(domain => {
           const id = domain.id
-          dMax += d[id] || 0
+          energyMax += d[id] || 0
           if (d[id] < 0) {
-            dMin += d[id] || 0
+            energyMin = d[id] || 0
           }
         })
 
-        if (dMax > max) {
-          max = dMax
+        const eIValue = d['_emissionsIntensity']
+        if (i === 0) {
+          emissionsIntensityMinAll = eIValue
         }
-        if (dMin < min) {
-          min = dMin
+        if (eIValue && emissionsIntensityMinAll > eIValue) {
+          emissionsIntensityMinAll = eIValue
+        }
+
+        if (energyMax > energyMaxAll) {
+          energyMaxAll = energyMax
+        }
+        if (energyMin < energyMinAll) {
+          energyMinAll = energyMin
         }
       })
-      this.energyMin = min
-      this.energyMax = max
+      this.energyMin = energyMinAll
+      this.energyMax = energyMaxAll
+
+      let minCheck = emissionsIntensityMinAll - 50
+      this.emissionsIntensityMin = minCheck < 0 ? 0 : minCheck
     },
 
     handleRangeChange(range) {
@@ -987,7 +1001,7 @@ export default {
     position: relative;
 
     &:not(:first-child) {
-      border-bottom: 1px solid #666;
+      // border-bottom: 1px solid #666;
     }
 
     .chart-title {
@@ -1046,5 +1060,9 @@ export default {
 ::v-deep .price-pos-vis .y-axis-guide-group .tick:not(:first-of-type) text,
 ::v-deep .price-neg-vis .y-axis-guide-group .tick text {
   display: none;
+}
+::v-deep .price-neg-vis .line-group path,
+::v-deep .price-pos-vis .line-group path {
+  stroke-dasharray: 1.8;
 }
 </style>

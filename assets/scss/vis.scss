@@ -38,20 +38,26 @@ path.line-path {
   stroke-dasharray: 4.8;
   stroke: rgba(0, 0, 0, 0.1);
 }
-.y-axis .tick:not(:first-of-type) line {
-  stroke-dasharray: 4.8;
-  stroke: rgba(0, 0, 0, 0.1);
+.x-axis-tick .tick line {
+  stroke: none;
 }
+// .y-axis .tick:not(:first-of-type) line {
+//   stroke-dasharray: 4.8;
+//   stroke: rgba(0, 0, 0, 0.1);
+// }
 .y-axis-tick .tick text {
   color: #888;
   text-anchor: start;
 }
-.x-axis-tick .tick line {
-  stroke: none;
+.y-axis-tick .tick line,
+.y-axis .tick line {
+  stroke: rgba(0, 0, 0, 0.05);
+  stroke-dasharray: 4.8;
 }
-.y-axis-tick .tick:not(:first-of-type) line {
-  stroke: none;
-}
+// .y-axis-tick .tick:not(:first-of-type) line,
+// .y-axis .tick:not(:first-of-type) line {
+//   stroke: none;
+// }
 
 // disable text selection in axis tick marks
 .tick {

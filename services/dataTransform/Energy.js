@@ -101,8 +101,8 @@ function transformEnergyData(
           findDate[id] = r.value
         } else if (isPriceData) {
           findDate[id] = r.value
-          findDate[PRICE_ABOVE_300] = r.value > 300 ? r.value : 0.1
-          findDate[PRICE_BELOW_0] = r.value < 0 ? r.value : -0.1
+          findDate[PRICE_ABOVE_300] = r.value > 300 ? r.value : 0.001
+          findDate[PRICE_BELOW_0] = r.value < 0 ? r.value : -0.001
         }
       }
     })

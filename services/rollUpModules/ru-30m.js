@@ -42,8 +42,8 @@ export default function(domains, data) {
       })
 
       const newPrice = obj[priceId]
-      obj[PRICE_ABOVE_300] = newPrice > 300 ? newPrice : 0.1
-      obj[PRICE_BELOW_0] = newPrice < 0 ? newPrice : -0.1
+      obj[PRICE_ABOVE_300] = newPrice > 300 ? newPrice : 0.001
+      obj[PRICE_BELOW_0] = newPrice < 0 ? newPrice : -0.001
 
       return obj
     })

@@ -342,7 +342,7 @@ export default {
       const chartWidth = this.$el.offsetWidth
       const height = this.showXAxis
         ? this.svgHeight - this.margin.top - this.margin.bottom
-        : this.svgHeight
+        : this.svgHeight - 1
       this.svgWidth = chartWidth
       this.width = chartWidth - this.margin.left - this.margin.right
       this.height = height
@@ -481,7 +481,7 @@ export default {
       const yMax = this.yMax || max(this.dataset, d => d[maxDomain]) + 5
 
       this.x.domain(xDomainExtent)
-      this.y.domain([yMin, yMax])
+      this.y.domain([yMin, yMax]).nice()
       this.z.range([this.domainColour]).domain([this.domainId])
 
       this.$xAxisGroup.call(this.customXAxis)
