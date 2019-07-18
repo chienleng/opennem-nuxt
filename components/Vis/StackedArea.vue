@@ -76,7 +76,7 @@ import { axisBottom, axisRight } from 'd3-axis'
 import {
   area as d3Area,
   stack,
-  curveStep,
+  curveStepAfter,
   curveLinear,
   curveMonotoneX
 } from 'd3-shape'
@@ -239,7 +239,7 @@ export default {
     curveType() {
       switch (this.curve) {
         case 'step':
-          return curveStep
+          return curveStepAfter
         case 'smooth':
           return curveMonotoneX
         case 'linear':
@@ -419,10 +419,6 @@ export default {
 
       // Setup the x/y/z Axis domains
       // - Use dataset date range if there is none being passed into
-      const xDomainExtent = this.dynamicExtent.length
-        ? this.dynamicExtent
-        : this.datasetDateExtent
-
       const yMin =
         this.yMin || this.yMin === 0
           ? this.yMin
@@ -432,6 +428,9 @@ export default {
           ? this.yMax
           : max(this.dataset, d => d._total) + 5
 
+      const xDomainExtent = this.dynamicExtent.length
+        ? this.dynamicExtent
+        : this.datasetDateExtent
       this.x.domain(xDomainExtent)
       // this.y
       //   .domain([

@@ -127,21 +127,21 @@ export default {
       case '30m':
         return d3TimeMinute.every(30).round(date)
       case 'Day':
-        return d3TimeDay.every(1).round(date)
+        return d3TimeDay.every(1).floor(date)
       case 'Week':
-        return d3TimeMonday.every(1).round(date)
+        return d3TimeMonday.every(1).floor(date)
       case 'Month':
-        return d3TimeMonth.every(1).round(date)
+        return d3TimeMonth.every(1).floor(date)
       case 'Season':
-        const quarter = d3TimeMonth.every(3).round(date)
+        const quarter = d3TimeMonth.every(3).floor(date)
         return d3TimeMonth.offset(quarter, -1)
       case 'Quarter':
-        return d3TimeMonth.every(3).round(date)
+        return d3TimeMonth.every(3).floor(date)
       case 'Fin Year':
-        const year = d3TimeYear.every(1).round(date)
+        const year = d3TimeYear.every(1).floor(date)
         return d3TimeMonth.offset(year, -6)
       case 'Year':
-        return d3TimeYear.every(1).round(date)
+        return d3TimeYear.every(1).floor(date)
       default:
         return date
     }

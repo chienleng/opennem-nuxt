@@ -176,7 +176,6 @@
                 }"
                 class="fal fa-fw" />
               <strong>Emissions Intensity</strong>
-              <!-- <small>-</small> -->
             </div>
             <div class="hover-values">
               <span>
@@ -402,6 +401,7 @@ import Domain from '~/services/Domain.js'
 
 import DataOptionsBar from '~/components/ui/DataOptionsBar'
 import StackedAreaVis from '~/components/Vis/StackedArea.vue'
+import StackedColumnVis from '~/components/Vis/StackedColumn.vue'
 import LineVis from '~/components/Vis/Line.vue'
 import SummaryTable from '~/components/SummaryTable'
 import VisTooltip from '~/components/ui/Tooltip'
@@ -413,6 +413,7 @@ export default {
     Draggable,
     DataOptionsBar,
     StackedAreaVis,
+    StackedColumnVis,
     LineVis,
     SummaryTable,
     VisTooltip
@@ -712,7 +713,7 @@ export default {
         this.interval
       ).then(dataset => {
         this.dataset = dataset
-        // this.dateFilter = d3Extent(this.dataset, d => d.date)
+        this.dateFilter = d3Extent(this.dataset, d => d.date)
         if (this.groupDomains.length > 0) {
           this.updateDatasetGroups(dataset, this.groupDomains)
         }
