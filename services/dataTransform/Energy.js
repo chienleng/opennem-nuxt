@@ -4,6 +4,7 @@ import _cloneDeep from 'lodash.clonedeep'
 import _includes from 'lodash.includes'
 import { timeMinute as d3TimeMinute } from 'd3-time'
 import parseInterval from '~/plugins/intervalParser.js'
+import millisecondsByInterval from '~/constants/millisecondsByInterval.js'
 
 import rollUp30m from '../rollUpModules/ru-30m.js'
 import rollUp1YDay from '../rollUpModules/ru-1y-day.js'
@@ -237,14 +238,6 @@ function mutateDataForInterpolation(data, interpolateSeriesTypes) {
   })
 }
 
-const ms = {}
-ms['Day'] = 86400000
-ms['Week'] = 604800000
-ms['Month'] = 2629800000
-ms['Season'] = 7889400000
-ms['Quarter'] = 7889400000
-ms['Fin Year'] = 31557600000
-ms['Year'] = 31557600000
 function addEmptyDataPoint(time, dataset) {
   const emptyDataPoint = _cloneDeep(dataset[dataset.length - 1])
   Object.keys(emptyDataPoint).forEach(key => {
@@ -367,8 +360,10 @@ export default {
             emissionDomains
           )
           // add an empty datapoint, so the stacked step will have something to render
-          if (ms[interval]) {
-            dataset.push(addEmptyDataPoint(ms[interval], dataset))
+          if (millisecondsByInterval[interval]) {
+            dataset.push(
+              addEmptyDataPoint(millisecondsByInterval[interval], dataset)
+            )
           }
           resolve(dataset)
         })

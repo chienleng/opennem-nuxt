@@ -54,7 +54,7 @@
           class="chart">
           <div
             v-if="step"
-            class="chart-title">
+            class="chart-title no-hover">
             <div>
               <strong>Energy</strong>
               <small>GWh/{{ interval }}</small>
@@ -117,7 +117,10 @@
 
         <div
           v-if="ready && hasEmissionData"
-          :class="{ 'is-hovered': hoverOn }"
+          :class="{
+            'is-hovered': hoverOn,
+            'has-border-bottom': !chartEmissionsVolume
+          }"
           class="chart">
           <div
             class="chart-title"
@@ -132,7 +135,9 @@
               <strong>Emissions Volume</strong>
               <small>tCO2e</small>
             </div>
-            <div class="hover-values">
+            <div
+              v-show="chartEmissionsVolume"
+              class="hover-values">
               <span>
                 Total:
                 <strong>{{ hoverEmissionVolumeTotal | formatValue }} tCO2e</strong>
@@ -164,7 +169,10 @@
 
         <div
           v-if="ready && hasEmissionData"
-          :class="{ 'is-hovered': hoverOn }"
+          :class="{
+            'is-hovered': hoverOn,
+            'has-border-bottom': !chartEmissionsIntensity
+          }"
           class="chart">
           <div
             class="chart-title"
@@ -178,7 +186,9 @@
                 class="fal fa-fw" />
               <strong>Emissions Intensity</strong>
             </div>
-            <div class="hover-values">
+            <div
+              v-show="chartEmissionsIntensity"
+              class="hover-values">
               <span>
                 <strong>{{ hoverEmissionsIntensity | formatValue }}</strong>
               </span>
@@ -209,7 +219,10 @@
 
         <div
           v-if="ready && hasPriceData"
-          :class="{ 'is-hovered': hoverOn }"
+          :class="{
+            'is-hovered': hoverOn,
+            'has-border-bottom': !chartPrice
+          }"
           class="chart">
           <div
             class="chart-title"
@@ -224,7 +237,9 @@
               <strong>Price</strong>
               <small>$/MWh</small>
             </div>
-            <div class="hover-values">
+            <div
+              v-show="chartPrice"
+              class="hover-values">
               <span>
                 <strong>{{ hoverPrice | formatCurrency }}</strong>
               </span>
@@ -311,7 +326,10 @@
 
         <div
           v-if="ready && hasTemperatureData"
-          :class="{ 'is-hovered': hoverOn }"
+          :class="{
+            'is-hovered': hoverOn,
+            'has-border-bottom': !chartTemperature
+          }"
           class="chart">
           <div
             class="chart-title"
@@ -326,7 +344,9 @@
               <strong>Temperature</strong>
               <small>°C</small>
             </div>
-            <div class="hover-values">
+            <div
+              v-show="chartTemperature"
+              class="hover-values">
               <span v-if="hoverMinTemperature">
                 Min:
                 <strong>{{ hoverMinTemperature | formatValue }}°C</strong>
@@ -1004,10 +1024,6 @@ export default {
   .chart {
     position: relative;
 
-    &:not(:first-child) {
-      // border-bottom: 1px solid #666;
-    }
-
     .chart-title {
       font-size: 0.8em;
       padding: 0.2rem 1rem 0.2rem 1rem;
@@ -1017,7 +1033,7 @@ export default {
       justify-content: space-between;
 
       &:hover {
-        background-color: rgba(255, 255, 255, 0.5);
+        background-color: rgba(255, 255, 255, 0.3);
       }
 
       .hover-values {
@@ -1036,12 +1052,22 @@ export default {
         position: relative;
         top: 1px;
       }
+
+      &.no-hover {
+        cursor: auto;
+        &:hover {
+          background-color: transparent;
+        }
+      }
     }
 
     &.is-hovered .hover-values {
       opacity: 1;
       background: rgba(255, 255, 255, 0.5);
       transition: all 0.2s ease-in-out;
+    }
+    &.has-border-bottom {
+      border-bottom: 1px dashed #ccc;
     }
   }
 }

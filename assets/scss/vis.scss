@@ -10,6 +10,12 @@ path.line-path {
 .cursor-line-rect {
   fill: $opennem-link-color;
 }
+.cursor-rect {
+  fill: rgba(199, 69, 35, 0.1);
+  // fill: rgba(0, 0, 0, 0.1);
+  stroke: $opennem-link-color;
+  stroke-width: 0.5px;
+}
 .tooltip-rect {
   fill: $opennem-link-color;
 }

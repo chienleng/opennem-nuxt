@@ -98,11 +98,11 @@ import { brushX } from 'd3-brush'
 import { timeFormat as d3Timeformat } from 'd3-time-format'
 import debounce from 'lodash.debounce'
 
+import millisecondsByInterval from '~/constants/millisecondsByInterval.js'
 import EventBus from '~/plugins/eventBus.js'
 import * as CONFIG from './shared/config.js'
 import axisTimeFormat from './shared/timeFormat.js'
 import axisSecondaryTimeFormat from './shared/secondaryTimeFormat.js'
-import axisTimeTicks from './shared/timeTicks.js'
 import DateDisplay from '~/services/DateDisplay.js'
 
 export default {
@@ -219,6 +219,7 @@ export default {
       cursorLineClass: CONFIG.CURSOR_LINE_CLASS,
       cursorLineTextClass: CONFIG.CURSOR_LINE_TEXT_CLASS,
       cursorLineRectClass: CONFIG.CURSOR_LINE_RECT_CLASS,
+      cursorRectClass: 'cursor-rect',
       tooltipRectHeight: 40,
       tooltipGroupClass: CONFIG.TOOLTIP_GROUP_CLASS,
       tooltipRectClass: CONFIG.TOOLTIP_RECT_CLASS,
@@ -285,7 +286,7 @@ export default {
       }
     },
     hoverDate(date) {
-      this.updateCursorLineTooltip(date)
+      this.updateCursorLineTooltip(new Date(date).getTime())
     }
   },
 
@@ -373,6 +374,11 @@ export default {
         .attr('class', this.cursorLineTextClass)
         .attr('text-anchor', 'middle')
         .style('fill', 'white')
+      this.$cursorLineGroup
+        .append('rect')
+        .attr('class', this.cursorRectClass)
+        .attr('height', this.height)
+        .attr('opacity', 0)
 
       // Create tooltip group
       this.$tooltipGroup = this.$cursorLineGroup
@@ -498,6 +504,11 @@ export default {
 
     updateCursorLineTooltip(date) {
       const xDate = this.x(date)
+      const nextPeriod = this.x(date + millisecondsByInterval[this.interval])
+      const bandwidth =
+        this.interval !== '5m' || this.interval !== '30m'
+          ? nextPeriod - xDate
+          : null
       const fTime = DateDisplay.specialDateFormats(
         new Date(date).getTime(),
         this.range,
@@ -522,9 +533,9 @@ export default {
         total = valueFormat(find._total)
       }
 
-      this.positionCursorLine(xDate, fTime)
+      this.positionCursorLine(xDate, fTime, bandwidth)
       if (this.showTooltip) {
-        this.positionRectText(xDate, fTime)
+        // this.positionRectText(xDate, fTime)
       }
       // this.positionTooltip(xDate, label, value, total)
     },
@@ -568,17 +579,29 @@ export default {
         .attr('d', this.area)
     },
 
-    positionCursorLine(xDate, time) {
+    positionCursorLine(xDate, time, bandwidth) {
       const $cursorLine = this.$cursorLineGroup.select(
         `.${this.cursorLineClass}`
       )
+      const $cursorRect = this.$cursorLineGroup.select(
+        `.${this.cursorRectClass}`
+      )
 
-      // Position and draw the line
-      $cursorLine.attr('d', () => {
-        let d = 'M' + xDate + ',' + this.height
-        d += ' ' + xDate + ',' + 0
-        return d
-      })
+      if (bandwidth) {
+        $cursorLine.attr('opacity', 0)
+        $cursorRect
+          .attr('x', xDate)
+          // .attr('y', this.height - this.timeRectHeight)
+          .attr('width', bandwidth)
+          .attr('opacity', 1)
+      } else {
+        $cursorRect.attr('opacity', 0)
+        $cursorLine.attr('opacity', 1).attr('d', () => {
+          let d = 'M' + xDate + ',' + this.height
+          d += ' ' + xDate + ',' + 0
+          return d
+        })
+      }
     },
 
     positionRectText(xDate, time) {
@@ -698,9 +721,7 @@ export default {
     },
 
     customXAxis(g) {
-      const ticks = axisTimeTicks(this.dynamicExtent[1] - this.dynamicExtent[0])
       let tickLength = null
-      console.log(ticks, this.interval, this.zoomed)
       if (!this.zoomed && this.range === 'ALL') {
         if (
           this.interval === 'Month' ||
