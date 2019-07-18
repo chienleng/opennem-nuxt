@@ -159,6 +159,11 @@ export default {
     showZoomOut: {
       type: Boolean,
       default: () => false
+    },
+    // OPTIONAL: whether to show value tooltip
+    showTooltip: {
+      type: Boolean,
+      default: () => true
     }
   },
 
@@ -508,6 +513,9 @@ export default {
       }
 
       this.positionCursorLine(xDate, fTime)
+      if (this.showTooltip) {
+        this.positionRectText(xDate, fTime)
+      }
       // this.positionTooltip(xDate, label, value, total)
     },
 
@@ -551,10 +559,20 @@ export default {
     },
 
     positionCursorLine(xDate, time) {
-      const rectWidth = time.length * 5 + 15
       const $cursorLine = this.$cursorLineGroup.select(
         `.${this.cursorLineClass}`
       )
+
+      // Position and draw the line
+      $cursorLine.attr('d', () => {
+        let d = 'M' + xDate + ',' + this.height
+        d += ' ' + xDate + ',' + 0
+        return d
+      })
+    },
+
+    positionRectText(xDate, time) {
+      const rectWidth = time.length * 5 + 15
       const $cursorLineRect = this.$cursorLineGroup.select(
         `.${this.cursorLineRectClass}`
       )
@@ -572,12 +590,6 @@ export default {
         .attr('x', xDate)
         .attr('y', this.height - this.timeRectHeight + 14)
         .text(time)
-      // Position and draw the line
-      $cursorLine.attr('d', () => {
-        let d = 'M' + xDate + ',' + this.height
-        d += ' ' + xDate + ',' + 0
-        return d
-      })
 
       if (this.mouseLoc) {
         const xMouse = this.mouseLoc[0]

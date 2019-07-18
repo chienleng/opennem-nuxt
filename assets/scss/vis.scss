@@ -46,8 +46,12 @@ path.line-path {
 //   stroke: rgba(0, 0, 0, 0.1);
 // }
 .y-axis-tick .tick text {
-  color: #888;
+  color: #555;
   text-anchor: start;
+  text-shadow: 0 0 10px hsla(0, 0%, 93%, 0.5);
+}
+.y-axis .tick text {
+  color: transparent;
 }
 .y-axis-tick .tick line,
 .y-axis .tick line {

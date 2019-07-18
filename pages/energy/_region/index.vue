@@ -65,12 +65,12 @@
                   :style="{ 'background-color': hoverDomainColour }"
                   class="colour-square" />
                 {{ hoverDomainLabel }}:
-                <strong>{{ hoverValue | formatValue }}</strong>
+                <strong>{{ hoverValue | formatValue }} GWh</strong>
                 |
               </span>
               <span>
                 Total:
-                <strong>{{ hoverTotal | formatValue }}</strong>
+                <strong>{{ hoverTotal | formatValue }} GWh</strong>
               </span>
             </div>
           </div>
@@ -87,12 +87,12 @@
                   :style="{ 'background-color': hoverDomainColour }"
                   class="colour-square" />
                 {{ hoverDomainLabel }}:
-                <strong>{{ hoverValue | formatValue }}</strong>
+                <strong>{{ hoverValue | formatValue }} MW</strong>
                 |
               </span>
               <span>
                 Total:
-                <strong>{{ hoverTotal | formatValue }}</strong>
+                <strong>{{ hoverTotal | formatValue }} MW</strong>
               </span>
             </div>
           </div>
@@ -135,7 +135,7 @@
             <div class="hover-values">
               <span>
                 Total:
-                <strong>{{ hoverEmissionVolumeTotal | formatValue }}</strong>
+                <strong>{{ hoverEmissionVolumeTotal | formatValue }} tCO2e</strong>
               </span>
             </div>
           </div>
@@ -152,6 +152,7 @@
             :curve="'step'"
             :vis-height="200"
             :show-x-axis="false"
+            :show-tooltip="false"
             :show-zoom-out="false"
             :y-min="0"
             :y-max="emissionsMax"
@@ -195,6 +196,7 @@
             :interval="interval"
             :mouse-loc="mouseLoc"
             :show-x-axis="false"
+            :show-tooltip="false"
             :vis-height="120"
             :y-min="emissionsIntensityMin"
             :curve="'smooth'"
@@ -297,6 +299,7 @@
             :y-min="-0.1"
             :y-max="-1000"
             :show-x-axis="false"
+            :show-tooltip="false"
             :vis-height="30"
             :show-zoom-out="false"
             :y-guides="[-50, -800]"
@@ -326,15 +329,15 @@
             <div class="hover-values">
               <span v-if="hoverMinTemperature">
                 Min:
-                <strong>{{ hoverMinTemperature | formatValue }}</strong>
+                <strong>{{ hoverMinTemperature | formatValue }}°C</strong>
                 | Av:
               </span>
               <span>
-                <strong>{{ hoverMeanTemperature | formatValue }}</strong>
+                <strong>{{ hoverMeanTemperature | formatValue }}°C</strong>
               </span>
               <span v-if="hoverMaxTemperature">
                 | Max:
-                <strong>{{ hoverMaxTemperature | formatValue }}</strong>
+                <strong>{{ hoverMaxTemperature | formatValue }}°C</strong>
               </span>
             </div>
           </div>
@@ -355,6 +358,7 @@
             :y-axis-log="false"
             :y-min="0"
             :show-x-axis="false"
+            :show-tooltip="false"
             :vis-height="100"
             :show-zoom-out="false"
             class="temperature-vis"
