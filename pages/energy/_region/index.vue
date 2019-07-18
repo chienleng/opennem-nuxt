@@ -827,7 +827,7 @@ export default {
           const id = domain.id
           energyMax += d[id] || 0
           if (d[id] < 0) {
-            energyMin = d[id] || 0
+            energyMin += d[id] || 0
           }
         })
 
