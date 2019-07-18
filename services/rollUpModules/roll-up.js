@@ -29,6 +29,44 @@ export default function(domains, data) {
     .rollup(a => {
       let obj = {}
       let priceId = null
+      let temperatureCount = 0
+      let temperatureId = ''
+
+      a.forEach(point => {
+        domains.forEach(domain => {
+          const id = domain.id
+          const type = domain.type
+          let isNew = false
+          if (!obj[id]) {
+            obj[id] = null
+            isNew = true
+          }
+          const isTemperatureType = checkTemperatureType(type)
+          if (isTemperatureType) {
+            if (type === 'temperature_mean' && point[id]) {
+              obj[id] += point[id]
+              temperatureCount += 1
+              temperatureId = id
+            }
+            if (type === 'temperature_min' && point[id]) {
+              if (isNew) {
+                obj[id] = point[id]
+              }
+              if (obj[id] > point[id]) {
+                obj[id] = point[id]
+              }
+            }
+            if (type === 'temperature_max' && point[id]) {
+              if (isNew) {
+                obj[id] = point[id]
+              }
+              if (obj[id] < point[id]) {
+                obj[id] = point[id]
+              }
+            }
+          }
+        })
+      })
 
       domains.forEach(domain => {
         const id = domain.id
@@ -47,19 +85,20 @@ export default function(domains, data) {
           obj[id] = d3Mean(a, d => d[id] || 0)
           if (isOriginalPrice) priceId = id
         } else if (isTemperatureType) {
-          if (type === 'temperature' || type === 'temperature_mean') {
-            obj[id] = d3Mean(a, d => d[id] || 0)
-          } else if (type === 'temperature_min') {
-            obj[id] = d3Min(a, d => d[id] || 0)
-          } else if (type === 'temperature_max') {
-            obj[id] = d3Max(a, d => d[id] || 0)
-          }
+          // if (type === 'temperature' || type === 'temperature_mean') {
+          //   obj[id] = d3Mean(a, d => d[id] || 0)
+          // } else if (type === 'temperature_min') {
+          //   obj[id] = d3Min(a, d => d[id] || 0)
+          // } else if (type === 'temperature_max') {
+          //   obj[id] = d3Max(a, d => d[id] || 0)
+          // }
         }
       })
 
       const newPrice = obj[priceId]
       obj[PRICE_ABOVE_300] = newPrice > 300 ? newPrice : 0.1
       obj[PRICE_BELOW_0] = newPrice < 0 ? newPrice : -0.1
+      obj[temperatureId] = obj[temperatureId] / temperatureCount
 
       return obj
     })

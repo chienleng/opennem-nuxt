@@ -30,12 +30,14 @@ export default function(domains, data) {
         const isOriginalPrice =
           isPriceType && id !== PRICE_ABOVE_300 && id !== PRICE_BELOW_0
 
-        if (isEnergyType || isPriceType || isTemperatureType) {
+        if (isEnergyType || isPriceType) {
           obj[id] = d3Mean(a, d => d[id] || 0)
 
           if (isOriginalPrice) {
             priceId = id
           }
+        } else if (isTemperatureType) {
+          obj[id] = d3Mean(a, d => d[id])
         }
       })
 

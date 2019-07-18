@@ -1,6 +1,7 @@
 import moment from 'moment'
 import _sortBy from 'lodash.sortby'
 import _cloneDeep from 'lodash.clonedeep'
+import _includes from 'lodash.includes'
 import { timeMinute as d3TimeMinute } from 'd3-time'
 import parseInterval from '~/plugins/intervalParser.js'
 
@@ -250,7 +251,11 @@ function addEmptyDataPoint(time, dataset) {
     if (key === 'date') {
       emptyDataPoint[key] = emptyDataPoint[key] + time
     } else {
-      emptyDataPoint[key] = null
+      if (_includes(key, 'temperature') || _includes(key, 'emissions')) {
+        console.log(key)
+      } else {
+        emptyDataPoint[key] = null
+      }
     }
   })
   return emptyDataPoint
@@ -422,7 +427,8 @@ export default {
       if (interval === '30m') {
         resolve(rollUp30m(domains, data))
       } else if (range === '30D' && interval === 'Day') {
-        resolve(data)
+        // resolve(data)
+        resolve(rollUp1YDay(domains, data))
       } else if (range === '1Y' && interval === 'Day') {
         resolve(rollUp1YDay(domains, data))
       } else if (range === '1Y' && interval === 'Week') {
