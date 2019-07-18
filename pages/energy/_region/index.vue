@@ -401,7 +401,7 @@ import Domain from '~/services/Domain.js'
 
 import DataOptionsBar from '~/components/ui/DataOptionsBar'
 import StackedAreaVis from '~/components/Vis/StackedArea.vue'
-import StackedColumnVis from '~/components/Vis/StackedColumn.vue'
+// import StackedColumnVis from '~/components/Vis/StackedColumn.vue'
 import LineVis from '~/components/Vis/Line.vue'
 import SummaryTable from '~/components/SummaryTable'
 import VisTooltip from '~/components/ui/Tooltip'
@@ -413,7 +413,7 @@ export default {
     Draggable,
     DataOptionsBar,
     StackedAreaVis,
-    StackedColumnVis,
+    // StackedColumnVis,
     LineVis,
     SummaryTable,
     VisTooltip
