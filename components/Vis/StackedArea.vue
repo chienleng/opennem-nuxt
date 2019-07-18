@@ -701,7 +701,7 @@ export default {
       const ticks = axisTimeTicks(this.dynamicExtent[1] - this.dynamicExtent[0])
       let tickLength = null
       console.log(ticks, this.interval, this.zoomed)
-      if (!this.zoomed) {
+      if (!this.zoomed && this.range === 'ALL') {
         if (
           this.interval === 'Month' ||
           this.interval === 'Season' ||
