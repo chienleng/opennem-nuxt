@@ -60,16 +60,17 @@
               <small>GWh/{{ interval }}</small>
             </div>
             <div class="hover-values">
-              <span v-if="hoverValue">
+              <span
+                v-if="hoverValue"
+                class="ft-value">
                 <em
                   :style="{ 'background-color': hoverDomainColour }"
                   class="colour-square" />
-                {{ hoverDomainLabel }}:
+                {{ hoverDomainLabel }}
                 <strong>{{ hoverValue | formatValue }} GWh</strong>
-                |
               </span>
-              <span>
-                Total:
+              <span class="total-value">
+                Total
                 <strong>{{ hoverTotal | formatValue }} GWh</strong>
               </span>
             </div>
@@ -82,16 +83,17 @@
               <small>MW</small>
             </div>
             <div class="hover-values">
-              <span v-if="hoverValue">
+              <span
+                v-if="hoverValue"
+                class="ft-value">
                 <em
                   :style="{ 'background-color': hoverDomainColour }"
                   class="colour-square" />
-                {{ hoverDomainLabel }}:
+                {{ hoverDomainLabel }}
                 <strong>{{ hoverValue | formatValue }} MW</strong>
-                |
               </span>
-              <span>
-                Total:
+              <span class="total-value">
+                Total
                 <strong>{{ hoverTotal | formatValue }} MW</strong>
               </span>
             </div>
@@ -139,7 +141,7 @@
               v-show="chartEmissionsVolume"
               class="hover-values">
               <span>
-                Total:
+                Total
                 <strong>{{ hoverEmissionVolumeTotal | formatValue }} tCO2e</strong>
               </span>
             </div>
@@ -264,7 +266,7 @@
             :y-min="300"
             :y-max="20000"
             :show-x-axis="false"
-            :vis-height="30"
+            :vis-height="50"
             :show-zoom-out="false"
             :y-guides="[300, 2000, 6000, 10000, 14000]"
             class="price-pos-vis"
@@ -312,12 +314,12 @@
             :y-axis-log="true"
             :y-axis-invert="true"
             :y-min="-0.1"
-            :y-max="-1000"
+            :y-max="-1100"
             :show-x-axis="false"
             :show-tooltip="false"
-            :vis-height="30"
+            :vis-height="35"
             :show-zoom-out="false"
-            :y-guides="[-50, -800]"
+            :y-guides="[-60, -400]"
             class="price-neg-vis"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
@@ -347,16 +349,20 @@
             <div
               v-show="chartTemperature"
               class="hover-values">
-              <span v-if="hoverMinTemperature">
-                Min:
+              <span
+                v-if="hoverMinTemperature"
+                class="min-temp-value">
+                Min
                 <strong>{{ hoverMinTemperature | formatValue }}°C</strong>
-                | Av:
               </span>
-              <span>
+              <span class="mean-temp-value">
+                Av
                 <strong>{{ hoverMeanTemperature | formatValue }}°C</strong>
               </span>
-              <span v-if="hoverMaxTemperature">
-                | Max:
+              <span
+                v-if="hoverMaxTemperature"
+                class="min-temp-value">
+                Max
                 <strong>{{ hoverMaxTemperature | formatValue }}°C</strong>
               </span>
             </div>
@@ -1038,9 +1044,20 @@ export default {
 
       .hover-values {
         opacity: 0;
-        padding: 2px 1rem 1px;
+        padding: 3px 1.5rem 2px;
         border-radius: 4px;
         white-space: nowrap;
+        font-size: 0.8em;
+
+        .ft-value {
+          margin-right: 1rem;
+        }
+        .mean-temp-value {
+          margin: 0 1rem;
+        }
+        strong {
+          font-size: 1.3em;
+        }
       }
 
       .colour-square {
@@ -1075,11 +1092,11 @@ export default {
 // Chart style adjustments
 .price-vis {
   position: relative;
-  top: -6px;
+  top: -7px;
 }
 .price-neg-vis {
   position: relative;
-  top: -12px;
+  top: -14px;
 }
 ::v-deep .price-vis .y-axis-guide-group .domain,
 ::v-deep .temperature-vis .y-axis .domain {
@@ -1093,6 +1110,6 @@ export default {
 }
 ::v-deep .price-neg-vis .line-group path,
 ::v-deep .price-pos-vis .line-group path {
-  stroke-dasharray: 1.8;
+  stroke-dasharray: 1;
 }
 </style>

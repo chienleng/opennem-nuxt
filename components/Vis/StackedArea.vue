@@ -591,7 +591,6 @@ export default {
         $cursorLine.attr('opacity', 0)
         $cursorRect
           .attr('x', xDate)
-          // .attr('y', this.height - this.timeRectHeight)
           .attr('width', bandwidth)
           .attr('opacity', 1)
       } else {

@@ -79,7 +79,7 @@
 </template>
 
 <script>
-import { scaleOrdinal, scaleLinear, scaleTime, scaleLog } from 'd3-scale'
+import { scaleOrdinal, scaleLinear, scaleTime, scaleSymlog } from 'd3-scale'
 import { axisBottom, axisRight } from 'd3-axis'
 import {
   area as d3Area,
@@ -101,6 +101,7 @@ import axisTimeFormat from './shared/timeFormat.js'
 import axisSecondaryTimeFormat from './shared/secondaryTimeFormat.js'
 import axisTimeTicks from './shared/timeTicks.js'
 import DateDisplay from '~/services/DateDisplay.js'
+import millisecondsByInterval from '~/constants/millisecondsByInterval.js'
 
 export default {
   props: {
@@ -251,6 +252,7 @@ export default {
       cursorLineClass: CONFIG.CURSOR_LINE_CLASS,
       cursorLineTextClass: CONFIG.CURSOR_LINE_TEXT_CLASS,
       cursorLineRectClass: CONFIG.CURSOR_LINE_RECT_CLASS,
+      cursorRectClass: 'cursor-rect',
       tooltipRectHeight: 20,
       tooltipGroupClass: CONFIG.TOOLTIP_GROUP_CLASS,
       tooltipRectClass: CONFIG.TOOLTIP_RECT_CLASS,
@@ -314,7 +316,7 @@ export default {
       }
     },
     hoverDate(date) {
-      this.updateCursorLineTooltip(date)
+      this.updateCursorLineTooltip(new Date(date).getTime())
     }
   },
 
@@ -370,7 +372,7 @@ export default {
       this.yRange = this.yAxisInvert ? [0, this.height] : [this.height, 0]
       this.x = scaleTime().range([0, this.width]) // Date axis
       this.y = this.yAxisLog // Value axis
-        ? scaleLog().range(this.yRange)
+        ? scaleSymlog().range(this.yRange)
         : scaleLinear().range([this.height, 0])
       this.z = scaleOrdinal() // Colour
 
@@ -402,6 +404,11 @@ export default {
       this.$cursorLineGroup
         .append('text')
         .attr('class', this.cursorLineTextClass)
+      this.$cursorLineGroup
+        .append('rect')
+        .attr('class', this.cursorRectClass)
+        .attr('height', this.height)
+        .attr('opacity', 0)
 
       // Create tooltip group
       this.$tooltipGroup = this.$cursorLineGroup
@@ -481,7 +488,7 @@ export default {
       const yMax = this.yMax || max(this.dataset, d => d[maxDomain]) + 5
 
       this.x.domain(xDomainExtent)
-      this.y.domain([yMin, yMax]).nice()
+      this.y.domain([yMin, yMax])
       this.z.range([this.domainColour]).domain([this.domainId])
 
       this.$xAxisGroup.call(this.customXAxis)
@@ -525,6 +532,11 @@ export default {
 
     updateCursorLineTooltip(date) {
       const xDate = this.x(date)
+      const nextPeriod = this.x(date + millisecondsByInterval[this.interval])
+      const bandwidth =
+        this.interval !== '5m' || this.interval !== '30m'
+          ? nextPeriod - xDate
+          : null
       const fTime = DateDisplay.specialDateFormats(
         new Date(date).getTime(),
         this.range,
@@ -534,7 +546,6 @@ export default {
         false,
         true
       )
-
       const valueFormat = d3Format(',.1f')
       const time = new Date(date).getTime()
       const find = this.dataset.find(d => d.date === time)
@@ -556,12 +567,24 @@ export default {
       const $cursorLine = this.$cursorLineGroup.select(
         `.${this.cursorLineClass}`
       )
-      // Position and draw the line
-      $cursorLine.attr('d', () => {
-        let d = 'M' + xDate + ',' + this.height
-        d += ' ' + xDate + ',' + 0
-        return d
-      })
+      const $cursorRect = this.$cursorLineGroup.select(
+        `.${this.cursorRectClass}`
+      )
+
+      if (bandwidth) {
+        $cursorLine.attr('opacity', 0)
+        $cursorRect
+          .attr('x', xDate)
+          .attr('width', bandwidth)
+          .attr('opacity', 1)
+      } else {
+        $cursorRect.attr('opacity', 0)
+        $cursorLine.attr('opacity', 1).attr('d', () => {
+          let d = 'M' + xDate + ',' + this.height
+          d += ' ' + xDate + ',' + 0
+          return d
+        })
+      }
     },
 
     positionTooltip(xDate, time) {
