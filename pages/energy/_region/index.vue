@@ -452,6 +452,11 @@
           :is-energy="step"
           @fuelTechsHidden="handleFuelTechsHidden"
         />
+
+        <donut-vis
+          :domains="donutDomains"
+          :dataset="dataset"
+          :dynamic-extent="dateFilter" />
       </div>
     </div>
   </section>
@@ -477,6 +482,7 @@ import DataOptionsBar from '~/components/ui/DataOptionsBar'
 import StackedAreaVis from '~/components/Vis/StackedArea.vue'
 // import StackedColumnVis from '~/components/Vis/StackedColumn.vue'
 import LineVis from '~/components/Vis/Line.vue'
+import DonutVis from '~/components/Vis/Donut.vue'
 import SummaryTable from '~/components/SummaryTable'
 import VisTooltip from '~/components/ui/Tooltip'
 
@@ -487,8 +493,8 @@ export default {
     Draggable,
     DataOptionsBar,
     StackedAreaVis,
-    // StackedColumnVis,
     LineVis,
+    DonutVis,
     SummaryTable,
     VisTooltip
   },
@@ -607,6 +613,15 @@ export default {
       return this.fuelTechGroup
         ? domains.filter(d => !_includes(hidden, d.id))
         : domains.filter(d => !_includes(hidden, d.fuelTech))
+    },
+    donutDomains() {
+      const hidden = this.hiddenFuelTechs
+      let domains =
+        this.groupDomains.length > 0 ? this.groupDomains : this.energyDomains
+      domains = this.fuelTechGroup
+        ? domains.filter(d => !_includes(hidden, d.id))
+        : domains.filter(d => !_includes(hidden, d.fuelTech))
+      return domains.filter(d => d.category === 'source')
     },
     summaryDomains() {
       return this.groupDomains.length > 0
