@@ -244,9 +244,14 @@ function addEmptyDataPoint(time, dataset) {
     if (key === 'date') {
       emptyDataPoint[key] = emptyDataPoint[key] + time
     } else {
-      if (_includes(key, 'temperature') || _includes(key, 'emissions')) {
+      if (
+        _includes(key, 'temperature') ||
+        _includes(key, 'emissions') ||
+        _includes(key, 'volume_weighted_price')
+      ) {
         console.log(key)
       } else {
+        console.log(key)
         emptyDataPoint[key] = null
       }
     }
