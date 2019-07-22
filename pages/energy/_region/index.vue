@@ -59,20 +59,27 @@
               <strong>Energy</strong>
               <small>GWh/{{ interval }}</small>
             </div>
-            <div class="hover-values">
-              <span
-                v-if="hoverValue"
-                class="ft-value">
-                <em
-                  :style="{ 'background-color': hoverDomainColour }"
-                  class="colour-square" />
-                {{ hoverDomainLabel }}
-                <strong>{{ hoverValue | formatValue }} GWh</strong>
-              </span>
-              <span class="total-value">
-                Total
-                <strong>{{ hoverTotal | formatValue }} GWh</strong>
-              </span>
+            <div class="hover-date-value">
+              <div class="hover-date">
+                <time>
+                  {{ hoverDisplayDate }}
+                </time>
+              </div>
+              <div class="hover-values">
+                <span
+                  v-if="hoverValue"
+                  class="ft-value">
+                  <em
+                    :style="{ 'background-color': hoverDomainColour }"
+                    class="colour-square" />
+                  {{ hoverDomainLabel }}
+                  <strong>{{ hoverValue | formatValue }} GWh</strong>
+                </span>
+                <span class="total-value">
+                  Total
+                  <strong>{{ hoverTotal | formatValue }} GWh</strong>
+                </span>
+              </div>
             </div>
           </div>
           <div
@@ -82,20 +89,27 @@
               <strong>Generation</strong>
               <small>MW</small>
             </div>
-            <div class="hover-values">
-              <span
-                v-if="hoverValue"
-                class="ft-value">
-                <em
-                  :style="{ 'background-color': hoverDomainColour }"
-                  class="colour-square" />
-                {{ hoverDomainLabel }}
-                <strong>{{ hoverValue | formatValue }} MW</strong>
-              </span>
-              <span class="total-value">
-                Total
-                <strong>{{ hoverTotal | formatValue }} MW</strong>
-              </span>
+            <div class="hover-date-value">
+              <div class="hover-date">
+                <time>
+                  {{ hoverDisplayDate }}
+                </time>
+              </div>
+              <div class="hover-values">
+                <span
+                  v-if="hoverValue"
+                  class="ft-value">
+                  <em
+                    :style="{ 'background-color': hoverDomainColour }"
+                    class="colour-square" />
+                  {{ hoverDomainLabel }}
+                  <strong>{{ hoverValue | formatValue }} MW</strong>
+                </span>
+                <span class="total-value">
+                  Total
+                  <strong>{{ hoverTotal | formatValue }} MW</strong>
+                </span>
+              </div>
             </div>
           </div>
           <stacked-area-vis
@@ -139,11 +153,18 @@
             </div>
             <div
               v-show="chartEmissionsVolume"
-              class="hover-values">
-              <span>
-                Total
-                <strong>{{ hoverEmissionVolumeTotal | formatValue }} tCO2e</strong>
-              </span>
+              class="hover-date-value">
+              <div class="hover-date">
+                <time>
+                  {{ hoverDisplayDate }}
+                </time>
+              </div>
+              <div class="hover-values">
+                <span>
+                  Total
+                  <strong>{{ hoverEmissionVolumeTotal | formatValue }} tCO2e</strong>
+                </span>
+              </div>
             </div>
           </div>
           <stacked-area-vis
@@ -190,10 +211,17 @@
             </div>
             <div
               v-show="chartEmissionsIntensity"
-              class="hover-values">
-              <span>
-                <strong>{{ hoverEmissionsIntensity | formatValue }}</strong>
-              </span>
+              class="hover-date-value">
+              <div class="hover-date">
+                <time>
+                  {{ hoverDisplayDate }}
+                </time>
+              </div>
+              <div class="hover-values">
+                <span>
+                  <strong>{{ hoverEmissionsIntensity | formatValue }}</strong>
+                </span>
+              </div>
             </div>
           </div>
           <line-vis
@@ -241,10 +269,17 @@
             </div>
             <div
               v-show="chartPrice"
-              class="hover-values">
-              <span>
-                <strong>{{ hoverPrice | formatCurrency }}</strong>
-              </span>
+              class="hover-date-value">
+              <div class="hover-date">
+                <time>
+                  {{ hoverDisplayDate }}
+                </time>
+              </div>
+              <div class="hover-values">
+                <span>
+                  <strong>{{ hoverPrice | formatCurrency }}</strong>
+                </span>
+              </div>
             </div>
           </div>
           <line-vis
@@ -346,25 +381,33 @@
               <strong>Temperature</strong>
               <small>°C</small>
             </div>
+
             <div
               v-show="chartTemperature"
-              class="hover-values">
-              <span
-                v-if="hoverMinTemperature"
-                class="min-temp-value">
-                Min
-                <strong>{{ hoverMinTemperature | formatValue }}°C</strong>
-              </span>
-              <span class="mean-temp-value">
-                Av
-                <strong>{{ hoverMeanTemperature | formatValue }}°C</strong>
-              </span>
-              <span
-                v-if="hoverMaxTemperature"
-                class="min-temp-value">
-                Max
-                <strong>{{ hoverMaxTemperature | formatValue }}°C</strong>
-              </span>
+              class="hover-date-value">
+              <div class="hover-date">
+                <time>
+                  {{ hoverDisplayDate }}
+                </time>
+              </div>
+              <div class="hover-values">
+                <span
+                  v-if="hoverMinTemperature"
+                  class="min-temp-value">
+                  Min
+                  <strong>{{ hoverMinTemperature | formatValue }}°C</strong>
+                </span>
+                <span class="mean-temp-value">
+                  Av
+                  <strong>{{ hoverMeanTemperature | formatValue }}°C</strong>
+                </span>
+                <span
+                  v-if="hoverMaxTemperature"
+                  class="min-temp-value">
+                  Max
+                  <strong>{{ hoverMaxTemperature | formatValue }}°C</strong>
+                </span>
+              </div>
             </div>
           </div>
           <line-vis
@@ -584,6 +627,17 @@ export default {
     },
     emissionsMax() {
       return d3Max(this.dataset, d => d._totalEmissionsVol)
+    },
+    hoverDisplayDate() {
+      return DateDisplay.specialDateFormats(
+        new Date(this.hoverDate).getTime(),
+        this.range,
+        this.interval,
+        false,
+        false,
+        false,
+        true
+      )
     },
     hoverData() {
       const time = new Date(this.hoverDate).getTime()
@@ -991,6 +1045,7 @@ export default {
 
 <style lang="scss" scoped>
 @import '~/assets/scss/responsive-mixins.scss';
+@import '~/assets/scss/variables.scss';
 
 .vis-table-container {
   display: flex;
@@ -1030,13 +1085,31 @@ export default {
         background-color: rgba(255, 255, 255, 0.3);
       }
 
-      .hover-values {
+      .hover-date-value {
         opacity: 0;
-        padding: 3px 1.5rem 2px;
-        border-radius: 4px;
-        white-space: nowrap;
-        font-size: 0.8em;
+        display: flex;
+        font-size: 0.9em;
+      }
 
+      .hover-date,
+      .hover-values {
+        background: rgba(255, 255, 255, 0.5);
+        padding: 3px 10px 2px;
+        white-space: nowrap;
+      }
+
+      .hover-date {
+        font-weight: 600;
+        background-color: rgba(199, 69, 35, 0.9);
+        color: #fff;
+        border-radius: 4px 0 0 4px;
+      }
+
+      .hover-values {
+        border-radius: 0 4px 4px 0;
+        display: flex;
+        align-items: center;
+        font-size: 0.8em;
         .ft-value {
           margin-right: 1rem;
         }
@@ -1051,8 +1124,8 @@ export default {
       .colour-square {
         display: inline-block;
         border: 1px solid transparent;
-        width: 11px;
-        height: 11px;
+        width: 9px;
+        height: 9px;
         border-radius: 1px;
         position: relative;
         top: 1px;
@@ -1066,9 +1139,8 @@ export default {
       }
     }
 
-    &.is-hovered .hover-values {
+    &.is-hovered .hover-date-value {
       opacity: 1;
-      background: rgba(255, 255, 255, 0.5);
       transition: all 0.2s ease-in-out;
     }
     &.has-border-bottom {
