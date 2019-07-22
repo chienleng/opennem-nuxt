@@ -847,8 +847,7 @@ export default {
 
     updateEnergyMinMax() {
       let energyMinAll = 0,
-        energyMaxAll = 0,
-        emissionsIntensityMinAll = 0
+        energyMaxAll = 0
       this.dataset.forEach((d, i) => {
         let energyMin = 0,
           energyMax = 0
@@ -861,14 +860,6 @@ export default {
           }
         })
 
-        const eIValue = d['_emissionsIntensity']
-        if (i === 0) {
-          emissionsIntensityMinAll = eIValue
-        }
-        if (eIValue && emissionsIntensityMinAll > eIValue) {
-          emissionsIntensityMinAll = eIValue
-        }
-
         if (energyMax > energyMaxAll) {
           energyMaxAll = energyMax
         }
@@ -878,9 +869,6 @@ export default {
       })
       this.energyMin = energyMinAll
       this.energyMax = energyMaxAll
-
-      let minCheck = emissionsIntensityMinAll - 50
-      this.emissionsIntensityMin = minCheck < 0 ? 0 : minCheck
     },
 
     handleRangeChange(range) {
