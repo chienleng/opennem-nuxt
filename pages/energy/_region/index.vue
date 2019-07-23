@@ -455,7 +455,7 @@
 
         <donut-vis
           :domains="donutDomains"
-          :dataset="dataset"
+          :dataset="filteredDataset"
           :dynamic-extent="dateFilter" />
       </div>
     </div>
@@ -1115,9 +1115,11 @@ export default {
 
       .hover-date {
         font-weight: 600;
-        background-color: rgba(199, 69, 35, 0.9);
-        color: #fff;
+        background-color: rgba(199, 69, 35, 0.1);
+        color: #444;
         border-radius: 4px 0 0 4px;
+        font-size: 0.9em;
+        padding-top: 4px;
       }
 
       .hover-values {
