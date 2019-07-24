@@ -377,7 +377,6 @@ export default {
       this.$cursorLineGroup
         .append('rect')
         .attr('class', this.cursorRectClass)
-        .attr('height', this.height)
         .attr('opacity', 0)
 
       // Create tooltip group
@@ -592,6 +591,7 @@ export default {
         $cursorRect
           .attr('x', xDate)
           .attr('width', bandwidth)
+          .attr('height', this.height)
           .attr('opacity', 1)
       } else {
         $cursorRect.attr('opacity', 0)
