@@ -162,7 +162,6 @@ export default {
     handleResponses(responses) {
       const data = responses[0].data
       FacilityDataTransformService.flatten(data).then(res => {
-        console.log(res)
         this.facilityData = res
       })
     },
