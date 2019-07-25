@@ -33,6 +33,11 @@ export default function(domains, data) {
         if (isEnergyType || isPriceType) {
           obj[id] = d3Mean(a, d => d[id] || 0)
 
+          if (type === 'price') {
+            // use the first 30min data for period
+            obj[id] = a[0][id]
+          }
+
           if (isOriginalPrice) {
             priceId = id
           }
