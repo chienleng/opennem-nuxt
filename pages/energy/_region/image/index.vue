@@ -1,31 +1,37 @@
 <template>
   <section style="margin: 2rem;">
     <export-header
+      :charts="charts"
+      :tables="tables"
+      :chart-energy="chartEnergy"
+      :chart-emissions-volume="chartEmissionsVolume"
+      :chart-emissions-intensity="chartEmissionsIntensity"
+      :chart-price="chartPrice"
+      :chart-temperature="chartTemperature"
+      :summary="summary"
+      :legend="legend"
       @exportClick="handleExportClick"
       @exportCancel="handleCancelClick"
+      @widgetToggle="handleWidgetToggle"
     />
 
     <div id="export-container">
       <div class="vis-table-container">
         <div class="vis-container">
           <div
-            v-if="ready"
+            v-if="ready && chartEnergy"
             class="chart">
             <div
               v-if="step"
               class="chart-title">
-              <div>
-                <strong>Energy</strong>
-                <small>GWh/{{ interval }}</small>
-              </div>
+              <strong>Energy</strong>
+              <small>GWh/{{ interval }}</small>
             </div>
             <div
               v-else
               class="chart-title">
-              <div>
-                <strong>Generation</strong>
-                <small>MW</small>
-              </div>
+              <strong>Generation</strong>
+              <small>MW</small>
             </div>
             <stacked-area-vis
               :domains="stackedAreaDomains"
@@ -41,18 +47,13 @@
           </div>
 
           <div
-            v-if="ready && hasEmissionData"
+            v-if="ready && hasEmissionData && chartEmissionsVolume"
             class="chart">
-            <div
-              class="chart-title"
-              @click="toggleChart('chartEmissionsVolume')">
-              <div>
-                <strong>Emissions Volume</strong>
-                <small>tCO2e</small>
-              </div>
+            <div class="chart-title">
+              <strong>Emissions Volume</strong>
+              <small>tCO2e</small>
             </div>
             <stacked-area-vis
-              v-if="chartEmissionsVolume"
               :domains="emissionStackedAreaDomains"
               :dataset="dataset"
               :dynamic-extent="dateFilter"
@@ -69,18 +70,13 @@
           </div>
 
           <div
-            v-if="ready && hasEmissionData"
+            v-if="ready && hasEmissionData && chartEmissionsIntensity"
             class="chart">
-            <div
-              class="chart-title"
-              @click="toggleChart('chartEmissionsIntensity')">
-              <div>
-                <strong>Emissions Intensity</strong>
-                <small>kgCO₂e/MWh</small>
-              </div>
+            <div class="chart-title">
+              <strong>Emissions Intensity</strong>
+              <small>kgCO₂e/MWh</small>
             </div>
             <line-vis
-              v-if="chartEmissionsIntensity"
               :domain-id="'_emissionsIntensity'"
               :domain-colour="lineColour"
               :dataset="dataset"
@@ -97,18 +93,13 @@
           </div>
 
           <div
-            v-if="ready && hasPriceData"
+            v-if="ready && hasPriceData && chartPrice"
             class="chart">
-            <div
-              class="chart-title"
-              @click="toggleChart('chartPrice')">
-              <div>
-                <strong>Price</strong>
-                <small>$/MWh</small>
-              </div>
+            <div class="chart-title">
+              <strong>Price</strong>
+              <small>$/MWh</small>
             </div>
             <line-vis
-              v-if="chartPrice"
               :domain-id="'price.above300'"
               :domain-colour="lineColour"
               :value-domain-id="priceDomains[0].id"
@@ -129,7 +120,6 @@
               class="price-pos-vis"
             />
             <line-vis
-              v-if="chartPrice"
               :domain-id="priceDomains[0].id"
               :domain-colour="lineColour"
               :dataset="dataset"
@@ -149,7 +139,6 @@
               class="price-vis"
             />
             <line-vis
-              v-if="chartPrice"
               :domain-id="'price.below0'"
               :domain-colour="lineColour"
               :dataset="dataset"
@@ -171,18 +160,13 @@
           </div>
 
           <div
-            v-if="ready && hasTemperatureData"
+            v-if="ready && hasTemperatureData && chartTemperature"
             class="chart">
-            <div
-              class="chart-title"
-              @click="toggleChart('chartTemperature')">
-              <div>
-                <strong>Temperature</strong>
-                <small>°C</small>
-              </div>
+            <div class="chart-title">
+              <strong>Temperature</strong>
+              <small>°C</small>
             </div>
             <line-vis
-              v-if="chartTemperature"
               :domain-id="temperatureMeanId"
               :min-domain-id="temperatureMinId"
               :max-domain-id="temperatureMaxId"
@@ -204,7 +188,7 @@
 
         <div class="table-container">
           <summary-table
-            v-if="ready"
+            v-if="ready && summary"
             :domains="summaryDomains"
             :price-id="priceDomains.length > 0 ? priceDomains[0].id : null"
             :market-value-domains="mvDomains"
@@ -237,6 +221,39 @@ import StackedAreaVis from '~/components/Vis/StackedArea.vue'
 import LineVis from '~/components/Vis/Line.vue'
 import SummaryTable from '~/components/SummaryTable'
 
+const charts = [
+  {
+    name: 'chartEnergy',
+    label: 'Energy'
+  },
+  {
+    name: 'chartEmissionsVolume',
+    label: 'Emissions Volume'
+  },
+  {
+    name: 'chartEmissionsIntensity',
+    label: 'Emissions Intensity'
+  },
+  {
+    name: 'chartPrice',
+    label: 'Price'
+  },
+  {
+    name: 'chartTemperature',
+    label: 'Temperature'
+  }
+]
+const tables = [
+  {
+    name: 'summary',
+    label: 'Summary'
+  },
+  {
+    name: 'legend',
+    label: 'Legend'
+  }
+]
+
 export default {
   layout: 'export',
 
@@ -266,25 +283,22 @@ export default {
       filteredDataset: [],
       lineColour: '#e34a33',
       windowWidth: 0,
-      stackedAreaHeight: 280
+      stackedAreaHeight: 280,
+      charts,
+      tables,
+      chartEnergy: true,
+      chartEmissionsVolume: false,
+      chartEmissionsIntensity: false,
+      chartPrice: false,
+      chartTemperature: false,
+      summary: false,
+      legend: false
     }
   },
 
   computed: {
     type() {
       return this.$store.getters.energyChartType
-    },
-    chartEmissionsVolume() {
-      return this.$store.getters.chartEmissionsVolume
-    },
-    chartEmissionsIntensity() {
-      return this.$store.getters.chartEmissionsIntensity
-    },
-    chartPrice() {
-      return this.$store.getters.chartPrice
-    },
-    chartTemperature() {
-      return this.$store.getters.chartTemperature
     },
     regionId() {
       return this.$route.params.region
@@ -537,8 +551,8 @@ export default {
       }
     },
 
-    toggleChart(chartName) {
-      this.$store.dispatch(chartName, !this[chartName])
+    handleWidgetToggle(widgetName) {
+      this[widgetName] = !this[widgetName]
     },
 
     handleExportClick() {
@@ -581,8 +595,6 @@ export default {
       font-size: 0.8em;
       padding: 0.2rem 1rem 0.2rem 1rem;
       user-select: none;
-      display: flex;
-      justify-content: space-between;
     }
   }
 }
@@ -605,5 +617,9 @@ export default {
 ::v-deep .price-pos-vis .y-axis-guide-group .tick:not(:first-of-type) text,
 ::v-deep .price-neg-vis .y-axis-guide-group .tick text {
   display: none;
+}
+::v-deep .price-neg-vis .line-group path,
+::v-deep .price-pos-vis .line-group path {
+  stroke-dasharray: 1;
 }
 </style>
