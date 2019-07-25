@@ -10,7 +10,9 @@
     class="summary-list"
     @start="drag=true"
     @end="drag=false"> -->
-  <div class="summary-list">
+  <div
+    :class="{ 'click-disable': !domainToggleable }"
+    class="summary-list">
     <div
       v-for="(ft, index) in order"
       :key="ft.id"
@@ -100,6 +102,10 @@ export default {
     showPercentColumn: {
       type: Boolean,
       default: () => true
+    },
+    domainToggleable: {
+      type: Boolean,
+      default: () => true
     }
   },
 
@@ -143,23 +149,27 @@ export default {
 
   methods: {
     handleRowClick(ft) {
-      const fuelTech = ft.fuelTech || ft.id
-      const hidden = _cloneDeep(this.hiddenFuelTechs)
-      if (_includes(hidden, fuelTech)) {
-        _remove(hidden, d => d === fuelTech)
-      } else {
-        hidden.push(fuelTech)
+      if (this.domainToggleable) {
+        const fuelTech = ft.fuelTech || ft.id
+        const hidden = _cloneDeep(this.hiddenFuelTechs)
+        if (_includes(hidden, fuelTech)) {
+          _remove(hidden, d => d === fuelTech)
+        } else {
+          hidden.push(fuelTech)
+        }
+        this.order = this.updateOrder(this.originalOrder)
+        this.$emit('fuelTechsHidden', hidden, false)
       }
-      this.order = this.updateOrder(this.originalOrder)
-      this.$emit('fuelTechsHidden', hidden, false)
     },
 
     handleRowShiftClicked(ft) {
-      const property = ft.fuelTech ? 'fuelTech' : 'id'
-      const hiddenObjs = this.order.filter(d => d[property] !== ft[property])
-      const hidden = hiddenObjs.map(d => d[property])
-      this.order = this.updateOrder(this.originalOrder)
-      this.$emit('fuelTechsHidden', hidden, true)
+      if (this.domainToggleable) {
+        const property = ft.fuelTech ? 'fuelTech' : 'id'
+        const hiddenObjs = this.order.filter(d => d[property] !== ft[property])
+        const hidden = hiddenObjs.map(d => d[property])
+        this.order = this.updateOrder(this.originalOrder)
+        this.$emit('fuelTechsHidden', hidden, true)
+      }
     },
 
     updateOrder(order) {
@@ -241,6 +251,17 @@ export default {
     border: 1px solid transparent;
     width: 15px;
     height: 15px;
+  }
+
+  &.click-disable {
+    .item {
+      cursor: auto;
+      user-select: auto;
+
+      &:hover {
+        background-color: transparent;
+      }
+    }
   }
 }
 </style>

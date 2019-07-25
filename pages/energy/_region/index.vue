@@ -7,47 +7,8 @@
       @onIntervalChange="handleIntervalChange"
     />
 
-    <div
-      id="export-container"
-      class="vis-table-container">
+    <div class="vis-table-container">
       <div class="vis-container">
-        <!-- <draggable
-          :group="'charts'"
-          :direction="'horizontal'"
-          :ghost-class="'sortable-ghost'"
-          :drag-class="'sortable-drag'"
-          :animation="150"
-          handle=".handle"
-          @start="drag=true"
-          @end="drag=false">
-
-          <div class="chart">
-            <div class="handle">...</div>
-            <vis-tooltip
-              :left-position="tooltipLeft"
-              :hover-value="hoverValue"
-              :hover-total="hoverTotal"
-              :hover-domain-colour="hoverDomainColour"
-            />
-            <stacked-area-vis
-              v-if="ready"
-              :domains="stackedAreaDomains"
-              :dataset="dataset"
-              :dynamic-extent="dateFilter"
-              :hover-date="hoverDate"
-              :range="range"
-              :interval="interval"
-              :mouse-loc="mouseLoc"
-              :curve="energyCurveType"
-              :vis-height="stackedAreaHeight"
-              @eventChange="handleEventChange"
-              @dateOver="handleDateOver"
-              @domainOver="handleDomainOver"
-            />
-          </div>
-          
-        </draggable> -->
-
         <div
           v-if="ready"
           :class="{ 'is-hovered': hoverOn }"
@@ -125,6 +86,7 @@
             :y-min="energyMin"
             :y-max="energyMax"
             :vis-height="stackedAreaHeight"
+            :zoomed="zoomed"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
             @domainOver="handleDomainOver"
@@ -184,6 +146,7 @@
             :show-zoom-out="false"
             :y-min="0"
             :y-max="emissionsMax"
+            :zoomed="zoomed"
             class="emissions-volume-vis"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
@@ -208,6 +171,7 @@
                 }"
                 class="fal fa-fw" />
               <strong>Emissions Intensity</strong>
+              <small>kgCO₂e/MWh</small>
             </div>
             <div
               v-show="chartEmissionsIntensity"
@@ -219,7 +183,7 @@
               </div>
               <div class="hover-values">
                 <span>
-                  <strong>{{ hoverEmissionsIntensity | formatValue }}</strong>
+                  <strong>{{ hoverEmissionsIntensity | formatValue }} kgCO₂e/MWh</strong>
                 </span>
               </div>
             </div>
@@ -241,6 +205,7 @@
             :y-min="emissionsIntensityMin"
             :curve="'smooth'"
             :show-zoom-out="false"
+            :zoomed="zoomed"
             class="emissions-intensity-vis"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
@@ -430,6 +395,7 @@
             :show-tooltip="false"
             :vis-height="100"
             :show-zoom-out="false"
+            :zoomed="zoomed"
             class="temperature-vis"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
@@ -480,7 +446,6 @@ import Domain from '~/services/Domain.js'
 
 import DataOptionsBar from '~/components/ui/DataOptionsBar'
 import StackedAreaVis from '~/components/Vis/StackedArea.vue'
-// import StackedColumnVis from '~/components/Vis/StackedColumn.vue'
 import LineVis from '~/components/Vis/Line.vue'
 import DonutVis from '~/components/Vis/Donut.vue'
 import SummaryTable from '~/components/SummaryTable'
@@ -516,7 +481,6 @@ export default {
       priceDomains: [],
       emissionDomains: [],
       responses: [],
-      dateFilter: [],
       hoverDate: null,
       hoverDomain: null,
       mouseLoc: null,
@@ -533,6 +497,12 @@ export default {
   },
 
   computed: {
+    dateFilter() {
+      return this.$store.getters.dateFilter
+    },
+    zoomed() {
+      return this.$store.getters.dateFilter.length !== 0
+    },
     type() {
       return this.$store.getters.energyChartType
     },
@@ -739,14 +709,13 @@ export default {
 
   created() {
     this.$store.dispatch('currentView', 'energy')
-  },
-
-  mounted() {
     EventBus.$on('dataset.filter', this.handleDatasetFilter)
     EventBus.$on('vis.mousemove', this.handleVisMouseMove)
     EventBus.$on('vis.mouseenter', this.handleVisEnter)
     EventBus.$on('vis.mouseleave', this.handleVisLeave)
+  },
 
+  mounted() {
     this.windowWidth = window.innerWidth
     this.visHeight = this.widthBreak ? 578 : 350
     this.$nextTick(() => {
@@ -758,7 +727,6 @@ export default {
         }, 200)
       )
     })
-
     this.fetchData(this.regionId, this.range)
     this.mounted = true
   },
@@ -813,21 +781,24 @@ export default {
         this.range,
         this.interval
       ).then(dataset => {
-        this.dataset = dataset
-        this.dateFilter = d3Extent(this.dataset, d => d.date)
-        if (this.groupDomains.length > 0) {
-          this.updateDatasetGroups(dataset, this.groupDomains)
-        }
-        if (this.groupMarketValueDomains.length > 0) {
-          this.updateDatasetGroups(dataset, this.groupMarketValueDomains)
-        }
-        if (this.groupEmissionDomains.length > 0) {
-          this.updateDatasetGroups(dataset, this.groupEmissionDomains)
-        }
-        this.updatedFilteredDataset(dataset)
-        this.updateEnergyMinMax()
-        this.ready = true
+        this.readyDataset(dataset)
       })
+    },
+
+    readyDataset(dataset) {
+      this.dataset = dataset
+      if (this.groupDomains.length > 0) {
+        this.updateDatasetGroups(dataset, this.groupDomains)
+      }
+      if (this.groupMarketValueDomains.length > 0) {
+        this.updateDatasetGroups(dataset, this.groupMarketValueDomains)
+      }
+      if (this.groupEmissionDomains.length > 0) {
+        this.updateDatasetGroups(dataset, this.groupEmissionDomains)
+      }
+      this.updatedFilteredDataset(dataset)
+      this.updateEnergyMinMax()
+      this.ready = true
     },
 
     updateDatasetGroups(dataset, groupDomains) {
@@ -945,29 +916,24 @@ export default {
       switch (range) {
         case '1D':
           interval = '5m'
-          this.dateFilter = []
           break
         case '3D':
         case '7D':
           interval = '30m'
-          this.dateFilter = []
           break
         case '30D':
           interval = 'Day'
-          this.dateFilter = []
           break
         case '1Y':
           interval = 'Week'
-          this.dateFilter = []
           break
         case 'ALL':
           interval = 'Month'
-          this.dateFilter = []
           break
         default:
           console.log('nothing yet')
       }
-
+      this.setDateFilter([])
       this.$store.dispatch('interval', interval)
       this.$store.dispatch('range', range)
       this.fetchData(this.regionId, range)
@@ -985,20 +951,7 @@ export default {
         this.range,
         interval
       ).then(dataset => {
-        this.dataset = dataset
-        this.dateFilter = d3Extent(this.dataset, d => d.date)
-        if (this.groupDomains.length > 0) {
-          this.updateDatasetGroups(dataset, this.groupDomains)
-        }
-        if (this.groupMarketValueDomains.length > 0) {
-          this.updateDatasetGroups(dataset, this.groupMarketValueDomains)
-        }
-        if (this.groupEmissionDomains.length > 0) {
-          this.updateDatasetGroups(dataset, this.groupEmissionDomains)
-        }
-        this.updatedFilteredDataset(dataset)
-        this.updateEnergyMinMax()
-        this.ready = true
+        this.readyDataset(dataset)
       })
     },
 
@@ -1015,8 +968,9 @@ export default {
           startTime,
           endTime
         )
-        this.dateFilter = [startTime, endTime]
+        this.setDateFilter([startTime, endTime])
       } else {
+        this.setDateFilter([])
         this.filteredDataset = this.dataset
       }
     },
@@ -1053,6 +1007,11 @@ export default {
 
     handleFuelTechsHidden(hidden) {
       this.hiddenFuelTechs = hidden
+    },
+
+    setDateFilter(dates) {
+      // this.dateFilter = dates
+      this.$store.dispatch('dateFilter', dates)
     }
   }
 }

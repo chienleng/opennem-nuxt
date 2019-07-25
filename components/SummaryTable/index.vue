@@ -25,7 +25,7 @@
         <div
           class="summary-col-label"
           style="padding-top: 3px;">
-          <group-selector />
+          <group-selector v-if="groupSelection" />
         </div>
         <div
           v-if="!hoverOn || isEnergy"
@@ -77,6 +77,7 @@
       :summary="summarySources"
       :summary-total="summary._totalEnergy"
       :show-percent-column="true"
+      :domain-toggleable="domainToggleable"
       @update="handleSourcesOrderUpdate"
       @fuelTechsHidden="handleSourceFuelTechsHidden"
     />
@@ -197,6 +198,14 @@ export default {
     isEnergy: {
       type: Boolean,
       default: () => false
+    },
+    domainToggleable: {
+      type: Boolean,
+      default: () => true
+    },
+    groupSelection: {
+      type: Boolean,
+      default: () => true
     }
   },
 

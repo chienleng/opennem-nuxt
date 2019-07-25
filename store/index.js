@@ -14,6 +14,7 @@ export const state = () => ({
   fuelTechOrder: cloneDeep(FUEL_TECHS.DEFAULT_FUEL_TECH_ORDER),
   range: '30D',
   interval: 'Day',
+  dateFilter: [],
   exportData: [],
   responsiveBreakWidth: 769,
   chartEmissionsVolume: true,
@@ -46,6 +47,9 @@ export const mutations = {
   },
   interval(state, data) {
     state.interval = data
+  },
+  dateFilter(state, data) {
+    state.dateFilter = data
   },
   exportData(state, data) {
     state.exportData = data
@@ -127,6 +131,7 @@ export const getters = {
     }
   },
   interval: state => state.interval,
+  dateFilter: state => state.dateFilter,
   exportData: state => state.exportData,
   responsiveBreakWidth: state => state.responsiveBreakWidth,
   chartEmissionsVolume: state => state.chartEmissionsVolume,
@@ -156,6 +161,9 @@ export const actions = {
   },
   interval({ commit }, data) {
     commit('interval', data)
+  },
+  dateFilter({ commit }, data) {
+    commit('dateFilter', data)
   },
   exportData({ commit }, data) {
     commit('exportData', data)

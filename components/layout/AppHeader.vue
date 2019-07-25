@@ -83,6 +83,9 @@ export default {
     interval() {
       return this.$store.getters.interval
     },
+    dateFilter() {
+      return this.$store.getters.dateFilter
+    },
     widthBreak() {
       return this.windowWidth < this.responsiveBreakWidth
     },
@@ -114,12 +117,17 @@ export default {
       this.openDrawer = !this.openDrawer
     },
     handleExportImage() {
+      const query = {
+        range: this.range,
+        interval: this.interval
+      }
+      if (this.dateFilter.length > 0) {
+        query.start = new Date(this.dateFilter[0]).getTime()
+        query.end = new Date(this.dateFilter[1]).getTime()
+      }
       this.$router.push({
         path: `/energy/${this.regionId}/image`,
-        query: {
-          range: this.range,
-          interval: this.interval
-        }
+        query
       })
     }
   }

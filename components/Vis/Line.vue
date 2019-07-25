@@ -1,7 +1,7 @@
 <template>
   <div class="vis line-vis">
     <button
-      v-if="showZoomOut"
+      v-if="zoomed && showZoomOut"
       class="button is-rounded is-small reset-btn"
       @click="handleReset"
     >
@@ -153,6 +153,10 @@ export default {
       type: String,
       default: () => ''
     },
+    zoomed: {
+      type: Boolean,
+      default: () => false
+    },
     // OPTIONAL: height for the chart
     visHeight: {
       type: Number,
@@ -226,7 +230,6 @@ export default {
       area: null,
       colours: schemeCategory10,
       brushX: null,
-      zoomed: false,
       $xAxisGroup: null,
       $xAxisBrushGroup: null,
       $yAxisGroup: null,
@@ -300,7 +303,6 @@ export default {
 
   watch: {
     dataset() {
-      this.zoomed = false
       this.update()
       this.resizeRedraw()
     },
@@ -311,9 +313,10 @@ export default {
     dynamicExtent(newExtent) {
       if (newExtent && newExtent.length) {
         this.x.domain(newExtent)
-        this.zoomed = true
-        this.zoomRedraw()
+      } else {
+        this.x.domain(this.datasetDateExtent)
       }
+      this.zoomRedraw()
     },
     hoverDate(date) {
       this.updateCursorLineTooltip(new Date(date).getTime())
@@ -676,10 +679,9 @@ export default {
     },
 
     handleReset() {
-      this.zoomed = false
       this.x.domain(this.datasetDateExtent)
       this.zoomRedraw()
-      EventBus.$emit('dataset.filter', this.datasetDateExtent)
+      EventBus.$emit('dataset.filter', [])
     },
 
     resizeRedraw() {
@@ -731,7 +733,6 @@ export default {
       // Set it to the current X domain
       this.x.domain(dateRange)
 
-      this.zoomed = true
       this.zoomRedraw()
       EventBus.$emit('dataset.filter', dateRange)
     },

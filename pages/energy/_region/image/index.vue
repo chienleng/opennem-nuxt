@@ -1,15 +1,15 @@
 <template>
   <section style="margin: 2rem;">
-    <button
-      class="button is-rounded is-primary"
-      @click="handleExportClick">Download</button>
+    <export-header
+      @exportClick="handleExportClick"
+      @exportCancel="handleCancelClick"
+    />
 
     <div id="export-container">
       <div class="vis-table-container">
         <div class="vis-container">
           <div
             v-if="ready"
-            :class="{ 'is-hovered': hoverOn }"
             class="chart">
             <div
               v-if="step"
@@ -31,33 +31,22 @@
               :domains="stackedAreaDomains"
               :dataset="dataset"
               :dynamic-extent="dateFilter"
-              :hover-date="hoverDate"
-              :hover-on="hoverOn"
               :range="range"
               :interval="interval"
-              :mouse-loc="mouseLoc"
               :curve="energyCurveType"
               :vis-height="stackedAreaHeight"
-              @eventChange="handleEventChange"
-              @dateOver="handleDateOver"
-              @domainOver="handleDomainOver"
+              :show-zoom-out="false"
+              :brush="false"
             />
           </div>
 
           <div
             v-if="ready && hasEmissionData"
-            :class="{ 'is-hovered': hoverOn }"
             class="chart">
             <div
               class="chart-title"
               @click="toggleChart('chartEmissionsVolume')">
               <div>
-                <i
-                  :class="{
-                    'fa-caret-down': chartEmissionsVolume,
-                    'fa-caret-right': !chartEmissionsVolume
-                  }"
-                  class="fal fa-fw" />
                 <strong>Emissions Volume</strong>
                 <small>tCO2e</small>
               </div>
@@ -67,11 +56,8 @@
               :domains="emissionStackedAreaDomains"
               :dataset="dataset"
               :dynamic-extent="dateFilter"
-              :hover-date="hoverDate"
-              :hover-on="hoverOn"
               :range="range"
               :interval="interval"
-              :mouse-loc="mouseLoc"
               :curve="'step'"
               :vis-height="200"
               :show-x-axis="false"
@@ -79,27 +65,18 @@
               :y-min="0"
               :y-max="emissionsMax"
               class="emissions-volume-vis"
-              @eventChange="handleEventChange"
-              @dateOver="handleDateOver"
             />
           </div>
 
           <div
             v-if="ready && hasEmissionData"
-            :class="{ 'is-hovered': hoverOn }"
             class="chart">
             <div
               class="chart-title"
               @click="toggleChart('chartEmissionsIntensity')">
               <div>
-                <i
-                  :class="{
-                    'fa-caret-down': chartEmissionsIntensity,
-                    'fa-caret-right': !chartEmissionsIntensity
-                  }"
-                  class="fal fa-fw" />
                 <strong>Emissions Intensity</strong>
-                <!-- <small>-</small> -->
+                <small>kgCO₂e/MWh</small>
               </div>
             </div>
             <line-vis
@@ -108,35 +85,24 @@
               :domain-colour="lineColour"
               :dataset="dataset"
               :dynamic-extent="dateFilter"
-              :hover-date="hoverDate"
-              :hover-on="hoverOn"
               :range="range"
               :interval="interval"
-              :mouse-loc="mouseLoc"
               :show-x-axis="false"
               :vis-height="80"
+              :y-min="0"
               :curve="'smooth'"
               :show-zoom-out="false"
               class="emissions-intensity-vis"
-              @eventChange="handleEventChange"
-              @dateOver="handleDateOver"
             />
           </div>
 
           <div
             v-if="ready && hasPriceData"
-            :class="{ 'is-hovered': hoverOn }"
             class="chart">
             <div
               class="chart-title"
               @click="toggleChart('chartPrice')">
               <div>
-                <i
-                  :class="{
-                    'fa-caret-down': chartPrice,
-                    'fa-caret-right': !chartPrice
-                  }"
-                  class="fal fa-fw" />
                 <strong>Price</strong>
                 <small>$/MWh</small>
               </div>
@@ -148,11 +114,8 @@
               :value-domain-id="priceDomains[0].id"
               :dataset="dataset"
               :dynamic-extent="dateFilter"
-              :hover-date="hoverDate"
-              :hover-on="hoverOn"
               :range="range"
               :interval="interval"
-              :mouse-loc="mouseLoc"
               :show-tooltip="false"
               :curve="'step'"
               :show-y-axis="false"
@@ -164,8 +127,6 @@
               :show-zoom-out="false"
               :y-guides="[300, 2000, 6000, 10000, 14000]"
               class="price-pos-vis"
-              @eventChange="handleEventChange"
-              @dateOver="handleDateOver"
             />
             <line-vis
               v-if="chartPrice"
@@ -173,11 +134,8 @@
               :domain-colour="lineColour"
               :dataset="dataset"
               :dynamic-extent="dateFilter"
-              :hover-date="hoverDate"
-              :hover-on="hoverOn"
               :range="range"
               :interval="interval"
-              :mouse-loc="mouseLoc"
               :show-tooltip="false"
               :curve="'step'"
               :show-y-axis="false"
@@ -189,8 +147,6 @@
               :show-zoom-out="false"
               :y-guides="[0, 100, 200, 300]"
               class="price-vis"
-              @eventChange="handleEventChange"
-              @dateOver="handleDateOver"
             />
             <line-vis
               v-if="chartPrice"
@@ -198,11 +154,8 @@
               :domain-colour="lineColour"
               :dataset="dataset"
               :dynamic-extent="dateFilter"
-              :hover-date="hoverDate"
-              :hover-on="hoverOn"
               :range="range"
               :interval="interval"
-              :mouse-loc="mouseLoc"
               :curve="'step'"
               :show-y-axis="false"
               :y-axis-log="true"
@@ -214,25 +167,16 @@
               :show-zoom-out="false"
               :y-guides="[-50, -800]"
               class="price-neg-vis"
-              @eventChange="handleEventChange"
-              @dateOver="handleDateOver"
             />
           </div>
 
           <div
             v-if="ready && hasTemperatureData"
-            :class="{ 'is-hovered': hoverOn }"
             class="chart">
             <div
               class="chart-title"
               @click="toggleChart('chartTemperature')">
               <div>
-                <i
-                  :class="{
-                    'fa-caret-down': chartTemperature,
-                    'fa-caret-right': !chartTemperature
-                  }"
-                  class="fal fa-fw" />
                 <strong>Temperature</strong>
                 <small>°C</small>
               </div>
@@ -245,11 +189,8 @@
               :domain-colour="lineColour"
               :dataset="dataset"
               :dynamic-extent="dateFilter"
-              :hover-date="hoverDate"
-              :hover-on="hoverOn"
               :range="range"
               :interval="interval"
-              :mouse-loc="mouseLoc"
               :curve="'smooth'"
               :y-axis-log="false"
               :y-min="0"
@@ -257,8 +198,6 @@
               :vis-height="100"
               :show-zoom-out="false"
               class="temperature-vis"
-              @eventChange="handleEventChange"
-              @dateOver="handleDateOver"
             />
           </div>
         </div>
@@ -270,12 +209,11 @@
             :price-id="priceDomains.length > 0 ? priceDomains[0].id : null"
             :market-value-domains="mvDomains"
             :dataset="filteredDataset"
-            :hover-date="hoverDate"
-            :hover-on="hoverOn"
             :range="range"
             :interval="interval"
             :is-energy="step"
-            @fuelTechsHidden="handleFuelTechsHidden"
+            :domain-toggleable="false"
+            :group-selection="false"
           />
         </div>
       </div>
@@ -284,21 +222,17 @@
 </template>
 
 <script>
-import { timeFormat as d3TimeFormat } from 'd3-time-format'
-import { mouse as d3Mouse } from 'd3-selection'
-import { extent as d3Extent, max as d3Max } from 'd3-array'
-import _debounce from 'lodash.debounce'
+import { max as d3Max } from 'd3-array'
 import _includes from 'lodash.includes'
 import { saveAs } from 'file-saver'
 
-import EventBus from '~/plugins/eventBus.js'
 import Http from '~/services/Http.js'
-import DateDisplay from '~/services/DateDisplay.js'
 import Data from '~/services/Data.js'
 import EnergyDataTransform from '~/services/dataTransform/Energy.js'
 import Domain from '~/services/Domain.js'
 import domToImage from '~/services/DomToImage.js'
 
+import ExportHeader from '~/components/Energy/ExportHeader.vue'
 import StackedAreaVis from '~/components/Vis/StackedArea.vue'
 import LineVis from '~/components/Vis/Line.vue'
 import SummaryTable from '~/components/SummaryTable'
@@ -307,6 +241,7 @@ export default {
   layout: 'export',
 
   components: {
+    ExportHeader,
     StackedAreaVis,
     LineVis,
     SummaryTable
@@ -314,7 +249,6 @@ export default {
 
   data() {
     return {
-      mounted: false,
       ready: false,
       dataset: [],
       energyDomains: [],
@@ -329,16 +263,10 @@ export default {
       priceDomains: [],
       emissionDomains: [],
       responses: [],
-      dateFilter: [],
-      hoverDate: null,
-      hoverDomain: null,
-      mouseLoc: null,
-      tooltipLeft: 0,
       filteredDataset: [],
-      visHeight: 0,
-      hoverOn: false,
       lineColour: '#e34a33',
-      windowWidth: 0
+      windowWidth: 0,
+      stackedAreaHeight: 280
     }
   },
 
@@ -358,12 +286,6 @@ export default {
     chartTemperature() {
       return this.$store.getters.chartTemperature
     },
-    responsiveBreakWidth() {
-      return this.$store.getters.responsiveBreakWidth
-    },
-    widthBreak() {
-      return this.windowWidth < 1024
-    },
     regionId() {
       return this.$route.params.region
     },
@@ -372,6 +294,14 @@ export default {
     },
     interval() {
       return this.$route.query.interval || '30m'
+    },
+    dateFilter() {
+      const start = this.$route.query.start
+      const end = this.$route.query.end
+      if (start && end) {
+        return [start, end]
+      }
+      return []
     },
     fuelTechOrder() {
       return this.$store.getters.fuelTechOrder
@@ -434,68 +364,8 @@ export default {
         ? this.groupEmissionDomains
         : this.emissionDomains
     },
-    stackedAreaHeight() {
-      return 280
-    },
     emissionsMax() {
       return d3Max(this.dataset, d => d._totalEmissionsVol)
-    },
-    hoverData() {
-      const time = new Date(this.hoverDate).getTime()
-      return this.dataset.find(d => d.date === time)
-    },
-    hoverDomainLabel() {
-      const find = this.summaryDomains.find(d => d.id === this.hoverDomain)
-      return find ? find.label : '—'
-    },
-    hoverValue() {
-      return this.hoverData ? this.hoverData[this.hoverDomain] : null
-    },
-    hoverDomainColour() {
-      const find = this.stackedAreaDomains.find(d => d.id === this.hoverDomain)
-      if (find) return find.colour
-      return null
-    },
-    hoverTotal() {
-      let total = 0
-      if (this.hoverData) {
-        this.stackedAreaDomains.forEach(d => {
-          total += this.hoverData[d.id]
-        })
-      }
-      return total
-    },
-    hoverEmissionVolumeTotal() {
-      if (this.hoverData) return this.hoverData._totalEmissionsVol
-      return 0
-    },
-    hoverEmissionsIntensity() {
-      if (this.hoverData) return this.hoverData._emissionsIntensity
-      return 0
-    },
-    hoverPrice() {
-      if (this.hoverData && this.priceDomains.length > 0) {
-        return this.hoverData[this.priceDomains[0].id]
-      }
-      return 0
-    },
-    hoverMeanTemperature() {
-      if (this.hoverData && this.temperatureDomains.length > 0) {
-        return this.hoverData[this.temperatureMeanId]
-      }
-      return 0
-    },
-    hoverMinTemperature() {
-      if (this.hoverData && this.temperatureDomains.length > 0) {
-        return this.hoverData[this.temperatureMinId]
-      }
-      return 0
-    },
-    hoverMaxTemperature() {
-      if (this.hoverData && this.temperatureDomains.length > 0) {
-        return this.hoverData[this.temperatureMaxId]
-      }
-      return 0
     }
   },
 
@@ -520,37 +390,8 @@ export default {
     }
   },
 
-  created() {
-    this.$store.dispatch('currentView', 'energy')
-  },
-
   mounted() {
-    EventBus.$on('dataset.filter', this.handleDatasetFilter)
-    EventBus.$on('vis.mousemove', this.handleVisMouseMove)
-    EventBus.$on('vis.mouseenter', this.handleVisEnter)
-    EventBus.$on('vis.mouseleave', this.handleVisLeave)
-
-    this.windowWidth = window.innerWidth
-    this.visHeight = this.widthBreak ? 578 : 350
-    this.$nextTick(() => {
-      window.addEventListener(
-        'resize',
-        _debounce(() => {
-          this.windowWidth = window.innerWidth
-          this.visHeight = this.widthBreak ? 578 : 350
-        }, 200)
-      )
-    })
-
     this.fetchData(this.regionId, this.range)
-    this.mounted = true
-  },
-
-  beforeDestroy() {
-    EventBus.$off('dataset.filter')
-    EventBus.$off('vis.mousemove')
-    EventBus.$off('vis.mouseenter')
-    EventBus.$off('vis.mouseleave')
   },
 
   methods: {
@@ -696,118 +537,8 @@ export default {
       }
     },
 
-    handleRangeChange(range) {
-      let interval = ''
-      switch (range) {
-        case '1D':
-          interval = '5m'
-          this.dateFilter = []
-          break
-        case '3D':
-        case '7D':
-          interval = '30m'
-          this.dateFilter = []
-          break
-        case '30D':
-          interval = 'Day'
-          this.dateFilter = []
-          break
-        case '1Y':
-          interval = 'Week'
-          this.dateFilter = []
-          break
-        case 'ALL':
-          interval = 'Month'
-          this.dateFilter = []
-          break
-        default:
-          console.log('nothing yet')
-      }
-
-      this.$store.dispatch('interval', interval)
-      this.$store.dispatch('range', range)
-      this.fetchData(this.regionId, range)
-    },
-
-    handleIntervalChange(interval) {
-      this.$store.dispatch('interval', interval)
-      EnergyDataTransform.mergeResponses(
-        this.responses,
-        this.energyDomains,
-        this.marketValueDomains,
-        this.temperatureDomains,
-        this.priceDomains,
-        this.emissionDomains,
-        this.range,
-        interval
-      ).then(dataset => {
-        this.dataset = dataset
-        this.dateFilter = d3Extent(this.dataset, d => d.date)
-        if (this.groupDomains.length > 0) {
-          this.updateDatasetGroups(dataset, this.groupDomains)
-        }
-        if (this.groupMarketValueDomains.length > 0) {
-          this.updateDatasetGroups(dataset, this.groupMarketValueDomains)
-        }
-        if (this.groupEmissionDomains.length > 0) {
-          this.updateDatasetGroups(dataset, this.groupEmissionDomains)
-        }
-        this.updatedFilteredDataset(dataset)
-        this.ready = true
-      })
-    },
-
-    handleDatasetFilter(dateRange) {
-      if (dateRange && dateRange.length > 0) {
-        const startTime = DateDisplay.snapToClosestInterval(
-          this.interval,
-          dateRange[0]
-        )
-        // const endTime = DateDisplay.snapToClosestInterval(this.interval, dateRange[1])
-        const endTime = dateRange[1]
-        this.filteredDataset = EnergyDataTransform.filterDataByStartEndDates(
-          this.dataset,
-          startTime,
-          endTime
-        )
-        this.dateFilter = [startTime, endTime]
-      } else {
-        this.filteredDataset = this.dataset
-      }
-    },
-
-    handleEventChange(evt) {
-      this.mouseLoc = d3Mouse(evt)
-      this.tooltipLeft = this.mouseLoc[0]
-    },
-
-    handleDateOver(evt, date) {
-      const closestDate = DateDisplay.snapToClosestInterval(this.interval, date)
-      EventBus.$emit('vis.mousemove', evt, this.dataset, closestDate)
-    },
-
-    handleDomainOver(domain) {
-      this.hoverDomain = domain
-    },
-
-    handleVisMouseMove(evt, dataset, date) {
-      this.hoverDate = date
-    },
-
-    handleVisEnter() {
-      this.hoverOn = true
-    },
-
-    handleVisLeave() {
-      this.hoverOn = false
-    },
-
     toggleChart(chartName) {
       this.$store.dispatch(chartName, !this[chartName])
-    },
-
-    handleFuelTechsHidden(hidden) {
-      this.hiddenFuelTechs = hidden
     },
 
     handleExportClick() {
@@ -816,6 +547,10 @@ export default {
         .then(blob => {
           saveAs(blob, `export.png`)
         })
+    },
+
+    handleCancelClick() {
+      console.log('cancel')
     }
   }
 }
@@ -842,10 +577,6 @@ export default {
   .chart {
     position: relative;
 
-    &:not(:first-child) {
-      border-bottom: 1px solid #666;
-    }
-
     .chart-title {
       font-size: 0.8em;
       padding: 0.2rem 1rem 0.2rem 1rem;
@@ -859,11 +590,11 @@ export default {
 // Chart style adjustments
 .price-vis {
   position: relative;
-  top: -6px;
+  top: -7px;
 }
 .price-neg-vis {
   position: relative;
-  top: -12px;
+  top: -14px;
 }
 ::v-deep .price-vis .y-axis-guide-group .domain,
 ::v-deep .temperature-vis .y-axis .domain {

@@ -1,7 +1,7 @@
 <template>
   <div class="vis stacked-area-vis">
     <button
-      v-show="zoomed"
+      v-if="zoomed && showZoomOut"
       class="button is-rounded is-small reset-btn"
       @click="handleReset"
     >
@@ -34,7 +34,7 @@
 
         <!-- x axis layer to allow zoom in (brush) -->
         <g 
-          v-if="showXAxis"
+          v-if="showXAxis && brush"
           :transform="xAxisBrushTransform" 
           class="x-axis-brush-group" />
       </g>
@@ -140,6 +140,10 @@ export default {
       type: String,
       default: () => ''
     },
+    zoomed: {
+      type: Boolean,
+      default: () => false
+    },
     // OPTIONAL: height for the chart
     visHeight: {
       type: Number,
@@ -168,10 +172,15 @@ export default {
     // OPTIONAL: whether to show zoom out button
     showZoomOut: {
       type: Boolean,
-      default: () => false
+      default: () => true
     },
     // OPTIONAL: whether to show value tooltip
     showTooltip: {
+      type: Boolean,
+      default: () => true
+    },
+    // OPTIONAL: whether to allow brush zoom interaction
+    brush: {
       type: Boolean,
       default: () => true
     }
@@ -195,7 +204,7 @@ export default {
       colours: schemeCategory10,
       stack: null,
       brushX: null,
-      zoomed: false,
+      // zoomed: false,
       mouseEvt: null,
       $xAxisGroup: null,
       $xAxisBrushGroup: null,
@@ -281,9 +290,10 @@ export default {
     dynamicExtent(newExtent) {
       if (newExtent && newExtent.length) {
         this.x.domain(newExtent)
-        // this.zoomed = true
-        this.zoomRedraw()
+      } else {
+        this.x.domain(this.datasetDateExtent)
       }
+      this.zoomRedraw()
     },
     hoverDate(date) {
       this.updateCursorLineTooltip(new Date(date).getTime())
@@ -546,10 +556,11 @@ export default {
     },
 
     handleReset() {
-      this.zoomed = false
+      // this.zoomed = false
+      // this.$emit('visZoomed', false)
       this.x.domain(this.datasetDateExtent)
       this.zoomRedraw()
-      EventBus.$emit('dataset.filter', this.datasetDateExtent)
+      EventBus.$emit('dataset.filter', [])
     },
 
     resizeRedraw() {
@@ -714,7 +725,8 @@ export default {
       // Set it to the current X domain
       this.x.domain(dateRange)
 
-      this.zoomed = true
+      // this.zoomed = true
+      // this.$emit('visZoomed', true)
       this.zoomRedraw()
       EventBus.$emit('dataset.filter', dateRange)
     },
