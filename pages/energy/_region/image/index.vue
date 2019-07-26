@@ -3,6 +3,9 @@
     <export-header
       :charts="charts"
       :tables="tables"
+      :has-emissions="hasEmissionData"
+      :has-price="hasPriceData"
+      :has-temperature="hasTemperatureData"
       :chart-energy="chartEnergy"
       :chart-emissions-volume="chartEmissionsVolume"
       :chart-emissions-intensity="chartEmissionsIntensity"
@@ -17,6 +20,8 @@
 
     <div id="export-container">
       <div class="vis-table-container">
+        <export-image-header />
+
         <div class="vis-container">
           <div
             v-if="ready && chartEnergy"
@@ -198,8 +203,11 @@
             :is-energy="step"
             :domain-toggleable="false"
             :group-selection="false"
+            class="export-summary"
           />
         </div>
+
+        <export-image-footer :show-bom-source="chartTemperature" />
       </div>
     </div>
   </section>
@@ -217,6 +225,8 @@ import Domain from '~/services/Domain.js'
 import domToImage from '~/services/DomToImage.js'
 
 import ExportHeader from '~/components/Energy/ExportHeader.vue'
+import ExportImageHeader from '~/components/Energy/ExportImageHeader.vue'
+import ExportImageFooter from '~/components/Energy/ExportImageFooter.vue'
 import StackedAreaVis from '~/components/Vis/StackedArea.vue'
 import LineVis from '~/components/Vis/Line.vue'
 import SummaryTable from '~/components/SummaryTable'
@@ -259,6 +269,8 @@ export default {
 
   components: {
     ExportHeader,
+    ExportImageHeader,
+    ExportImageFooter,
     StackedAreaVis,
     LineVis,
     SummaryTable
@@ -582,11 +594,13 @@ export default {
 .vis-table-container {
   .vis-container {
     width: 100%;
-    padding: 0.5rem;
   }
   .table-container {
     width: 100%;
-    padding: 0.5rem;
+
+    .export-summary {
+      margin: 0.5rem;
+    }
   }
   .chart {
     position: relative;

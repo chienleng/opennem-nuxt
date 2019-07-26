@@ -20,7 +20,8 @@ export const state = () => ({
   chartEmissionsVolume: true,
   chartEmissionsIntensity: true,
   chartPrice: true,
-  chartTemperature: true
+  chartTemperature: true,
+  exportAttribution: '@name'
 })
 
 export const mutations = {
@@ -68,6 +69,9 @@ export const mutations = {
   },
   chartTemperature(state, data) {
     state.chartTemperature = data
+  },
+  exportAttribution(state, data) {
+    state.exportAttribution = data
   }
 }
 
@@ -137,7 +141,8 @@ export const getters = {
   chartEmissionsVolume: state => state.chartEmissionsVolume,
   chartEmissionsIntensity: state => state.chartEmissionsIntensity,
   chartPrice: state => state.chartPrice,
-  chartTemperature: state => state.chartTemperature
+  chartTemperature: state => state.chartTemperature,
+  exportAttribution: state => state.exportAttribution
 }
 
 export const actions = {
@@ -182,5 +187,8 @@ export const actions = {
   },
   chartTemperature({ commit }, data) {
     commit('chartTemperature', data)
+  },
+  exportAttribution({ commit }, data) {
+    commit('exportAttribution', data)
   }
 }
