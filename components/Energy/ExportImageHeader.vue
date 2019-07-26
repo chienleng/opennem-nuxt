@@ -40,6 +40,12 @@
 <script>
 import REGIONS from '~/constants/regions.js'
 export default {
+  props: {
+    exporting: {
+      type: Boolean,
+      default: () => false
+    }
+  },
   data() {
     return {
       showTitle: true,
@@ -47,6 +53,7 @@ export default {
       description: '[Description]'
     }
   },
+
   computed: {
     regionId() {
       return this.$route.params.region
@@ -64,6 +71,14 @@ export default {
     }
   },
 
+  watch: {
+    exporting(isExporting) {
+      if (isExporting && this.description === '[Description]') {
+        this.showDescription = false
+      }
+    }
+  },
+
   methods: {
     onTitleBlur(e) {
       if (e.target.innerText.trim() === '') {
@@ -76,12 +91,6 @@ export default {
       } else {
         this.description = e.target.innerText.trim()
       }
-    },
-    beforeDownloadPng() {
-      if (this.description === '[Description]') {
-        this.showDescription = false
-      }
-      // EventBus.$emit('download.png')
     }
   }
 }
@@ -126,8 +135,9 @@ h3,
 h5 {
   transition: all 0.2s ease-in;
   padding: 0 0.1rem;
+  border-radius: 4px;
   &:hover {
-    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.6);
   }
 }
 </style>

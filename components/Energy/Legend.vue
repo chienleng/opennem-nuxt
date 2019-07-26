@@ -37,7 +37,6 @@ export default {
   flex-wrap: wrap;
   margin: 0 1rem;
   font-size: 11px;
-  font-weight: 600;
 
   .legend-item {
     width: 33%;

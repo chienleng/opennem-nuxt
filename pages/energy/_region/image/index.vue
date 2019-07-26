@@ -21,7 +21,8 @@
 
     <div id="export-container">
       <div class="vis-legend-container">
-        <export-image-header />
+        <export-image-header
+          :exporting="exporting" />
 
         <div class="vis-container">
           <div
@@ -214,17 +215,21 @@
           />
         </div>
 
-        <export-image-footer :show-bom-source="chartTemperature" />
+        <export-image-footer
+          :show-bom-source="chartTemperature"
+          :exporting="exporting"/>
       </div>
     </div>
   </section>
 </template>
 
 <script>
+import { timeFormat as d3TimeFormat } from 'd3-time-format'
 import { max as d3Max } from 'd3-array'
 import _includes from 'lodash.includes'
 import { saveAs } from 'file-saver'
 
+import REGIONS from '~/constants/regions.js'
 import Http from '~/services/Http.js'
 import Data from '~/services/Data.js'
 import EnergyDataTransform from '~/services/dataTransform/Energy.js'
@@ -313,7 +318,8 @@ export default {
       chartPrice: false,
       chartTemperature: false,
       summary: false,
-      legend: true
+      legend: true,
+      exporting: false
     }
   },
 
@@ -577,10 +583,21 @@ export default {
     },
 
     handleExportClick() {
+      this.exporting = true
+      let date = ''
+      let region = REGIONS.find(r => r.id === this.regionId).label
+      if (this.dataset.length > 0) {
+        date = d3TimeFormat('%Y%m%d')(this.dataset[0].date)
+      }
+      if (this.regionId === 'nem') {
+        region = 'OpenNEM'
+      }
+
       domToImage
         .toBlob(document.getElementById('export-container'))
         .then(blob => {
-          saveAs(blob, `export.png`)
+          saveAs(blob, `${date} ${region}.png`)
+          this.exporting = false
         })
     },
 

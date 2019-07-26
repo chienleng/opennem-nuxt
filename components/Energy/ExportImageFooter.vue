@@ -30,6 +30,10 @@ export default {
     showBomSource: {
       type: Boolean,
       default: () => false
+    },
+    exporting: {
+      type: Boolean,
+      default: () => false
     }
   },
   data() {
@@ -51,17 +55,19 @@ export default {
       return 'AEMO, OpenNEM'
     }
   },
+  watch: {
+    exporting(isExporting) {
+      if (isExporting && this.exportAttribution === '@name') {
+        this.showAttribution = false
+      }
+    }
+  },
   methods: {
     onAttributionBlur(e) {
       if (e.target.innerText.trim() === '') {
         this.showAttribution = false
       } else {
         this.$store.dispatch('exportAttribution', e.target.innerText.trim())
-      }
-    },
-    beforeDownloadPng() {
-      if (this.exportAttribution === '@name') {
-        this.showAttribution = false
       }
     }
   }
@@ -87,7 +93,7 @@ export default {
   .annotation-btns {
     position: absolute;
     margin-top: -4px;
-    left: -139px;
+    left: -130px;
     width: 130px;
     text-align: right;
 
