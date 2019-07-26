@@ -21,7 +21,7 @@
           :class="{ 'is-primary': isEnabled(chart.name) }"
           class="tag is-rounded is-white"
           @click="handleWidgetToggle(chart.name)">
-          {{ chart.label }}
+          {{ chart.name === 'chartEnergy' ? getChartEnergyLabel(chart.label) : chart.label }}
         </a>
         <hr>
         <a
@@ -40,6 +40,10 @@
 <script>
 export default {
   props: {
+    type: {
+      type: String,
+      default: () => ''
+    },
     charts: {
       type: Array,
       default: () => []
@@ -119,6 +123,10 @@ export default {
 
     handleWidgetToggle(widgetName) {
       this.$emit('widgetToggle', widgetName)
+    },
+
+    getChartEnergyLabel(chartLabel) {
+      return this.type === 'power' ? 'Generation' : chartLabel
     }
   }
 }

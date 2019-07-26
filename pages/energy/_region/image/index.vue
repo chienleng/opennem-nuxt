@@ -1,6 +1,7 @@
 <template>
   <section style="margin: 2rem;">
     <export-header
+      :type="type"
       :charts="charts"
       :tables="tables"
       :has-emissions="hasEmissionData"
@@ -19,7 +20,7 @@
     />
 
     <div id="export-container">
-      <div class="vis-table-container">
+      <div class="vis-legend-container">
         <export-image-header />
 
         <div class="vis-container">
@@ -191,7 +192,7 @@
           </div>
         </div>
 
-        <div class="table-container">
+        <div class="legend-container">
           <summary-table
             v-if="ready && summary"
             :domains="summaryDomains"
@@ -204,6 +205,12 @@
             :domain-toggleable="false"
             :group-selection="false"
             class="export-summary"
+          />
+
+          <energy-legend
+            v-if="ready && legend"
+            :domains="summaryDomains"
+            :dataset="filteredDataset"
           />
         </div>
 
@@ -230,6 +237,7 @@ import ExportImageFooter from '~/components/Energy/ExportImageFooter.vue'
 import StackedAreaVis from '~/components/Vis/StackedArea.vue'
 import LineVis from '~/components/Vis/Line.vue'
 import SummaryTable from '~/components/SummaryTable'
+import EnergyLegend from '~/components/Energy/Legend'
 
 const charts = [
   {
@@ -255,12 +263,12 @@ const charts = [
 ]
 const tables = [
   {
-    name: 'summary',
-    label: 'Summary'
-  },
-  {
     name: 'legend',
     label: 'Legend'
+  },
+  {
+    name: 'summary',
+    label: 'Summary'
   }
 ]
 
@@ -273,7 +281,8 @@ export default {
     ExportImageFooter,
     StackedAreaVis,
     LineVis,
-    SummaryTable
+    SummaryTable,
+    EnergyLegend
   },
 
   data() {
@@ -304,7 +313,7 @@ export default {
       chartPrice: false,
       chartTemperature: false,
       summary: false,
-      legend: false
+      legend: true
     }
   },
 
@@ -576,7 +585,7 @@ export default {
     },
 
     handleCancelClick() {
-      console.log('cancel')
+      this.$router.go(-1)
     }
   }
 }
@@ -591,11 +600,11 @@ export default {
   box-shadow: 0 0 2rem rgba(0, 0, 0, 0.1);
   border: 1px solid #ddd;
 }
-.vis-table-container {
+.vis-legend-container {
   .vis-container {
     width: 100%;
   }
-  .table-container {
+  .legend-container {
     width: 100%;
 
     .export-summary {

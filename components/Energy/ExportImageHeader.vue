@@ -97,7 +97,7 @@ export default {
 
   .annotation-btns {
     position: absolute;
-    left: -139px;
+    left: -130px;
     margin-top: 10px;
     width: 130px;
     text-align: right;

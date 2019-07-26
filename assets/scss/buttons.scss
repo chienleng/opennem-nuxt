@@ -16,6 +16,10 @@ $button-hover-background: hsla(0,0%,100%,.9);
   color: $opennem-link-color;
   min-width: 62px;
 
+  &.is-small {
+    padding-top: 4px;
+  }
+
   &:hover {
     background-color: $button-hover-background;
     color: $opennem-link-color;
