@@ -24,6 +24,8 @@
       <g 
         :transform="gTransform"
         class="axis-line-group">
+        <g class="x-guides-group" />
+
         <!-- x and y axis ticks/lines/text -->
         <g
           v-if="showXAxis"
@@ -183,6 +185,10 @@ export default {
     brush: {
       type: Boolean,
       default: () => true
+    },
+    xGuides: {
+      type: Array,
+      default: () => []
     }
   },
 
@@ -214,6 +220,7 @@ export default {
       $cursorLineGroup: null,
       $tooltipGroup: null,
       $stackedAreaGroup: null,
+      $xGuideGroup: null,
       // Stacked Area
       stackedAreaPathClass: CONFIG.CHART_STACKED_AREA_PATH_CLASS,
       stackedAreaGroupClass: CONFIG.CHART_STACKED_AREA_GROUP_CLASS,
@@ -222,6 +229,7 @@ export default {
       yAxisClass: CONFIG.Y_AXIS_CLASS,
       yAxisTickClass: CONFIG.Y_AXIS_TICK_CLASS,
       hoverLayerClass: CONFIG.HOVER_LAYER_CLASS,
+      xGuideGroupClass: 'x-guides-group',
       // Cursor Line and Tooltip
       timeRectHeight: 20,
       cursorLineGroupClass: CONFIG.CURSOR_LINE_GROUP_CLASS,
@@ -339,6 +347,7 @@ export default {
       this.$xAxisGroup = $svg.select(`.${this.xAxisClass}`)
       this.$yAxisGroup = $svg.select(`.${this.yAxisClass}`)
       this.$yAxisTickGroup = $svg.select(`.${this.yAxisTickClass}`)
+      this.$xGuideGroup = $svg.select(`.${this.xGuideGroupClass}`)
 
       // Brush
       this.$xAxisBrushGroup = $svg.select(`.${this.xAxisBrushGroupClass}`)
@@ -474,6 +483,7 @@ export default {
       this.$xAxisGroup.call(this.customXAxis)
       this.$yAxisGroup.call(this.customYAxis)
       this.$yAxisTickGroup.call(this.customYAxis)
+      this.updateGuides()
 
       // Setup the keys in the stack so it knows how to draw the area
       this.stack.keys(this.domainIds).value((d, key) => (d[key] ? d[key] : 0))
@@ -573,6 +583,7 @@ export default {
       this.$xAxisGroup.call(this.customXAxis)
       this.$yAxisGroup.call(this.customYAxis)
       this.$yAxisTickGroup.call(this.customYAxis)
+      this.updateGuides()
 
       this.brushX.extent([[0, 0], [this.width, 40]])
       this.$xAxisBrushGroup.selectAll('.brush').call(this.brushX)
@@ -583,10 +594,25 @@ export default {
       // Animate to the selected area by updating the x axis and area path
       const transition = 100
       this.$xAxisGroup.call(this.customXAxis)
+      this.updateGuides()
       this.$stackedAreaGroup
         .selectAll('path')
         .transition(transition)
         .attr('d', this.area)
+    },
+
+    updateGuides() {
+      // Remove Area
+      this.$xGuideGroup.selectAll('rect').remove()
+      this.$xGuideGroup
+        .selectAll('rect')
+        .data(this.xGuides)
+        .enter()
+        .append('rect')
+        .attr('opacity', 0.05)
+        .attr('x', d => this.x(d.start))
+        .attr('width', d => this.x(d.end) - this.x(d.start))
+        .attr('height', this.height)
     },
 
     positionCursorLine(xDate, time, bandwidth) {

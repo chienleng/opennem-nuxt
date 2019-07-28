@@ -24,6 +24,8 @@
       <g 
         :transform="gTransform"
         class="axis-line-group">
+        <g class="x-guides-group" />
+
         <!-- x and y axis ticks/lines/text -->
         <g
           v-show="hasYGuides"
@@ -210,6 +212,10 @@ export default {
     yGuides: {
       type: Array,
       default: () => []
+    },
+    xGuides: {
+      type: Array,
+      default: () => []
     }
   },
 
@@ -240,10 +246,12 @@ export default {
       $tooltipGroup: null,
       $lineGroup: null,
       $areaGroup: null,
+      $xGuideGroup: null,
       linePathClass: 'line-path',
       lineGroupClass: 'line-group',
       areaPathClass: 'area-path',
       areaGroupClass: 'area-group',
+      xGuideGroupClass: 'x-guides-group',
       yAxisGuideGroupClass: 'y-axis-guide-group',
       xAxisClass: CONFIG.X_AXIS_CLASS,
       xAxisBrushGroupClass: CONFIG.X_AXIS_BRUSH_GROUP_CLASS,
@@ -363,6 +371,7 @@ export default {
       this.$yAxisGroup = $svg.select(`.${this.yAxisClass}`)
       this.$yAxisTickGroup = $svg.select(`.${this.yAxisTickClass}`)
       this.$yAxisGuideGroup = $svg.select(`.${this.yAxisGuideGroupClass}`)
+      this.$xGuideGroup = $svg.select(`.${this.xGuideGroupClass}`)
 
       // Brush
       this.$xAxisBrushGroup = $svg.select(`.${this.xAxisBrushGroupClass}`)
@@ -497,6 +506,7 @@ export default {
       this.$yAxisGroup.call(this.customYAxis)
       this.$yAxisTickGroup.call(this.customYAxis)
       this.$yAxisGuideGroup.call(this.guideYAxis)
+      this.updateXGuides()
 
       // Remove existing Line and Area
       this.$lineGroup.selectAll('path').remove()
@@ -530,6 +540,20 @@ export default {
         self.$emit('eventChange', this)
         self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
       })
+    },
+
+    updateXGuides() {
+      // Remove Area
+      this.$xGuideGroup.selectAll('rect').remove()
+      this.$xGuideGroup
+        .selectAll('rect')
+        .data(this.xGuides)
+        .enter()
+        .append('rect')
+        .attr('opacity', 0.05)
+        .attr('x', d => this.x(d.start))
+        .attr('width', d => this.x(d.end) - this.x(d.start))
+        .attr('height', this.height)
     },
 
     updateCursorLineTooltip(date) {
@@ -695,6 +719,7 @@ export default {
       this.$yAxisGroup.call(this.customYAxis)
       this.$yAxisTickGroup.call(this.customYAxis)
       this.$yAxisGuideGroup.call(this.guideYAxis)
+      this.updateXGuides()
 
       this.brushX.extent([[0, 0], [this.width, 40]])
       this.$xAxisBrushGroup.selectAll('.brush').call(this.brushX)
@@ -706,6 +731,7 @@ export default {
       // Animate to the selected area by updating the x axis and line path
       const transition = 100
       this.$xAxisGroup.call(this.customXAxis)
+      this.updateXGuides()
       this.$lineGroup
         .selectAll('path')
         .transition(transition)

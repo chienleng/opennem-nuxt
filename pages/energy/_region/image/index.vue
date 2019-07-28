@@ -50,6 +50,7 @@
               :vis-height="stackedAreaHeight"
               :show-zoom-out="false"
               :brush="false"
+              :x-guides="xGuides"
             />
           </div>
 
@@ -72,6 +73,7 @@
               :show-zoom-out="false"
               :y-min="0"
               :y-max="emissionsMax"
+              :x-guides="xGuides"
               class="emissions-volume-vis"
             />
           </div>
@@ -95,6 +97,7 @@
               :y-min="0"
               :curve="'smooth'"
               :show-zoom-out="false"
+              :x-guides="xGuides"
               class="emissions-intensity-vis"
             />
           </div>
@@ -123,6 +126,7 @@
               :show-x-axis="false"
               :vis-height="30"
               :show-zoom-out="false"
+              :x-guides="xGuides"
               :y-guides="[300, 2000, 6000, 10000, 14000]"
               class="price-pos-vis"
             />
@@ -142,6 +146,7 @@
               :show-x-axis="false"
               :vis-height="80"
               :show-zoom-out="false"
+              :x-guides="xGuides"
               :y-guides="[0, 100, 200, 300]"
               class="price-vis"
             />
@@ -161,6 +166,7 @@
               :show-x-axis="false"
               :vis-height="30"
               :show-zoom-out="false"
+              :x-guides="xGuides"
               :y-guides="[-50, -800]"
               class="price-neg-vis"
             />
@@ -188,6 +194,7 @@
               :show-x-axis="false"
               :vis-height="100"
               :show-zoom-out="false"
+              :x-guides="xGuides"
               class="temperature-vis"
             />
           </div>
@@ -231,6 +238,7 @@ import { saveAs } from 'file-saver'
 
 import REGIONS from '~/constants/regions.js'
 import Http from '~/services/Http.js'
+import DateDisplay from '~/services/DateDisplay.js'
 import Data from '~/services/Data.js'
 import EnergyDataTransform from '~/services/dataTransform/Energy.js'
 import Domain from '~/services/Domain.js'
@@ -407,6 +415,18 @@ export default {
     },
     emissionsMax() {
       return d3Max(this.dataset, d => d._totalEmissionsVol)
+    },
+    xGuides() {
+      let dStart = this.dataset[0].date
+      const dEnd = this.dataset[this.dataset.length - 1].date
+
+      if (this.interval === 'Day') {
+        return DateDisplay.weekendGuides(dStart, dEnd, this.interval)
+      }
+      if (this.interval === '5m' || this.interval === '30m') {
+        return DateDisplay.nightGuides(dStart, dEnd)
+      }
+      return []
     }
   },
 

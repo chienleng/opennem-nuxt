@@ -145,5 +145,42 @@ export default {
       default:
         return date
     }
+  },
+
+  weekendGuides(datasetStart, datasetEnd) {
+    const guides = []
+    let dStart = datasetStart
+    const dEnd = datasetEnd
+    const checkWeekend = d3TimeFormat('%a')
+
+    while (dStart <= dEnd) {
+      if (checkWeekend(dStart) === 'Sat') {
+        guides.push({
+          start: dStart,
+          end: dStart + 86400000 + 86400000
+        })
+      }
+      dStart = dStart + 86400000
+    }
+    return guides
+  },
+
+  nightGuides(datasetStart, datasetEnd) {
+    const guides = []
+    let dStart = datasetStart
+    const dEnd = datasetEnd
+
+    while (dStart <= dEnd) {
+      const startTime = new Date(dStart)
+      startTime.setHours(22)
+      startTime.setMinutes(0)
+      const endTime = new Date(startTime.getTime() + 32400000)
+      guides.push({
+        start: startTime,
+        end: endTime
+      })
+      dStart = dStart + 86400000
+    }
+    return guides
   }
 }

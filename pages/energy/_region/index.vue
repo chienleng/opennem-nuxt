@@ -87,6 +87,7 @@
             :y-max="energyMax"
             :vis-height="stackedAreaHeight"
             :zoomed="zoomed"
+            :x-guides="xGuides"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
             @domainOver="handleDomainOver"
@@ -147,6 +148,7 @@
             :y-min="0"
             :y-max="emissionsMax"
             :zoomed="zoomed"
+            :x-guides="xGuides"
             class="emissions-volume-vis"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
@@ -206,6 +208,7 @@
             :curve="'smooth'"
             :show-zoom-out="false"
             :zoomed="zoomed"
+            :x-guides="xGuides"
             class="emissions-intensity-vis"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
@@ -268,6 +271,7 @@
             :show-x-axis="false"
             :vis-height="50"
             :show-zoom-out="false"
+            :x-guides="xGuides"
             :y-guides="[300, 2000, 6000, 10000, 14000]"
             class="price-pos-vis"
             @eventChange="handleEventChange"
@@ -293,6 +297,7 @@
             :show-x-axis="false"
             :vis-height="80"
             :show-zoom-out="false"
+            :x-guides="xGuides"
             :y-guides="[0, 100, 200, 300]"
             class="price-vis"
             @eventChange="handleEventChange"
@@ -319,6 +324,7 @@
             :show-tooltip="false"
             :vis-height="35"
             :show-zoom-out="false"
+            :x-guides="xGuides"
             :y-guides="[-60, -400]"
             class="price-neg-vis"
             @eventChange="handleEventChange"
@@ -396,6 +402,7 @@
             :vis-height="100"
             :show-zoom-out="false"
             :zoomed="zoomed"
+            :x-guides="xGuides"
             class="temperature-vis"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
@@ -612,6 +619,18 @@ export default {
     },
     emissionsMax() {
       return d3Max(this.dataset, d => d._totalEmissionsVol)
+    },
+    xGuides() {
+      let dStart = this.dataset[0].date
+      const dEnd = this.dataset[this.dataset.length - 1].date
+
+      if (this.interval === 'Day') {
+        return DateDisplay.weekendGuides(dStart, dEnd)
+      }
+      if (this.interval === '5m' || this.interval === '30m') {
+        return DateDisplay.nightGuides(dStart, dEnd)
+      }
+      return []
     },
     hoverDisplayDate() {
       return DateDisplay.specialDateFormats(
