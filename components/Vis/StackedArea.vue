@@ -23,12 +23,12 @@
 
       <g 
         :transform="gTransform"
+        :class="{ 'hide-x-axis-labels': !showXAxis }"
         class="axis-line-group">
         <g class="x-guides-group" />
 
         <!-- x and y axis ticks/lines/text -->
         <g
-          v-if="showXAxis"
           :transform="xAxisTransform" 
           :class="xAxisClass" />
         

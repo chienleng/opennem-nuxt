@@ -23,6 +23,7 @@
 
       <g 
         :transform="gTransform"
+        :class="{ 'hide-x-axis-labels': !showXAxis }"
         class="axis-line-group">
         <g class="x-guides-group" />
 
@@ -31,7 +32,6 @@
           v-show="hasYGuides"
           class="y-axis-guide-group" />
         <g
-          v-if="showXAxis"
           :transform="xAxisTransform" 
           :class="xAxisClass" />
 
