@@ -362,7 +362,9 @@ export default {
           const dataset = this.calculateMinTotal(
             rolledUpData,
             energyDomains,
-            emissionDomains
+            emissionDomains,
+            data[0].date,
+            data[data.length - 1].date
           )
           // add an empty datapoint, so the stacked step will have something to render
           if (millisecondsByInterval[interval]) {
@@ -376,7 +378,13 @@ export default {
     })
   },
 
-  calculateMinTotal(dataset, energyDomains, emissionDomains) {
+  calculateMinTotal(
+    dataset,
+    energyDomains,
+    emissionDomains,
+    actualStartDate,
+    actualLastDate
+  ) {
     // Calculate total, min, reverse value for imports and load types
     dataset.forEach((d, i) => {
       let total = 0,
@@ -402,6 +410,8 @@ export default {
       dataset[i]._min = min
       dataset[i]._totalEmissionsVol = totalEmissionsVol
       dataset[i]._emissionsIntensity = totalEmissionsVol / total || 0
+      dataset[i]._actualLastDate = actualLastDate
+      dataset[i]._actualStartDate = actualStartDate
     })
     return dataset
   },

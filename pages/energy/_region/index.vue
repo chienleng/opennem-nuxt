@@ -88,6 +88,7 @@
             :vis-height="stackedAreaHeight"
             :zoomed="zoomed"
             :x-guides="xGuides"
+            :incomplete-intervals="incompleteIntervals"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
             @domainOver="handleDomainOver"
@@ -149,6 +150,7 @@
             :y-max="emissionsMax"
             :zoomed="zoomed"
             :x-guides="xGuides"
+            :incomplete-intervals="incompleteIntervals"
             class="emissions-volume-vis"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
@@ -620,6 +622,7 @@ export default {
     emissionsMax() {
       return d3Max(this.dataset, d => d._totalEmissionsVol)
     },
+
     xGuides() {
       let dStart = this.dataset[0].date
       const dEnd = this.dataset[this.dataset.length - 1].date
@@ -632,6 +635,86 @@ export default {
       }
       return []
     },
+
+    incompleteIntervals() {
+      let dStart = this.dataset[0].date
+      const dEnd = this.dataset[this.dataset.length - 1].date
+
+      const actualStartDate = this.dataset[0]._actualStartDate
+      const aSD = new Date(actualStartDate).setHours(0)
+      const actualLastDate = this.dataset[0]._actualLastDate
+      const aLD = new Date(actualLastDate).setHours(0)
+
+      if (this.interval === 'Week') {
+        const incompletes = []
+        if (aSD > dStart) {
+          incompletes.push({
+            start: dStart,
+            end: dStart + 604800000
+          })
+        }
+        if (aLD < dEnd) {
+          incompletes.push({
+            start: dEnd - 604800000,
+            end: dEnd
+          })
+        }
+        return incompletes
+      }
+
+      if (this.interval === 'Month') {
+        const incompletes = []
+        if (aSD > dStart) {
+          incompletes.push({
+            start: dStart,
+            end: dStart + 2629800000
+          })
+        }
+        if (aLD < dEnd) {
+          incompletes.push({
+            start: dEnd - 2629800000,
+            end: dEnd
+          })
+        }
+        return incompletes
+      }
+
+      if (this.interval === 'Season' || this.interval === 'Quarter') {
+        const incompletes = []
+        if (aSD > dStart) {
+          incompletes.push({
+            start: dStart,
+            end: dStart + 7889400000
+          })
+        }
+        if (aLD < dEnd) {
+          incompletes.push({
+            start: dEnd - 7889400000,
+            end: dEnd
+          })
+        }
+        return incompletes
+      }
+
+      if (this.interval === 'Fin Year' || this.interval === 'Year') {
+        const incompletes = []
+        if (aSD > dStart) {
+          incompletes.push({
+            start: dStart,
+            end: dStart + 31557600000
+          })
+        }
+        if (aLD < dEnd) {
+          incompletes.push({
+            start: dEnd - 31557600000,
+            end: dEnd
+          })
+        }
+        return incompletes
+      }
+      return []
+    },
+
     hoverDisplayDate() {
       return DateDisplay.specialDateFormats(
         new Date(this.hoverDate).getTime(),

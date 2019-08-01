@@ -1,5 +1,27 @@
 <template>
   <div class="vis stacked-area-vis">
+    <svg
+      class="pattern-def"
+      height="5"
+      width="5"
+      xmlns="http://www.w3.org/2000/svg"
+      version="1.1"> 
+      <defs> 
+        <pattern
+          id="pattern-1"
+          width="4"
+          height="4"
+          patternUnits="userSpaceOnUse"
+          patternTransform="rotate(45)">
+          <rect
+            fill="#ece9e6"
+            opacity="1"
+            width="1"
+            height="4"
+            transform="translate(0,0)" />
+        </pattern>
+      </defs> 
+    </svg>
     <button
       v-if="zoomed && showZoomOut"
       class="button is-rounded is-small reset-btn"
@@ -52,6 +74,8 @@
 
         <!-- where the stacked area path will show -->
         <g class="stacked-area-group" />
+
+        <g class="x-incomplete-group" />
       </g>
 
       <!-- yAxis tick text here to show above the area -->
@@ -189,6 +213,10 @@ export default {
     xGuides: {
       type: Array,
       default: () => []
+    },
+    incompleteIntervals: {
+      type: Array,
+      default: () => []
     }
   },
 
@@ -221,6 +249,7 @@ export default {
       $tooltipGroup: null,
       $stackedAreaGroup: null,
       $xGuideGroup: null,
+      $xIncompleteGroup: null,
       // Stacked Area
       stackedAreaPathClass: CONFIG.CHART_STACKED_AREA_PATH_CLASS,
       stackedAreaGroupClass: CONFIG.CHART_STACKED_AREA_GROUP_CLASS,
@@ -230,6 +259,7 @@ export default {
       yAxisTickClass: CONFIG.Y_AXIS_TICK_CLASS,
       hoverLayerClass: CONFIG.HOVER_LAYER_CLASS,
       xGuideGroupClass: 'x-guides-group',
+      xIncompleteGroupClass: 'x-incomplete-group',
       // Cursor Line and Tooltip
       timeRectHeight: 20,
       cursorLineGroupClass: CONFIG.CURSOR_LINE_GROUP_CLASS,
@@ -348,6 +378,7 @@ export default {
       this.$yAxisGroup = $svg.select(`.${this.yAxisClass}`)
       this.$yAxisTickGroup = $svg.select(`.${this.yAxisTickClass}`)
       this.$xGuideGroup = $svg.select(`.${this.xGuideGroupClass}`)
+      this.$xIncompleteGroup = $svg.select(`.${this.xIncompleteGroupClass}`)
 
       // Brush
       this.$xAxisBrushGroup = $svg.select(`.${this.xAxisBrushGroupClass}`)
@@ -504,9 +535,13 @@ export default {
         .attr('stroke-opacity', 0)
         .attr('stroke-width', 1)
         .attr('stroke', '#000')
-        .attr('fill', d => this.z(d.key))
+        .attr('fill', d => {
+          // return `url(#${d.key})`
+          return this.z(d.key)
+        })
         .style('clip-path', this.clipPathUrl)
         .style('-webkit-clip-path', this.clipPathUrl)
+        .style('pointer-events', 'fill')
 
       stackArea.exit().remove()
 
@@ -604,6 +639,7 @@ export default {
     updateGuides() {
       // Remove Area
       this.$xGuideGroup.selectAll('rect').remove()
+      this.$xIncompleteGroup.selectAll('rect').remove()
       this.$xGuideGroup
         .selectAll('rect')
         .data(this.xGuides)
@@ -613,6 +649,18 @@ export default {
         .attr('x', d => this.x(d.start))
         .attr('width', d => this.x(d.end) - this.x(d.start))
         .attr('height', this.height)
+
+      this.$xIncompleteGroup
+        .selectAll('rect')
+        .data(this.incompleteIntervals)
+        .enter()
+        .append('rect')
+        .attr('opacity', 1)
+        .attr('x', d => this.x(d.start))
+        .attr('width', d => this.x(d.end) - this.x(d.start))
+        .attr('height', this.height)
+        .attr('fill', 'url(#pattern-1)')
+        .style('pointer-events', 'none')
     },
 
     positionCursorLine(xDate, time, bandwidth) {
@@ -816,5 +864,9 @@ export default {
   position: absolute;
   right: 1rem;
   top: 1rem;
+}
+.pattern-def {
+  position: absolute;
+  left: -9999em;
 }
 </style>
