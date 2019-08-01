@@ -296,8 +296,12 @@ export default {
     },
 
     endDate() {
+      const powerRange =
+        this.range === '1D' || this.range === '3D' || this.range === '7D'
       const dataLength = this.dataset.length
-      const endDate = dataLength > 0 ? this.dataset[dataLength - 1].date : null
+      const whichIndex = powerRange ? 1 : 2
+      const endDate =
+        dataLength > 0 ? this.dataset[dataLength - whichIndex].date : null
       return endDate
     },
 
