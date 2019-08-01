@@ -264,6 +264,7 @@ export default {
       cursorLineTextClass: CONFIG.CURSOR_LINE_TEXT_CLASS,
       cursorLineRectClass: CONFIG.CURSOR_LINE_RECT_CLASS,
       cursorRectClass: 'cursor-rect',
+      cursorCircleClass: 'cursor-circle',
       tooltipRectHeight: 20,
       tooltipGroupClass: CONFIG.TOOLTIP_GROUP_CLASS,
       tooltipRectClass: CONFIG.TOOLTIP_RECT_CLASS,
@@ -420,6 +421,10 @@ export default {
         .append('rect')
         .attr('class', this.cursorRectClass)
         .attr('opacity', 0)
+      this.$cursorLineGroup
+        .append('circle')
+        .attr('class', this.cursorCircleClass)
+        .attr('opacity', 0)
 
       // Create tooltip group
       this.$tooltipGroup = this.$cursorLineGroup
@@ -558,6 +563,7 @@ export default {
 
     updateCursorLineTooltip(date) {
       const xDate = this.x(date)
+      let yValue = null
       const nextPeriod = this.x(date + millisecondsByInterval[this.interval])
       const bandwidth =
         this.interval !== '5m' || this.interval !== '30m'
@@ -581,6 +587,7 @@ export default {
 
       if (find) {
         const dId = this.valueDomainId || this.domainId
+        yValue = this.y(find[dId])
         value = valueFormat(find[dId])
         minValue = this.minDomainId ? valueFormat(find[this.minDomainId]) : null
         maxValue = this.maxDomainId ? valueFormat(find[this.maxDomainId]) : null
@@ -596,6 +603,9 @@ export default {
       const $cursorRect = this.$cursorLineGroup.select(
         `.${this.cursorRectClass}`
       )
+      const $cursorCircle = this.$cursorLineGroup.select(
+        `.${this.cursorCircleClass}`
+      )
 
       if (bandwidth) {
         $cursorLine.attr('opacity', 0)
@@ -604,8 +614,14 @@ export default {
           .attr('width', bandwidth)
           .attr('height', this.height)
           .attr('opacity', 1)
+        $cursorCircle
+          .attr('cx', xDate)
+          .attr('cy', yValue)
+          .attr('r', 2)
+          .attr('opacity', 1)
       } else {
         $cursorRect.attr('opacity', 0)
+        $cursorCircle.attr('opacity', 0)
         $cursorLine.attr('opacity', 1).attr('d', () => {
           let d = 'M' + xDate + ',' + this.height
           d += ' ' + xDate + ',' + 0

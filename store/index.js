@@ -21,6 +21,7 @@ export const state = () => ({
   chartEmissionsIntensity: true,
   chartPrice: true,
   chartTemperature: true,
+  chartSummaryPie: false,
   exportAttribution: '@name'
 })
 
@@ -69,6 +70,9 @@ export const mutations = {
   },
   chartTemperature(state, data) {
     state.chartTemperature = data
+  },
+  chartSummaryPie(state, data) {
+    state.chartSummaryPie = data
   },
   exportAttribution(state, data) {
     state.exportAttribution = data
@@ -142,6 +146,7 @@ export const getters = {
   chartEmissionsIntensity: state => state.chartEmissionsIntensity,
   chartPrice: state => state.chartPrice,
   chartTemperature: state => state.chartTemperature,
+  chartSummaryPie: state => state.chartSummaryPie,
   exportAttribution: state => state.exportAttribution
 }
 
@@ -187,6 +192,9 @@ export const actions = {
   },
   chartTemperature({ commit }, data) {
     commit('chartTemperature', data)
+  },
+  chartSummaryPie({ commit }, data) {
+    commit('chartSummaryPie', data)
   },
   exportAttribution({ commit }, data) {
     commit('exportAttribution', data)

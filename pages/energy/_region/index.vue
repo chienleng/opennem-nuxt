@@ -426,12 +426,40 @@
           :interval="interval"
           :is-energy="step"
           @fuelTechsHidden="handleFuelTechsHidden"
+          @summaryDatasetUpdate="handleSummaryDatasetUpdate"
         />
 
-        <donut-vis
-          :domains="donutDomains"
-          :dataset="filteredDataset"
-          :dynamic-extent="dateFilter" />
+        <section class="bar-donut-wrapper">
+          <header>
+            <div class="buttons has-addons">
+              <button
+                :class="{ 'is-selected': !chartSummaryPie }"
+                class="button is-rounded"
+                @click="handleChartSummaryClick('bar')">
+                <i class="fal fa-chart-bar" />
+              </button>
+              <button
+                :class="{ 'is-selected': chartSummaryPie }"
+                class="button is-rounded"
+                @click="handleChartSummaryClick('pie')">
+                <i class="fal fa-chart-pie" />
+              </button>
+            </div>
+          </header>
+
+          <energy-bar
+            v-show="!chartSummaryPie"
+            :bar-width="150"
+            :domains="summaryDomains.filter(d => d.category === 'source')"
+            :dataset="summaryDataset"
+          />
+
+          <donut-vis
+            v-show="chartSummaryPie"
+            :domains="donutDomains"
+            :dataset="filteredDataset"
+            :dynamic-extent="dateFilter" />
+        </section>
       </div>
     </div>
   </section>
@@ -457,6 +485,7 @@ import DataOptionsBar from '~/components/ui/DataOptionsBar'
 import StackedAreaVis from '~/components/Vis/StackedArea.vue'
 import LineVis from '~/components/Vis/Line.vue'
 import DonutVis from '~/components/Vis/Donut.vue'
+import EnergyBar from '~/components/Energy/EnergyBar.vue'
 import SummaryTable from '~/components/SummaryTable'
 import VisTooltip from '~/components/ui/Tooltip'
 
@@ -469,6 +498,7 @@ export default {
     StackedAreaVis,
     LineVis,
     DonutVis,
+    EnergyBar,
     SummaryTable,
     VisTooltip
   },
@@ -478,6 +508,7 @@ export default {
       mounted: false,
       ready: false,
       dataset: [],
+      summaryDataset: {},
       energyDomains: [],
       fuelTechEnergyOrder: [],
       hiddenFuelTechs: [],
@@ -526,6 +557,9 @@ export default {
     },
     chartTemperature() {
       return this.$store.getters.chartTemperature
+    },
+    chartSummaryPie() {
+      return this.$store.getters.chartSummaryPie
     },
     responsiveBreakWidth() {
       return this.$store.getters.responsiveBreakWidth
@@ -639,6 +673,8 @@ export default {
     incompleteIntervals() {
       let dStart = this.dataset[0].date
       const dEnd = this.dataset[this.dataset.length - 1].date
+
+      console.log(new Date(dStart), new Date(dEnd))
 
       const actualStartDate = this.dataset[0]._actualStartDate
       const aSD = new Date(actualStartDate).setHours(0)
@@ -1014,6 +1050,7 @@ export default {
     },
 
     handleRangeChange(range) {
+      // this.ready = false
       let interval = ''
       switch (range) {
         case '1D':
@@ -1114,6 +1151,18 @@ export default {
     setDateFilter(dates) {
       // this.dateFilter = dates
       this.$store.dispatch('dateFilter', dates)
+    },
+
+    handleChartSummaryClick(chartType) {
+      if (chartType === 'pie') {
+        this.$store.dispatch('chartSummaryPie', true)
+      } else {
+        this.$store.dispatch('chartSummaryPie', false)
+      }
+    },
+
+    handleSummaryDatasetUpdate(dataset) {
+      this.summaryDataset = dataset
     }
   }
 }
@@ -1249,5 +1298,24 @@ export default {
 ::v-deep .price-neg-vis .line-group path,
 ::v-deep .price-pos-vis .line-group path {
   stroke-dasharray: 1;
+}
+
+.bar-donut-wrapper {
+  header {
+    margin: 1rem 0;
+    .buttons {
+      justify-content: center;
+    }
+    button {
+      font-size: 11px;
+      min-width: 30px;
+    }
+    i.fa-chart-bar {
+      -moz-transform: scaleY(-1) rotate(90deg);
+      -o-transform: scaleY(-1) rotate(90deg);
+      -webkit-transform: scaleY(-1) rotate(90deg);
+      transform: scaleY(-1) rotate(90deg);
+    }
+  }
 }
 </style>

@@ -140,3 +140,8 @@ export default {
   }
 }
 </script>
+<style lang="scss" scoped>
+.donut-vis {
+  text-align: center;
+}
+</style>
