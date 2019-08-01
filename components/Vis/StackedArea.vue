@@ -1,27 +1,5 @@
 <template>
   <div class="vis stacked-area-vis">
-    <svg
-      class="pattern-def"
-      height="5"
-      width="5"
-      xmlns="http://www.w3.org/2000/svg"
-      version="1.1"> 
-      <defs> 
-        <pattern
-          id="pattern-1"
-          width="4"
-          height="4"
-          patternUnits="userSpaceOnUse"
-          patternTransform="rotate(45)">
-          <rect
-            fill="#ece9e6"
-            opacity="1"
-            width="1"
-            height="4"
-            transform="translate(0,0)" />
-        </pattern>
-      </defs> 
-    </svg>
     <button
       v-if="zoomed && showZoomOut"
       class="button is-rounded is-small reset-btn"
@@ -41,6 +19,18 @@
             :width="width"
             :height="height"/>
         </clipPath>
+
+        <pattern
+          id="incomplete-period-pattern"
+          width="4"
+          height="4"
+          patternUnits="userSpaceOnUse"
+          patternTransform="rotate(45)">
+          <line
+            stroke="#ece9e6"
+            stroke-width="2px"
+            y2="10" />
+        </pattern>
       </defs>
 
       <g 
@@ -275,6 +265,9 @@ export default {
   },
 
   computed: {
+    path() {
+      return this.$route.path
+    },
     datasetDateExtent() {
       return extent(this.dataset, d => new Date(d.date))
     },
@@ -659,7 +652,7 @@ export default {
         .attr('x', d => this.x(d.start))
         .attr('width', d => this.x(d.end) - this.x(d.start))
         .attr('height', this.height)
-        .attr('fill', 'url(#pattern-1)')
+        .attr('fill', `url(${this.path}#incomplete-period-pattern)`)
         .style('pointer-events', 'none')
     },
 
@@ -864,9 +857,5 @@ export default {
   position: absolute;
   right: 1rem;
   top: 1rem;
-}
-.pattern-def {
-  position: absolute;
-  left: -9999em;
 }
 </style>
