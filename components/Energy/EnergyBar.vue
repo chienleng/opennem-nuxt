@@ -44,6 +44,18 @@ export default {
     dataset: {
       type: Object,
       default: () => null
+    },
+    hoverDate: {
+      type: Date,
+      default: () => null
+    },
+    hoverData: {
+      type: Object,
+      default: () => null
+    },
+    hoverOn: {
+      type: Boolean,
+      default: () => false
     }
   },
 
@@ -74,12 +86,24 @@ export default {
       // this.xDomains = this.domains.slice(0)
     },
     getWidth(id) {
-      const value = this.dataset[id]
+      const dataset =
+        this.hoverOn && this.hoverData ? this.hoverData : this.dataset
+      const value = dataset[id]
+      const total =
+        this.hoverOn && this.hoverData
+          ? this.hoverData._total
+          : this.dataset._totalEnergy
+      this.x.domain([0, total])
       return this.x(value)
     },
     getContribution(id) {
-      const rowValue = this.dataset[id]
-      const total = this.dataset._totalEnergy
+      const dataset =
+        this.hoverOn && this.hoverData ? this.hoverData : this.dataset
+      const rowValue = dataset[id]
+      const total =
+        this.hoverOn && this.hoverData
+          ? this.hoverData._total
+          : this.dataset._totalEnergy
 
       return (rowValue / total) * 100
     }

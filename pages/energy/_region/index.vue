@@ -452,6 +452,9 @@
             :bar-width="150"
             :domains="summaryDomains.filter(d => d.category === 'source')"
             :dataset="summaryDataset"
+            :hover-date="hoverDate"
+            :hover-data="hoverData"
+            :hover-on="hoverOn"
           />
 
           <donut-vis
