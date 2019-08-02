@@ -7,8 +7,19 @@
       :viewBox="viewBox"
       class="donut-chart">
       <g class="slices" />
-      <g class="total">
-        <text>{{ total | formatValue }}</text>
+      <g
+        v-if="hoverOnSlice"
+        class="total">
+        <text
+          class="total-label"
+          dy="-10">{{ hoverOnSliceLabel }}</text>
+        <!-- <text dy="12">{{ hoverOnSliceValue | formatValue }}</text> -->
+        <text dy="12">{{ hoverOnSlicePercent | formatValue }}%</text>
+      </g>
+      <g
+        v-else
+        class="total">
+        <text dy="10">{{ total | formatValue }}</text>
       </g>
     </svg>
   </div>
@@ -54,7 +65,9 @@ export default {
       radius: 0,
       pie: null,
       arc: null,
-      colour: null
+      colour: null,
+      hoverOnSlice: false,
+      hoverOnSliceData: null
     }
   },
 
@@ -98,6 +111,18 @@ export default {
       return `${-this.width / 2},${-this.height / 2},${this.width},
         ${this.height}
       `
+    },
+
+    hoverOnSliceLabel() {
+      return this.hoverOnSliceData ? this.hoverOnSliceData.label : ''
+    },
+    hoverOnSliceValue() {
+      return this.hoverOnSliceData ? this.hoverOnSliceData.value : ''
+    },
+    hoverOnSlicePercent() {
+      return this.hoverOnSliceData
+        ? (this.hoverOnSliceData.value / this.total) * 100
+        : ''
     }
   },
 
@@ -154,12 +179,33 @@ export default {
         .join('path')
         .attr('d', this.arc)
         .attr('fill', d => this.colour(d.data.name))
+        .on('mouseover', slice => {
+          const id = slice.data.name
+          const find = this.domains.find(d => d.id === id)
+          find.value = slice.data.value
+          this.hoverOnSliceData = find
+          this.hoverOnSlice = true
+        })
+        .on('mouseout', () => {
+          this.hoverOnSliceData = null
+          this.hoverOnSlice = false
+        })
     }
   }
 }
 </script>
 <style lang="scss" scoped>
+@import '~/assets/scss/variables.scss';
 .donut-vis {
   text-align: center;
+}
+.total text {
+  fill: #333;
+  font-size: 24px;
+
+  &.total-label {
+    fill: #666;
+    font-size: 12px;
+  }
 }
 </style>
