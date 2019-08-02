@@ -45,10 +45,6 @@ export default {
       type: Object,
       default: () => null
     },
-    hoverDate: {
-      type: Date,
-      default: () => null
-    },
     hoverData: {
       type: Object,
       default: () => null
@@ -67,6 +63,10 @@ export default {
   },
 
   watch: {
+    // domains(d) {
+    //   this.x.domain([0, d._totalEnergy])
+    //   this.xDomains = this.domains.slice(0)
+    // },
     dataset(d) {
       this.x.domain([0, d._totalEnergy])
       this.xDomains = this.domains.slice(0)

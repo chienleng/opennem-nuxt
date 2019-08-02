@@ -33,6 +33,14 @@ export default {
     dynamicExtent: {
       type: Array,
       default: () => []
+    },
+    hoverData: {
+      type: Object,
+      default: () => null
+    },
+    hoverOn: {
+      type: Boolean,
+      default: () => false
     }
   },
 
@@ -54,6 +62,16 @@ export default {
     donutDataset() {
       const domains = this.domains
       const dataset = this.dataset
+
+      if (this.hoverOn && this.hoverData) {
+        return domains.map(domain => {
+          const id = domain.id
+          return {
+            name: id,
+            value: this.hoverData[id]
+          }
+        })
+      }
 
       return domains.map(domain => {
         const id = domain.id

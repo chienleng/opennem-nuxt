@@ -450,18 +450,18 @@
           <energy-bar
             v-show="!chartSummaryPie"
             :bar-width="150"
-            :domains="summaryDomains.filter(d => d.category === 'source')"
+            :domains="donutDomains"
             :dataset="summaryDataset"
-            :hover-date="hoverDate"
             :hover-data="hoverData"
-            :hover-on="hoverOn"
-          />
+            :hover-on="hoverOn" />
 
           <donut-vis
             v-show="chartSummaryPie"
             :domains="donutDomains"
             :dataset="filteredDataset"
-            :dynamic-extent="dateFilter" />
+            :dynamic-extent="dateFilter"
+            :hover-data="hoverData"
+            :hover-on="hoverOn" />
         </section>
       </div>
     </div>
@@ -676,9 +676,6 @@ export default {
     incompleteIntervals() {
       let dStart = this.dataset[0].date
       const dEnd = this.dataset[this.dataset.length - 1].date
-
-      console.log(new Date(dStart), new Date(dEnd))
-
       const actualStartDate = this.dataset[0]._actualStartDate
       const aSD = new Date(actualStartDate).setHours(0)
       const actualLastDate = this.dataset[0]._actualLastDate
@@ -1165,6 +1162,7 @@ export default {
     },
 
     handleSummaryDatasetUpdate(dataset) {
+      console.log(this.hiddenFuelTechs)
       this.summaryDataset = dataset
     }
   }

@@ -21,7 +21,7 @@ export const state = () => ({
   chartEmissionsIntensity: true,
   chartPrice: true,
   chartTemperature: true,
-  chartSummaryPie: false,
+  chartSummaryPie: true,
   exportAttribution: '@name'
 })
 
