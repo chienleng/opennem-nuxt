@@ -439,8 +439,6 @@ export default {
       this.summary._totalAverageValue = totalAverageValue
       this.summarySources._totalEnergy = totalSources
       this.summaryLoads._totalEnergy = totalLoads
-
-      this.$emit('summaryDatasetUpdate', this.summarySources)
     },
 
     calculatePointSummary(data) {

@@ -35,15 +35,15 @@ export default {
   props: {
     barWidth: {
       type: Number,
-      default: () => 200
+      default: () => 100
     },
     domains: {
       type: Array,
       default: () => []
     },
     dataset: {
-      type: Object,
-      default: () => null
+      type: Array,
+      default: () => []
     },
     hoverData: {
       type: Object,
@@ -62,50 +62,67 @@ export default {
     }
   },
 
+  computed: {
+    barDataset() {
+      const domains = this.xDomains
+      const dataset = this.dataset
+
+      if (this.hoverOn && this.hoverData) {
+        return domains.map(domain => {
+          const id = domain.id
+          return {
+            name: id,
+            value: this.hoverData[id]
+          }
+        })
+      }
+
+      return domains.map(domain => {
+        const id = domain.id
+        return {
+          name: id,
+          value: dataset.reduce((a, b) => a + (b[id] || 0), 0)
+        }
+      })
+    },
+
+    total() {
+      return this.barDataset.reduce((a, b) => a + b.value, 0)
+    }
+  },
+
   watch: {
-    // domains(d) {
-    //   this.x.domain([0, d._totalEnergy])
-    //   this.xDomains = this.domains.slice(0)
-    // },
-    dataset(d) {
-      this.x.domain([0, d._totalEnergy])
+    domains(d) {
+      this.xDomains = this.domains.slice(0)
+    },
+    total(d) {
+      this.x.domain([0, d])
+    },
+    barWidth(d) {
+      this.x.range([0, this.barWidth])
       this.xDomains = this.domains.slice(0)
     }
   },
 
   mounted() {
-    // this.elWidth = this.$el.offsetWidth / 2
     this.x = d3ScaleLinear().range([0, this.barWidth])
-    window.addEventListener('resize', _debounce(this.handleResize, 250))
   },
 
   methods: {
-    handleResize() {
-      // this.elWidth = this.$el.offsetWidth / 2
-      // this.x.range([0, this.elWidth])
-      // this.xDomains = this.domains.slice(0)
-    },
     getWidth(id) {
-      const dataset =
-        this.hoverOn && this.hoverData ? this.hoverData : this.dataset
-      const value = dataset[id]
-      const total =
-        this.hoverOn && this.hoverData
-          ? this.hoverData._total
-          : this.dataset._totalEnergy
-      this.x.domain([0, total])
-      return this.x(value)
+      const find = this.barDataset.find(d => d.name === id)
+      if (find) {
+        this.x.domain([0, this.total])
+        return this.x(find.value)
+      }
+      return 0
     },
     getContribution(id) {
-      const dataset =
-        this.hoverOn && this.hoverData ? this.hoverData : this.dataset
-      const rowValue = dataset[id]
-      const total =
-        this.hoverOn && this.hoverData
-          ? this.hoverData._total
-          : this.dataset._totalEnergy
-
-      return (rowValue / total) * 100
+      const find = this.barDataset.find(d => d.name === id)
+      if (find) {
+        return (find.value / this.total) * 100
+      }
+      return 0
     }
   }
 }

@@ -426,7 +426,6 @@
           :interval="interval"
           :is-energy="step"
           @fuelTechsHidden="handleFuelTechsHidden"
-          @summaryDatasetUpdate="handleSummaryDatasetUpdate"
         />
 
         <section class="bar-donut-wrapper">
@@ -449,9 +448,9 @@
 
           <energy-bar
             v-show="!chartSummaryPie"
-            :bar-width="150"
+            :bar-width="barWidth"
             :domains="donutDomains"
-            :dataset="summaryDataset"
+            :dataset="filteredDataset"
             :hover-data="hoverData"
             :hover-on="hoverOn" />
 
@@ -511,7 +510,6 @@ export default {
       mounted: false,
       ready: false,
       dataset: [],
-      summaryDataset: {},
       energyDomains: [],
       fuelTechEnergyOrder: [],
       hiddenFuelTechs: [],
@@ -569,6 +567,9 @@ export default {
     },
     widthBreak() {
       return this.windowWidth < 1024
+    },
+    barWidth() {
+      return this.widthBreak ? 250 : 130
     },
     regionId() {
       return this.$route.params.region
@@ -1159,11 +1160,6 @@ export default {
       } else {
         this.$store.dispatch('chartSummaryPie', false)
       }
-    },
-
-    handleSummaryDatasetUpdate(dataset) {
-      console.log(this.hiddenFuelTechs)
-      this.summaryDataset = dataset
     }
   }
 }
