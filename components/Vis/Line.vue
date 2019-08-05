@@ -209,6 +209,10 @@ export default {
       type: Boolean,
       default: () => true
     },
+    showPointOnHover: {
+      type: Boolean,
+      default: () => false
+    },
     yGuides: {
       type: Array,
       default: () => []
@@ -614,11 +618,14 @@ export default {
           .attr('width', bandwidth)
           .attr('height', this.height)
           .attr('opacity', 1)
-        $cursorCircle
-          .attr('cx', xDate)
-          .attr('cy', yValue)
-          .attr('r', 2)
-          .attr('opacity', 1)
+
+        if (this.showPointOnHover) {
+          $cursorCircle
+            .attr('cx', xDate)
+            .attr('cy', yValue)
+            .attr('r', 2)
+            .attr('opacity', 1)
+        }
       } else {
         $cursorRect.attr('opacity', 0)
         $cursorCircle.attr('opacity', 0)
