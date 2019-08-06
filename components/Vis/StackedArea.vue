@@ -785,9 +785,10 @@ export default {
 
       // Get the brush selection (start/end) points -> dates
       const s = event.selection
-      const startDate = this.x.invert(s[0])
-      const endDate = this.x.invert(s[1])
-      const dateRange = [startDate, endDate]
+      const dateRange = this.getZoomDateRanges(
+        this.x.invert(s[0]),
+        this.x.invert(s[1])
+      )
 
       // Set it to the current X domain
       this.x.domain(dateRange)
@@ -796,6 +797,56 @@ export default {
       // this.$emit('visZoomed', true)
       this.zoomRedraw()
       EventBus.$emit('dataset.filter', dateRange)
+    },
+
+    getZoomDateRanges(startDate, endDate) {
+      let start = startDate
+      let end = endDate
+      const duration = endDate - startDate
+      let limit = 0
+
+      function checkWithZoomLimits(limit, datasetEndDate) {
+        if (duration < limit) {
+          const newEnd = new Date(startDate).getTime() + limit
+          const datasetEndTime = new Date(datasetEndDate).getTime()
+
+          if (newEnd > datasetEndTime) {
+            start = new Date(datasetEndTime - limit)
+            end = datasetEndDate
+          } else {
+            end = new Date(newEnd)
+          }
+        }
+
+        return [start, end]
+      }
+
+      // Limit the zoom level based on interval
+      switch (this.interval) {
+        case '5m':
+        case '30m':
+          limit = 14400000
+          break
+        case 'Day':
+          limit = 345600000
+          break
+        case 'Week':
+          limit = 2419200000
+          break
+        case 'Month':
+          limit = 10519200000
+          break
+        case 'Season':
+        case 'Quarter':
+          limit = 23668200000
+          break
+        case 'Fin Year':
+        case 'Year':
+          limit = 126230400000
+          break
+      }
+
+      return checkWithZoomLimits(limit, this.datasetDateExtent[1])
     },
 
     customXAxis(g) {
