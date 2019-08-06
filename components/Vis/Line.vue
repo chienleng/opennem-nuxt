@@ -623,7 +623,7 @@ export default {
           $cursorCircle
             .attr('cx', xDate)
             .attr('cy', yValue)
-            .attr('r', 2)
+            .attr('r', 2.5)
             .attr('opacity', 1)
         }
       } else {

@@ -16,6 +16,9 @@ path.line-path {
   // stroke: rgba(199, 69, 35, 0.3);
   // stroke-width: 0.5px;
 }
+.cursor-circle {
+  fill: $opennem-link-color;
+}
 .tooltip-rect {
   fill: $opennem-link-color;
 }
