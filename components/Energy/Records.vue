@@ -10,120 +10,82 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>
-            Demand
-            <small>MW</small>
-          </td>
 
-          <td
-            class="has-text-right"
-            @mouseenter="handleMouseEnter(minDemandDate)"
-            @mouseleave="handleMouseLeave">
-            <div>{{ minDemand | formatValue }}</div>
-            <time datetime="minDemandDate">
-              {{ minDemandDate | formatDate }}
-            </time>
-          </td>
+        <energy-record
+          :row-label="'Demand'"
+          :row-unit="'MW'"
+          :min-date="minDemandDate"
+          :min-value="minDemand"
+          :max-date="maxDemandDate"
+          :max-value="maxDemand"
+          @recordMouseEnter="handleMouseEnter"
+          @recordMouseLeave="handleMouseLeave"/>
 
-          <td
-            class="has-text-right"
-            @mouseenter="handleMouseEnter(maxDemandDate)"
-            @mouseleave="handleMouseLeave">
-            <div>{{ maxDemand | formatValue }}</div>
-            <time datetime="maxDemandDate">
-              {{ maxDemandDate | formatDate }}
-            </time>
-          </td>
-        </tr>
+        <energy-record
+          :row-label="'D. Renewables'"
+          :row-unit="'%'"
+          :min-date="minDemandRenewablesDate"
+          :min-value="minDemandRenewables"
+          :max-date="maxDemandRenewablesDate"
+          :max-value="maxDemandRenewables"
+          @recordMouseEnter="handleMouseEnter"
+          @recordMouseLeave="handleMouseLeave"/>
+        
+        <energy-record
+          :row-label="'Generation'"
+          :row-unit="'MW'"
+          :min-date="minGenerationDate"
+          :min-value="minGeneration"
+          :max-date="maxGenerationDate"
+          :max-value="maxGeneration"
+          @recordMouseEnter="handleMouseEnter"
+          @recordMouseLeave="handleMouseLeave"/>
+        
+        <energy-record
+          :row-label="'G. Renewables'"
+          :row-unit="'%'"
+          :min-date="minGenerationRenewablesDate"
+          :min-value="minGenerationRenewables"
+          :max-date="maxGenerationRenewablesDate"
+          :max-value="maxGenerationRenewables"
+          @recordMouseEnter="handleMouseEnter"
+          @recordMouseLeave="handleMouseLeave"/>
 
-        <tr>
-          <td>
-            Demand Renewables
-            <small>%</small>
-          </td>
+        <energy-record
+          v-if="priceId"
+          :row-label="'Price'"
+          :row-unit="'$/'"
+          :min-date="minPriceDate"
+          :min-value="minPrice"
+          :max-date="maxPriceDate"
+          :max-value="maxPrice"
+          :is-currency="true"
+          @recordMouseEnter="handleMouseEnter"
+          @recordMouseLeave="handleMouseLeave"/>
 
-          <td
-            class="has-text-right"
-            @mouseenter="handleMouseEnter(minDemandRenewablesDate)"
-            @mouseleave="handleMouseLeave">
-            <div>{{ minDemandRenewables | formatValue }}</div>
-            <time datetime="minDemandRenewablesDate">
-              {{ minDemandRenewablesDate | formatDate }}
-            </time>
-          </td>
+        <energy-record
+          v-if="temperatureId"
+          :row-label="'Temperature'"
+          :row-unit="'°C'"
+          :min-date="minTemperatureDate"
+          :min-value="minTemperature"
+          :max-date="maxTemperatureDate"
+          :max-value="maxTemperature"
+          @recordMouseEnter="handleMouseEnter"
+          @recordMouseLeave="handleMouseLeave"/>
 
-          <td
-            class="has-text-right"
-            @mouseenter="handleMouseEnter(maxDemandRenewablesDate)"
-            @mouseleave="handleMouseLeave">
-            <div>{{ maxDemandRenewables | formatValue }}</div>
-            <time datetime="maxDemandRenewablesDate">
-              {{ maxDemandRenewablesDate | formatDate }}
-            </time>
-          </td>
-        </tr>
-
-        <tr>
-          <td>
-            Generation
-            <small>MW</small>
-          </td>
-
-          <td
-            class="has-text-right"
-            @mouseenter="handleMouseEnter(minGenerationDate)"
-            @mouseleave="handleMouseLeave">
-            <div>{{ minGeneration | formatValue }}</div>
-            <time datetime="minGenerationDate">
-              {{ minGenerationDate | formatDate }}
-            </time>
-          </td>
-
-          <td
-            class="has-text-right"
-            @mouseenter="handleMouseEnter(maxGenerationDate)"
-            @mouseleave="handleMouseLeave">
-            <div>{{ maxGeneration | formatValue }}</div>
-            <time datetime="maxGenerationDate">
-              {{ maxGenerationDate | formatDate }}
-            </time>
-          </td>
-        </tr>
-
-        <tr>
-          <td>
-            Generation Renewables
-            <small>%</small>
-          </td>
-
-          <td
-            class="has-text-right"
-            @mouseenter="handleMouseEnter(minGenerationRenewablesDate)"
-            @mouseleave="handleMouseLeave">
-            <div>{{ minGenerationRenewables | formatValue }}</div>
-            <time datetime="minGenerationRenewablesDate">
-              {{ minGenerationRenewablesDate | formatDate }}
-            </time>
-          </td>
-
-          <td
-            class="has-text-right"
-            @mouseenter="handleMouseEnter(maxGenerationRenewablesDate)"
-            @mouseleave="handleMouseLeave">
-            <div>{{ maxGenerationRenewables | formatValue }}</div>
-            <time datetime="maxGenerationRenewablesDate">
-              {{ maxGenerationRenewablesDate | formatDate }}
-            </time>
-          </td>
-        </tr>
       </tbody>
     </table>
   </section>
 </template>
 
 <script>
+import EnergyRecord from '~/components/Energy/Record.vue'
 export default {
+  components: {
+    EnergyRecord
+  },
+
   props: {
     domains: {
       type: Array,
@@ -132,6 +94,14 @@ export default {
     dataset: {
       type: Array,
       default: () => []
+    },
+    priceId: {
+      type: String,
+      default: () => null
+    },
+    temperatureId: {
+      type: String,
+      default: () => null
     }
   },
 
@@ -153,7 +123,17 @@ export default {
       minGenerationRenewables: null,
       minGenerationRenewablesDate: null,
       maxGenerationRenewables: null,
-      maxGenerationRenewablesDate: null
+      maxGenerationRenewablesDate: null,
+
+      minPrice: null,
+      minPriceDate: null,
+      maxPrice: null,
+      maxPriceDate: null,
+
+      minTemperature: null,
+      minTemperatureDate: null,
+      maxTemperature: null,
+      maxTemperatureDate: null
     }
   },
 
@@ -186,7 +166,15 @@ export default {
         minGenerationRenewables = 0,
         minGenerationRenewablesDate = null,
         maxGenerationRenewables = 0,
-        maxGenerationRenewablesDate = null
+        maxGenerationRenewablesDate = null,
+        minPrice = 0,
+        minPriceDate = null,
+        maxPrice = 0,
+        maxPriceDate = null,
+        minTemperature = 0,
+        minTemperatureDate = null,
+        maxTemperature = 0,
+        maxTemperatureDate = null
 
       dataset.every(d => {
         if (d._total) {
@@ -207,6 +195,19 @@ export default {
           minGenerationRenewablesDate = d.date
           maxGenerationRenewables = d._totalGenerationRenewables
           maxGenerationRenewablesDate = d.date
+
+          if (this.priceId) {
+            minPrice = d[this.priceId]
+            minPriceDate = d.date
+            maxPrice = d[this.priceId]
+            maxPriceDate = d.date
+          }
+          if (this.temperatureId) {
+            minTemperature = d[this.temperatureId]
+            minTemperatureDate = d.date
+            maxTemperature = d[this.temperatureId]
+            maxTemperatureDate = d.date
+          }
           return false
         }
         return true
@@ -258,6 +259,40 @@ export default {
           maxGenerationRenewables = d._totalGenerationRenewables
           maxGenerationRenewablesDate = d.date
         }
+
+        if (
+          this.priceId &&
+          d[this.priceId] !== null &&
+          d[this.priceId] < minPrice
+        ) {
+          minPrice = d[this.priceId]
+          minPriceDate = d.date
+        }
+        if (
+          this.priceId &&
+          d[this.priceId] !== null &&
+          d[this.priceId] > maxPrice
+        ) {
+          maxPrice = d[this.priceId]
+          maxPriceDate = d.date
+        }
+
+        if (
+          this.temperatureId &&
+          d[this.temperatureId] !== null &&
+          d[this.temperatureId] < minTemperature
+        ) {
+          minTemperature = d[this.temperatureId]
+          minTemperatureDate = d.date
+        }
+        if (
+          this.temperatureId &&
+          d[this.temperatureId] !== null &&
+          d[this.temperatureId] > maxTemperature
+        ) {
+          maxTemperature = d[this.temperatureId]
+          maxTemperatureDate = d.date
+        }
       })
 
       this.minDemand = minDemand
@@ -277,6 +312,16 @@ export default {
       this.minGenerationRenewablesDate = minGenerationRenewablesDate
       this.maxGenerationRenewables = maxGenerationRenewables
       this.maxGenerationRenewablesDate = maxGenerationRenewablesDate
+
+      this.minPrice = minPrice
+      this.minPriceDate = minPriceDate
+      this.maxPrice = maxPrice
+      this.maxPriceDate = maxPriceDate
+
+      this.minTemperature = minTemperature
+      this.minTemperatureDate = minTemperatureDate
+      this.maxTemperature = maxTemperature
+      this.maxTemperatureDate = maxTemperatureDate
     },
 
     handleMouseEnter(date) {
@@ -291,4 +336,19 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '~/assets/scss/variables.scss';
+
+.table {
+  background-color: transparent;
+  font-size: 0.8em;
+
+  caption {
+    border-bottom: 1px solid #333;
+    text-align: left;
+    font-family: $header-font-family;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 1.2em;
+  }
+}
 </style>

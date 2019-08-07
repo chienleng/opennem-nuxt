@@ -419,6 +419,8 @@
           v-if="ready"
           :domains="summaryDomains"
           :dataset="filteredDataset"
+          :price-id="priceDomains.length > 0 ? priceDomains[0].id : null"
+          :temperature-id="temperatureMeanId"
           @recordMouseEnter="handleRecordMouseEnter"
           @recordMouseLeave="handleRecordMouseLeave" />
         <summary-table

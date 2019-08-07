@@ -390,7 +390,6 @@ export default {
           const dataset = this.calculateMinTotal(
             rolledUpData,
             energyDomains,
-            priceDomains,
             emissionDomains,
             data[0].date,
             data[data.length - 1].date
@@ -411,7 +410,6 @@ export default {
   calculateMinTotal(
     dataset,
     energyDomains,
-    priceDomains,
     emissionDomains,
     actualStartDate,
     actualLastDate
