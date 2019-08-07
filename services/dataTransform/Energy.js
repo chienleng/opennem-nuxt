@@ -360,11 +360,11 @@ export default {
             ) {
               const find = res[0].data.find(d => d.id === domain.id)
               if (find) {
-                startDate = new Date(find.history.start)
+                startDate = moment(find.history.start).valueOf()
                 let lastTime =
-                  new Date(find.history.last).getTime() -
+                  moment(find.history.last).valueOf() -
                   millisecondsByInterval[interval]
-                lastDate = new Date(lastTime)
+                lastDate = moment(lastTime).valueOf()
                 return false
               }
             }
