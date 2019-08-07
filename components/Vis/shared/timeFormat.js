@@ -13,7 +13,7 @@ import {
 const formatMillisecond = timeFormat('.%L'),
   formatSecond = timeFormat(':%S'),
   formatMinute = timeFormat('%I:%M'),
-  formatHour = timeFormat('%H:%M'),
+  formatHour = timeFormat('%I:%M'),
   formatDay = timeFormat('%a'),
   formatWeek = timeFormat('%a'),
   formatMonth = timeFormat('%b %y'),

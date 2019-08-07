@@ -415,6 +415,12 @@
       </div>
 
       <div class="table-container">
+        <energy-records
+          v-if="ready"
+          :domains="summaryDomains"
+          :dataset="filteredDataset"
+          @recordMouseEnter="handleRecordMouseEnter"
+          @recordMouseLeave="handleRecordMouseLeave" />
         <summary-table
           v-if="ready"
           id="summary-table"
@@ -430,7 +436,9 @@
           @fuelTechsHidden="handleFuelTechsHidden"
         />
 
-        <section class="bar-donut-wrapper">
+        <section
+          v-show="ready"
+          class="bar-donut-wrapper">
           <header>
             <div class="buttons has-addons">
               <button
@@ -492,6 +500,7 @@ import DonutVis from '~/components/Vis/Donut.vue'
 import EnergyBar from '~/components/Energy/EnergyBar.vue'
 import SummaryTable from '~/components/SummaryTable'
 import VisTooltip from '~/components/ui/Tooltip'
+import EnergyRecords from '~/components/Energy/Records.vue'
 
 export default {
   layout: 'main',
@@ -504,7 +513,8 @@ export default {
     DonutVis,
     EnergyBar,
     SummaryTable,
-    VisTooltip
+    VisTooltip,
+    EnergyRecords
   },
 
   data() {
@@ -1162,6 +1172,16 @@ export default {
       } else {
         this.$store.dispatch('chartSummaryPie', false)
       }
+    },
+
+    handleRecordMouseEnter(date) {
+      this.hoverOn = true
+      this.hoverDate = new Date(date)
+    },
+
+    handleRecordMouseLeave() {
+      this.hoverOn = false
+      this.hoverDate = null
     }
   }
 }

@@ -149,16 +149,6 @@ export default {
   },
 
   props: {
-    // stacked area data, requires domains.colour, domain.id and data
-    visData: {
-      type: Object,
-      default: () => {
-        return {
-          domains: [],
-          dataset: []
-        }
-      }
-    },
     domains: {
       type: Array,
       default: () => []

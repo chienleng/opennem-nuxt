@@ -329,7 +329,7 @@ export default {
           data = [...data, ...v]
         })
 
-        // If 1D or 3D, use 7D data and filter the data here, so the chart takes doesn't zoom
+        // If 1D or 3D, use 7D data and filter the data here, so the chart doesn't zoom
         if (range === '1D' || range === '3D') {
           const now = new Date().getTime()
           const roundedEndDate =
@@ -343,9 +343,37 @@ export default {
             roundedEndDate
           )
         } else if (range === '1Y') {
+          // filter 1Y because it could be a combination of two 1Y datasets
           const now = new Date().getTime()
           const aYearAgo = now - 31557600000
           data = data.filter(d => d.date >= aYearAgo && d.date <= now)
+        }
+
+        // Filter the start and last date based on a fuel tech other than solars
+        if (range === '1D' || range === '3D' || range === '7D') {
+          let startDate = null,
+            lastDate = null
+          energyDomains.every(domain => {
+            if (
+              domain.fuelTech !== 'rooftop_solar' &&
+              domain.fuelTech !== 'solar'
+            ) {
+              const find = res[0].data.find(d => d.id === domain.id)
+              if (find) {
+                startDate = new Date(find.history.start)
+                let lastTime =
+                  new Date(find.history.last).getTime() -
+                  millisecondsByInterval[interval]
+                lastDate = new Date(lastTime)
+                return false
+              }
+            }
+            return true
+          })
+
+          if (startDate && lastDate) {
+            data = data.filter(d => d.date >= startDate && d.date <= lastDate)
+          }
         }
 
         // Roll up based on interval
@@ -362,16 +390,18 @@ export default {
           const dataset = this.calculateMinTotal(
             rolledUpData,
             energyDomains,
+            priceDomains,
             emissionDomains,
             data[0].date,
             data[data.length - 1].date
           )
           // add an empty datapoint, so the stacked step will have something to render
-          if (millisecondsByInterval[interval]) {
+          if (range !== '1D' && range !== '3D' && range !== '7D') {
             dataset.push(
               addEmptyDataPoint(millisecondsByInterval[interval], dataset)
             )
           }
+
           resolve(dataset)
         })
       })
@@ -381,15 +411,19 @@ export default {
   calculateMinTotal(
     dataset,
     energyDomains,
+    priceDomains,
     emissionDomains,
     actualStartDate,
     actualLastDate
   ) {
     // Calculate total, min, reverse value for imports and load types
     dataset.forEach((d, i) => {
-      let total = 0,
+      let totalDemand = 0,
+        totalGeneration = 0,
         min = 0,
-        totalEmissionsVol = 0
+        totalEmissionsVol = 0,
+        totalRenewables = 0
+
       energyDomains.forEach(domain => {
         const id = domain.id
 
@@ -397,7 +431,17 @@ export default {
           const negValue = -d[id]
           d[id] = negValue
         }
-        total += d[id] || 0
+
+        if (domain.category == 'source') {
+          totalGeneration += d[id] || 0
+        }
+
+        totalDemand += d[id] || 0
+
+        if (domain.renewable) {
+          totalRenewables += d[id] || 0
+        }
+
         if (d[id] < 0) {
           min += d[id] || 0
         }
@@ -406,10 +450,15 @@ export default {
       emissionDomains.forEach(domain => {
         totalEmissionsVol += d[domain.id] || 0
       })
-      dataset[i]._total = total
+
+      dataset[i]._total = totalDemand
+      dataset[i]._totalDemandRenewables = (totalRenewables / totalDemand) * 100
+      dataset[i]._totalGeneration = totalGeneration
+      dataset[i]._totalGenerationRenewables =
+        (totalRenewables / totalGeneration) * 100
       dataset[i]._min = min
       dataset[i]._totalEmissionsVol = totalEmissionsVol
-      dataset[i]._emissionsIntensity = totalEmissionsVol / total || 0
+      dataset[i]._emissionsIntensity = totalEmissionsVol / totalDemand || 0
       dataset[i]._actualLastDate = actualLastDate
       dataset[i]._actualStartDate = actualStartDate
     })

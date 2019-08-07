@@ -12,8 +12,8 @@ export const state = () => ({
   fuelTechNames: null,
   fuelTechGroupName: 'Default',
   fuelTechOrder: cloneDeep(FUEL_TECHS.DEFAULT_FUEL_TECH_ORDER),
-  range: '30D',
-  interval: 'Day',
+  range: '7D',
+  interval: '30m',
   dateFilter: [],
   exportData: [],
   responsiveBreakWidth: 769,
@@ -113,7 +113,7 @@ export const getters = {
       case '1D':
       case '3D':
       case '7D':
-        return 'linear'
+        return 'smooth'
       default:
         return 'step'
     }

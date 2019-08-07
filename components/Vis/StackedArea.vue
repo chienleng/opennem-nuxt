@@ -553,7 +553,7 @@ export default {
       const xDate = this.x(date)
       const nextPeriod = this.x(date + millisecondsByInterval[this.interval])
       const bandwidth =
-        this.interval !== '5m' || this.interval !== '30m'
+        this.interval !== '5m' && this.interval !== '30m'
           ? nextPeriod - xDate
           : null
       const fTime = DateDisplay.specialDateFormats(

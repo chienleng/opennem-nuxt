@@ -151,7 +151,8 @@ export default {
         label: FUEL_TECHS.FUEL_TECH_LABEL[ft],
         colour: FUEL_TECHS.DEFAULT_FUEL_TECH_COLOUR[ft],
         category: FUEL_TECHS.FUEL_TECH_CATEGORY[ft],
-        type
+        type,
+        renewable: FUEL_TECHS.FUEL_TECH_RENEWABLE[ft]
       }
     })
   }
