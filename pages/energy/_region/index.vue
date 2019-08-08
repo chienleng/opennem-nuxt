@@ -415,14 +415,6 @@
       </div>
 
       <div class="table-container">
-        <energy-records
-          v-if="ready"
-          :domains="summaryDomains"
-          :dataset="filteredDataset"
-          :price-id="priceDomains.length > 0 ? priceDomains[0].id : null"
-          :temperature-id="temperatureMeanId"
-          @recordMouseEnter="handleRecordMouseEnter"
-          @recordMouseLeave="handleRecordMouseLeave" />
         <summary-table
           v-if="ready"
           id="summary-table"
@@ -474,6 +466,17 @@
             :hover-data="hoverData"
             :hover-on="hoverOn" />
         </section>
+
+        <energy-records
+          v-if="ready"
+          :domains="summaryDomains"
+          :dataset="filteredDataset"
+          :range="range"
+          :interval="interval"
+          :price-id="priceDomains.length > 0 ? priceDomains[0].id : null"
+          :temperature-id="temperatureMeanId"
+          @recordMouseEnter="handleRecordMouseEnter"
+          @recordMouseLeave="handleRecordMouseLeave" />
       </div>
     </div>
   </section>
@@ -1322,6 +1325,7 @@ export default {
 }
 
 .bar-donut-wrapper {
+  margin-bottom: 1rem;
   header {
     margin: 1rem 0;
     .buttons {

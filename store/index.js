@@ -138,6 +138,16 @@ export const getters = {
         return 'energy'
     }
   },
+  chartUnit: state => {
+    switch (state.range) {
+      case '1D':
+      case '3D':
+      case '7D':
+        return ' MW'
+      default:
+        return ' GWh'
+    }
+  },
   interval: state => state.interval,
   dateFilter: state => state.dateFilter,
   exportData: state => state.exportData,

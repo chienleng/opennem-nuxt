@@ -13,11 +13,13 @@
 
         <energy-record
           :row-label="'Demand'"
-          :row-unit="'MW'"
+          :row-unit="energyUnit"
           :min-date="minDemandDate"
           :min-value="minDemand"
           :max-date="maxDemandDate"
           :max-value="maxDemand"
+          :range="range"
+          :interval="interval"
           @recordMouseEnter="handleMouseEnter"
           @recordMouseLeave="handleMouseLeave"/>
 
@@ -28,16 +30,21 @@
           :min-value="minDemandRenewables"
           :max-date="maxDemandRenewablesDate"
           :max-value="maxDemandRenewables"
+          :range="range"
+          :interval="interval"
+          :divider="true"
           @recordMouseEnter="handleMouseEnter"
           @recordMouseLeave="handleMouseLeave"/>
         
         <energy-record
           :row-label="'Generation'"
-          :row-unit="'MW'"
+          :row-unit="energyUnit"
           :min-date="minGenerationDate"
           :min-value="minGeneration"
           :max-date="maxGenerationDate"
           :max-value="maxGeneration"
+          :range="range"
+          :interval="interval"
           @recordMouseEnter="handleMouseEnter"
           @recordMouseLeave="handleMouseLeave"/>
         
@@ -48,17 +55,22 @@
           :min-value="minGenerationRenewables"
           :max-date="maxGenerationRenewablesDate"
           :max-value="maxGenerationRenewables"
+          :range="range"
+          :interval="interval"
+          :divider="true"
           @recordMouseEnter="handleMouseEnter"
           @recordMouseLeave="handleMouseLeave"/>
 
         <energy-record
           v-if="priceId"
           :row-label="'Price'"
-          :row-unit="'$/'"
+          :row-unit="'$/MWh'"
           :min-date="minPriceDate"
           :min-value="minPrice"
           :max-date="maxPriceDate"
           :max-value="maxPrice"
+          :range="range"
+          :interval="interval"
           :is-currency="true"
           @recordMouseEnter="handleMouseEnter"
           @recordMouseLeave="handleMouseLeave"/>
@@ -71,6 +83,8 @@
           :min-value="minTemperature"
           :max-date="maxTemperatureDate"
           :max-value="maxTemperature"
+          :range="range"
+          :interval="interval"
           @recordMouseEnter="handleMouseEnter"
           @recordMouseLeave="handleMouseLeave"/>
 
@@ -102,6 +116,14 @@ export default {
     temperatureId: {
       type: String,
       default: () => null
+    },
+    range: {
+      type: String,
+      default: () => ''
+    },
+    interval: {
+      type: String,
+      default: () => ''
     }
   },
 
@@ -137,7 +159,11 @@ export default {
     }
   },
 
-  computed: {},
+  computed: {
+    energyUnit() {
+      return this.$store.getters.chartUnit
+    }
+  },
 
   watch: {
     dataset(d) {
