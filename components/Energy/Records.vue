@@ -24,7 +24,7 @@
           @recordMouseLeave="handleMouseLeave"/>
 
         <energy-record
-          :row-label="'D. Renewables'"
+          :row-label="'Renewables'"
           :row-unit="'%'"
           :min-date="minDemandRenewablesDate"
           :min-value="minDemandRenewables"
@@ -49,7 +49,7 @@
           @recordMouseLeave="handleMouseLeave"/>
         
         <energy-record
-          :row-label="'G. Renewables'"
+          :row-label="'Renewables'"
           :row-unit="'%'"
           :min-date="minGenerationRenewablesDate"
           :min-value="minGenerationRenewables"
