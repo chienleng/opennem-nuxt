@@ -37,7 +37,11 @@
           class="summary-col-energy">
           Power <small>MW</small>
         </div>
-        <div class="summary-col-contribution">Contribution <small>to demand</small></div>
+        <div
+          class="summary-col-contribution contribution-toggle"
+          @click="handlePercentContributionToClick">
+          Contribution <small>to {{ percentContributionTo }}</small>
+        </div>
         <div class="summary-col-av-value">Av.Value <small>$/MWh</small></div>
       </div>
       <div class="summary-row">
@@ -75,8 +79,7 @@
       :point-summary="pointSummarySources"
       :point-summary-total="pointSummary._total"
       :summary="summarySources"
-      :summary-total="summary._totalEnergy"
-      :show-percent-column="true"
+      :summary-total="summarySourcesTotal"
       :domain-toggleable="domainToggleable"
       @update="handleSourcesOrderUpdate"
       @fuelTechsHidden="handleSourceFuelTechsHidden"
@@ -110,7 +113,7 @@
       :point-summary-total="pointSummary._total"
       :summary="summaryLoads"
       :summary-total="summary._totalEnergy"
-      :show-percent-column="true"
+      :show-percent-column="percentContributionTo === 'demand'"
       @update="handleLoadsOrderUpdate"
       @fuelTechsHidden="handleLoadFuelTechsHidden"
     />
@@ -129,6 +132,24 @@
           {{ pointSummary._total | formatValue }}
         </div>
         <div class="summary-col-contribution cell-value" />
+        <div class="summary-col-av-value cell-value" />
+      </div>
+    </div>
+
+    <div class="summary-column-headers">
+      <div class="summary-row last-row">
+        <div class="summary-col-label">Renewables</div>
+        <div class="summary-col-energy cell-value" />
+        <div
+          v-if="!hoverOn"
+          class="summary-col-contribution cell-value">
+          {{ renewables | formatValue }}%
+        </div>
+        <div
+          v-if="hoverOn"
+          class="summary-col-contribution cell-value">
+          {{ pointRenewables | formatValue }}%
+        </div>
         <div class="summary-col-av-value cell-value" />
       </div>
     </div>
@@ -219,6 +240,10 @@ export default {
       return this.$store.getters.fuelTechGroupName
     },
 
+    percentContributionTo() {
+      return this.$store.getters.percentContributionTo
+    },
+
     sourcesOrderLength() {
       return this.domains.filter(
         d => d.category === 'source' || d.category === 'load'
@@ -241,14 +266,31 @@ export default {
       return this.marketValueDomains.filter(d => d.category === 'load')
     },
 
-    totalGeneration() {
-      const reducer = (accumulator, currentValue) =>
-        accumulator + currentValue._total
-      return this.dataset.reduce(reducer, 0)
+    renewables() {
+      const key =
+        this.percentContributionTo === 'demand' ? '_total' : '_totalGeneration'
+      const totalRenewables = this.dataset.reduce(
+        (a, b) => a + b._totalRenewables,
+        0
+      )
+      const totalDemand = this.dataset.reduce((a, b) => a + b[key], 0)
+      return (totalRenewables / totalDemand) * 100
     },
 
-    totalEnergy() {
-      return this.summary._totalEnergy
+    pointRenewables() {
+      const key =
+        this.percentContributionTo === 'demand' ? '_total' : '_totalGeneration'
+      const totalRenewables = this.pointSummary._totalRenewables
+      const totalDemand = this.pointSummary[key]
+      return (totalRenewables / totalDemand) * 100
+    },
+
+    summarySourcesTotal() {
+      if (this.percentContributionTo === 'demand') {
+        return this.summary._totalEnergy
+      } else {
+        return this.summarySources._totalEnergy
+      }
     },
 
     intervalMins() {
@@ -546,6 +588,14 @@ export default {
         this.hiddenSources = this.sourcesOrder.map(d => d[property])
       }
       this.emitHiddenFuelTechs()
+    },
+
+    handlePercentContributionToClick() {
+      if (this.percentContributionTo === 'demand') {
+        this.$store.dispatch('percentContributionTo', 'generation')
+      } else {
+        this.$store.dispatch('percentContributionTo', 'demand')
+      }
     }
   }
 }
@@ -570,6 +620,13 @@ export default {
 
   .cell-value {
     font-family: $family-primary;
+  }
+}
+
+.contribution-toggle {
+  cursor: pointer;
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.7);
   }
 }
 
@@ -598,6 +655,7 @@ export default {
   .summary-col-av-value {
     width: 25%;
     text-align: right;
+    padding: 0 5px;
   }
 
   small {

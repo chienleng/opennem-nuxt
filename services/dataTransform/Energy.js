@@ -450,6 +450,7 @@ export default {
       })
 
       dataset[i]._total = totalDemand
+      dataset[i]._totalRenewables = totalRenewables
       dataset[i]._totalDemandRenewables = (totalRenewables / totalDemand) * 100
       dataset[i]._totalGeneration = totalGeneration
       dataset[i]._totalGenerationRenewables =

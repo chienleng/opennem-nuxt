@@ -22,7 +22,8 @@ export const state = () => ({
   chartPrice: true,
   chartTemperature: true,
   chartSummaryPie: true,
-  exportAttribution: '@name'
+  exportAttribution: '@name',
+  percentContributionTo: 'demand' // or generation
 })
 
 export const mutations = {
@@ -76,6 +77,9 @@ export const mutations = {
   },
   exportAttribution(state, data) {
     state.exportAttribution = data
+  },
+  percentContributionTo(state, data) {
+    state.percentContributionTo = data
   }
 }
 
@@ -157,7 +161,8 @@ export const getters = {
   chartPrice: state => state.chartPrice,
   chartTemperature: state => state.chartTemperature,
   chartSummaryPie: state => state.chartSummaryPie,
-  exportAttribution: state => state.exportAttribution
+  exportAttribution: state => state.exportAttribution,
+  percentContributionTo: state => state.percentContributionTo
 }
 
 export const actions = {
@@ -208,5 +213,8 @@ export const actions = {
   },
   exportAttribution({ commit }, data) {
     commit('exportAttribution', data)
+  },
+  percentContributionTo({ commit }, data) {
+    commit('percentContributionTo', data)
   }
 }

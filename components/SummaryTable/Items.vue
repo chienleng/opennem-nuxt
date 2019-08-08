@@ -35,11 +35,10 @@
         {{ getValue(ft.id) | formatValue }}
       </div>
 
-      <div
-        v-if="showPercentColumn"
-        class="summary-col-contribution"
-      >
-        {{ getContribution(ft.id) | formatValue }}%
+      <div class="summary-col-contribution">
+        <span v-show="showPercentColumn">
+          {{ getContribution(ft.id) | formatValue }}%
+        </span>
       </div>
 
       <div class="summary-col-contribution">
