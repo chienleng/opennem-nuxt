@@ -32,7 +32,7 @@
         >
           {{ getFtLabel(ft) }}
           <small v-if="facility.genFuelTechs.length > 1">
-            ({{ facility.fuelTechRegisteredCap[ft] | customFormatValue({ formatter: ',.0f'}) }}MW)
+            ({{ facility.fuelTechRegisteredCap[ft] | facilityFormatNumber }}MW)
           </small><span v-if="genFtIndex !== facility.genFuelTechs.length - 1">,</span> 
         </span>
         <span v-if="facility.loadFuelTechs.length && facility.genFuelTechs.length">,</span>
@@ -42,7 +42,7 @@
         >
           {{ getFtLabel(ft) }}
           <small>
-            ({{ facility.fuelTechRegisteredCap[ft] | customFormatValue({ formatter: ',.0f'}) }}MW)
+            ({{ facility.fuelTechRegisteredCap[ft] | facilityFormatNumber }}MW)
           </small><span v-if="loadFtIndex !== facility.loadFuelTechs.length - 1">,</span>
         </em>
       </div>
@@ -50,7 +50,7 @@
 
     <div class="capacity-wrapper">
       <div v-show="facility.generatorCap">
-        {{ generatorCap | customFormatValue({ formatter: ',.0f'}) }}
+        {{ generatorCap | facilityFormatNumber }}
         <span
           v-if="generatorCap !== 0"
           class="unit">MW</span>

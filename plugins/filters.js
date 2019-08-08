@@ -38,6 +38,12 @@ Vue.filter('formatValue', value => {
   return f(value)
 })
 
+Vue.filter('facilityFormatNumber', value => {
+  const fString = value < 10 ? ',.1f' : ',.0f'
+  const f = d3Format(fString)
+  return f(value)
+})
+
 Vue.filter('customFormatValue', (value, { formatter = ',.1f' }) => {
   const f = d3Format(formatter)
   return f(value)

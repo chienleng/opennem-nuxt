@@ -191,14 +191,7 @@ const simpleGroups = [
     label: 'Gas',
     type: 'sources',
     colour: '#F48E1B',
-    fields: [
-      'gas_recip',
-      'gas_ocgt',
-      'gas_ccgt',
-      'gas_steam',
-      'gas_lfg',
-      'gas_wcmg'
-    ]
+    fields: ['gas_recip', 'gas_ocgt', 'gas_ccgt', 'gas_steam', 'gas_wcmg']
   },
 
   {
@@ -210,11 +203,11 @@ const simpleGroups = [
   },
 
   {
-    id: 'group_biomass',
-    label: 'Biomass',
+    id: 'group_bioenergy',
+    label: 'Bioenergy',
     type: 'sources',
-    colour: '#A3886F',
-    fields: ['biomass']
+    colour: '#4CB9B9',
+    fields: ['bioenergy_biomass', 'bioenergy_biogas']
   },
 
   {
@@ -456,6 +449,7 @@ export default {
   font-family: $family-primary;
   margin-left: 0.75rem;
   margin-top: 0.1rem;
+  min-width: 200px;
 
   .dropdown-content {
     padding: 0.3rem 0;
