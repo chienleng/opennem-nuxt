@@ -19,7 +19,7 @@
         :selected-techs="selectedTechs"
         :sort-by="sortBy"
         :order-by="orderBy"
-        :hide-region-column="!isNemRegion"
+        :hide-region-column="!isAllRegion"
         class="facility-list"
         @orderChanged="handleOrderChange"
         @facilitySelect="handleFacilitySelect"
@@ -98,6 +98,9 @@ export default {
     },
     isNemRegion() {
       return this.$route.params.region === 'nem'
+    },
+    isAllRegion() {
+      return this.$route.params.region === 'all'
     },
     widthBreak() {
       return this.windowWidth < 769
@@ -195,13 +198,19 @@ export default {
           : sortedData
 
       const that = this
+      let regionIds = [this.regionId]
+      if (this.regionId === 'all') {
+        regionIds = ['nsw1', 'qld1', 'sa1', 'tas1', 'vic1', 'wa1']
+      } else if (this.regionId === 'nem') {
+        regionIds = ['nsw1', 'qld1', 'sa1', 'tas1', 'vic1']
+      }
       async function updateFilter() {
         return filtered.filter(
           g =>
             g.displayName
               .toLowerCase()
               .includes(that.filterString.toLowerCase()) &&
-            (that.regionId === 'nem' || g.regionId.includes(that.regionId)) &&
+            _.includes(regionIds, g.regionId.toLowerCase()) &&
             (that.selectedStatuses.length <= 0 ||
               _includes(that.selectedStatuses, g.status))
         )

@@ -1,7 +1,11 @@
 export default [
   {
-    id: 'nem',
+    id: 'all',
     label: 'All Regions'
+  },
+  {
+    id: 'nem',
+    label: 'NEM'
   },
   {
     id: 'nsw1',
@@ -22,5 +26,9 @@ export default [
   {
     id: 'vic1',
     label: 'Victoria'
+  },
+  {
+    id: 'wa1',
+    label: 'Western Australia'
   }
 ]

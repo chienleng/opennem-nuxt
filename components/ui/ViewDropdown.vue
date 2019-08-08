@@ -19,6 +19,7 @@
         <div class="dropdown-content">
           <nuxt-link
             v-for="view in views" 
+            v-show="showLink(view.id)"
             :key="view.id" 
             :to="`/${view.id}/${regionId}`"
             class="dropdown-item"
@@ -64,6 +65,15 @@ export default {
     },
     handleClickAway() {
       this.dropdownActive = false
+    },
+    showLink(view) {
+      if (
+        (this.regionId === 'all' || this.regionId === 'wa1') &&
+        view === 'energy'
+      ) {
+        return false
+      }
+      return true
     }
   }
 }

@@ -15,7 +15,8 @@
 
       <div class="menu">
         <nuxt-link
-          v-for="view in views" 
+          v-for="view in views"
+          v-show="showViewLink(view.id)"
           :key="view.id" 
           :to="`/${view.id}/${regionId}`"
           class="menu-item">
@@ -28,7 +29,8 @@
 
       <div class="menu">
         <nuxt-link
-          v-for="region in regions" 
+          v-for="region in regions"
+          v-show="showRegionLink(region.id)"
           :key="region.id" 
           :to="`/${currentView}/${region.id}`"
           class="menu-item">
@@ -86,6 +88,26 @@ export default {
     close() {
       window.scrollTo(0, 0)
       this.$emit('close')
+    },
+
+    showViewLink(view) {
+      if (
+        (this.regionId === 'all' || this.regionId === 'wa1') &&
+        view === 'energy'
+      ) {
+        return false
+      }
+      return true
+    },
+
+    showRegionLink(regionId) {
+      if (
+        (regionId === 'all' || regionId === 'wa1') &&
+        this.currentView === 'energy'
+      ) {
+        return false
+      }
+      return true
     }
   }
 }
