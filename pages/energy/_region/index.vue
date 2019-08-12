@@ -427,6 +427,7 @@
           :range="range"
           :interval="interval"
           :is-energy="step"
+          :hidden-fuel-techs="hiddenFuelTechs"
           @fuelTechsHidden="handleFuelTechsHidden"
         />
 
@@ -529,7 +530,6 @@ export default {
       dataset: [],
       energyDomains: [],
       fuelTechEnergyOrder: [],
-      hiddenFuelTechs: [],
       emissionsOrder: [],
       marketValueDomains: [],
       temperatureDomains: [],
@@ -602,6 +602,9 @@ export default {
     },
     fuelTechGroup() {
       return this.$store.getters.fuelTechGroup
+    },
+    hiddenFuelTechs() {
+      return this.$store.getters.hiddenFuelTechs
     },
     groupDomains() {
       const dict = this.fuelTechGroup
@@ -1163,7 +1166,7 @@ export default {
     },
 
     handleFuelTechsHidden(hidden) {
-      this.hiddenFuelTechs = hidden
+      this.$store.dispatch('hiddenFuelTechs', hidden)
     },
 
     setDateFilter(dates) {

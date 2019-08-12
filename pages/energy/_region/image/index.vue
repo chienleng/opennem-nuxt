@@ -51,6 +51,8 @@
               :show-zoom-out="false"
               :brush="false"
               :x-guides="xGuides"
+              :y-min="energyMin"
+              :y-max="energyMax"
             />
           </div>
 
@@ -212,6 +214,7 @@
             :is-energy="step"
             :domain-toggleable="false"
             :group-selection="false"
+            :hidden-fuel-techs="hiddenFuelTechs"
             class="export-summary"
           />
 
@@ -219,6 +222,7 @@
             v-if="ready && legend"
             :domains="summaryDomains"
             :dataset="filteredDataset"
+            :hidden-fuel-techs="hiddenFuelTechs"
           />
         </div>
 
@@ -304,7 +308,6 @@ export default {
       dataset: [],
       energyDomains: [],
       fuelTechEnergyOrder: [],
-      hiddenFuelTechs: [],
       emissionsOrder: [],
       marketValueDomains: [],
       temperatureDomains: [],
@@ -327,11 +330,16 @@ export default {
       chartTemperature: false,
       summary: false,
       legend: true,
-      exporting: false
+      exporting: false,
+      energyMin: 0,
+      energyMax: 1000
     }
   },
 
   computed: {
+    hiddenFuelTechs() {
+      return this.$store.getters.hiddenFuelTechs
+    },
     type() {
       return this.$store.getters.energyChartType
     },
@@ -448,6 +456,9 @@ export default {
     },
     filteredDataset(updated) {
       this.$store.dispatch('exportData', updated)
+    },
+    hiddenFuelTechs() {
+      this.updateEnergyMinMax()
     }
   },
 
@@ -510,6 +521,7 @@ export default {
           this.updateDatasetGroups(dataset, this.groupEmissionDomains)
         }
         this.updatedFilteredDataset(dataset)
+        this.updateEnergyMinMax()
         this.ready = true
       })
     },
@@ -623,6 +635,32 @@ export default {
 
     handleCancelClick() {
       this.$router.go(-1)
+    },
+
+    updateEnergyMinMax() {
+      let energyMinAll = 0,
+        energyMaxAll = 0
+      this.dataset.forEach((d, i) => {
+        let energyMin = 0,
+          energyMax = 0
+
+        this.stackedAreaDomains.forEach(domain => {
+          const id = domain.id
+          energyMax += d[id] || 0
+          if (d[id] < 0) {
+            energyMin += d[id] || 0
+          }
+        })
+
+        if (energyMax > energyMaxAll) {
+          energyMaxAll = energyMax
+        }
+        if (energyMin < energyMinAll) {
+          energyMinAll = energyMin
+        }
+      })
+      this.energyMin = energyMinAll
+      this.energyMax = energyMaxAll
     }
   }
 }

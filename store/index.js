@@ -12,6 +12,7 @@ export const state = () => ({
   fuelTechNames: null,
   fuelTechGroupName: 'Default',
   fuelTechOrder: cloneDeep(FUEL_TECHS.DEFAULT_FUEL_TECH_ORDER),
+  hiddenFuelTechs: [],
   range: '7D',
   interval: '30m',
   dateFilter: [],
@@ -44,6 +45,9 @@ export const mutations = {
   },
   fuelTechOrder(state, data) {
     state.fuelTechOrder = data
+  },
+  hiddenFuelTechs(state, data) {
+    state.hiddenFuelTechs = data
   },
   range(state, data) {
     state.range = data
@@ -111,6 +115,7 @@ export const getters = {
     return group
   },
   fuelTechOrder: state => state.fuelTechOrder,
+  hiddenFuelTechs: state => state.hiddenFuelTechs,
   range: state => state.range,
   energyCurveType: state => {
     switch (state.range) {
@@ -180,6 +185,9 @@ export const actions = {
   },
   fuelTechOrder({ commit }, data) {
     commit('fuelTechOrder', data)
+  },
+  hiddenFuelTechs({ commit }, data) {
+    commit('hiddenFuelTechs', data)
   },
   range({ commit }, data) {
     commit('range', data)

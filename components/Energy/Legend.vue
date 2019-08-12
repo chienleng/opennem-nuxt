@@ -1,7 +1,7 @@
 <template>
   <section class="legend">
     <div
-      v-for="(domain, index) in domains"
+      v-for="(domain, index) in legendItems"
       :key="`domain-${index}`"
       class="legend-item">
       <span
@@ -15,6 +15,8 @@
 </template>
 
 <script>
+import _includes from 'lodash.includes'
+
 export default {
   props: {
     domains: {
@@ -24,6 +26,18 @@ export default {
     dataset: {
       type: Array,
       default: () => []
+    },
+    hiddenFuelTechs: {
+      type: Array,
+      default: () => []
+    }
+  },
+
+  computed: {
+    legendItems() {
+      return this.domains.filter(
+        domain => !_includes(this.hiddenFuelTechs, domain.fuelTech)
+      )
     }
   }
 }

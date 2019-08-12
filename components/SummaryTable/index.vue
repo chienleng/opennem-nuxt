@@ -182,6 +182,10 @@ export default {
       type: Array,
       default: () => []
     },
+    hiddenFuelTechs: {
+      type: Array,
+      default: () => []
+    },
     hoverDate: {
       type: Date,
       default: () => null
@@ -228,7 +232,6 @@ export default {
       pointSummary: {},
       pointSummarySources: {},
       pointSummaryLoads: {},
-      hiddenFuelTechs: [],
       hiddenSources: [],
       hiddenLoads: [],
       hoveredTemperature: 0
@@ -363,6 +366,16 @@ export default {
   },
 
   mounted() {
+    this.hiddenFuelTechs.forEach(fuelTech => {
+      const find = this.domains.find(domain => domain.fuelTech === fuelTech)
+      if (find) {
+        if (find.category === 'source') {
+          this.hiddenSources.push(fuelTech)
+        } else {
+          this.hiddenLoads.push(fuelTech)
+        }
+      }
+    })
     this.calculateSummary(this.dataset)
   },
 
@@ -561,15 +574,15 @@ export default {
     },
 
     emitHiddenFuelTechs() {
-      this.hiddenFuelTechs = [...this.hiddenSources, ...this.hiddenLoads]
+      let hiddenFuelTechs = [...this.hiddenSources, ...this.hiddenLoads]
 
       // if all is hidden, then unhide all
-      if (this.hiddenFuelTechs.length === this.sourcesOrderLength) {
+      if (hiddenFuelTechs.length === this.sourcesOrderLength) {
         this.hiddenSources = []
         this.hiddenLoads = []
-        this.hiddenFuelTechs = []
+        hiddenFuelTechs = []
       }
-      this.$emit('fuelTechsHidden', this.hiddenFuelTechs)
+      this.$emit('fuelTechsHidden', hiddenFuelTechs)
     },
 
     handleSourceFuelTechsHidden(hidden, hideOthers) {
