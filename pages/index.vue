@@ -17,6 +17,17 @@ export default {
     } else {
       this.$router.push({ path: `energy/nem` })
     }
+
+    if (
+      this.$route.hash === `#/widget` ||
+      this.$route.hash === `#/widget/small`
+    ) {
+      this.$router.push({ path: `widget/small` })
+    }
+
+    if (this.$route.hash === `#/widget/large`) {
+      this.$router.push({ path: `widget/large` })
+    }
   }
 }
 </script>
