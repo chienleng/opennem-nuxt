@@ -36,7 +36,7 @@
       <button class="button is-rounded">
         <download-csv
           :data="exportData"
-          :name="`test.csv`"
+          :name="`${filename}.csv`"
         >
           <i class="fal fa-fw fa-table" />
           <span class="label-csv">Data</span>
@@ -47,6 +47,7 @@
 </template>
 
 <script>
+import { timeFormat as d3TimeFormat } from 'd3-time-format'
 import _debounce from 'lodash.debounce'
 import DownloadCsv from 'vue-json-csv'
 import REGIONS from '~/constants/regions.js'
@@ -98,6 +99,17 @@ export default {
     regionLabel() {
       const region = this.regions.find(d => d.id === this.regionId)
       return region ? region.label : ''
+    },
+    filename() {
+      let date = ''
+      let region = REGIONS.find(r => r.id === this.regionId).label
+      if (this.exportData.length > 0) {
+        date = d3TimeFormat('%Y%m%d')(this.exportData[0].date)
+      }
+      if (this.regionId === 'nem') {
+        region = 'OpenNEM'
+      }
+      return `${date} ${region}`
     }
   },
 
