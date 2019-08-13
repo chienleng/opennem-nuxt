@@ -18,7 +18,7 @@
             class="chart-title no-hover">
             <div>
               <strong>Energy</strong>
-              <small>GWh/{{ interval }}</small>
+              <small>{{ isYearInterval ? 'TWh' : 'GWh' }}/{{ interval }}</small>
             </div>
             <div class="hover-date-value">
               <div class="hover-date">
@@ -96,7 +96,7 @@
         </div>
 
         <div
-          v-if="ready && hasEmissionData"
+          v-if="ready && hasEmissionData && featureEmissions"
           :class="{
             'is-hovered': hoverOn,
             'has-border-bottom': !chartEmissionsVolume
@@ -158,7 +158,7 @@
         </div>
 
         <div
-          v-if="ready && hasEmissionData"
+          v-if="ready && hasEmissionData && featureEmissions"
           :class="{
             'is-hovered': hoverOn,
             'has-border-bottom': !chartEmissionsIntensity
@@ -555,6 +555,9 @@ export default {
   },
 
   computed: {
+    featureEmissions() {
+      return this.$store.getters.featureEmissions
+    },
     dateFilter() {
       return this.$store.getters.dateFilter
     },
@@ -839,6 +842,10 @@ export default {
         return this.hoverData[this.temperatureMaxId]
       }
       return 0
+    },
+
+    isYearInterval() {
+      return this.interval === 'Fin Year' || this.interval === 'Year'
     }
   },
 

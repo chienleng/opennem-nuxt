@@ -102,7 +102,7 @@ export default {
     },
     filename() {
       let date = ''
-      let region = REGIONS.find(r => r.id === this.regionId).label
+      let region = this.regionLabel
       if (this.exportData.length > 0) {
         date = d3TimeFormat('%Y%m%d')(this.exportData[0].date)
       }

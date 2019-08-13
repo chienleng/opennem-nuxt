@@ -52,6 +52,10 @@ export default {
       type: Array,
       default: () => []
     },
+    featureEmissions: {
+      type: Boolean,
+      default: () => false
+    },
     hasEmissions: {
       type: Boolean,
       default: () => false
@@ -98,7 +102,7 @@ export default {
     chartButtons() {
       return this.charts.filter(
         c =>
-          (this.hasEmissions
+          (this.hasEmissions && this.featureEmissions
             ? true
             : c.name !== 'chartEmissionsVolume' &&
               c.name !== 'chartEmissionsIntensity') &&

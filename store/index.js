@@ -24,7 +24,8 @@ export const state = () => ({
   chartTemperature: true,
   chartSummaryPie: true,
   exportAttribution: '@name',
-  percentContributionTo: 'demand' // or generation
+  percentContributionTo: 'demand', // or generation
+  featureEmissions: false
 })
 
 export const mutations = {
@@ -84,6 +85,9 @@ export const mutations = {
   },
   percentContributionTo(state, data) {
     state.percentContributionTo = data
+  },
+  featureEmissions(state, data) {
+    state.featureEmissions = data
   }
 }
 
@@ -154,6 +158,9 @@ export const getters = {
       case '7D':
         return ' MW'
       default:
+        if (state.interval === 'Fin Year' || state.interval === 'Year') {
+          return ' TWh'
+        }
         return ' GWh'
     }
   },
@@ -167,7 +174,8 @@ export const getters = {
   chartTemperature: state => state.chartTemperature,
   chartSummaryPie: state => state.chartSummaryPie,
   exportAttribution: state => state.exportAttribution,
-  percentContributionTo: state => state.percentContributionTo
+  percentContributionTo: state => state.percentContributionTo,
+  featureEmissions: state => state.featureEmissions
 }
 
 export const actions = {
@@ -224,5 +232,8 @@ export const actions = {
   },
   percentContributionTo({ commit }, data) {
     commit('percentContributionTo', data)
+  },
+  featureEmissions({ commit }, data) {
+    commit('featureEmissions', data)
   }
 }

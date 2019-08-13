@@ -30,7 +30,7 @@
         <div
           v-if="!hoverOn || isEnergy"
           class="summary-col-energy">
-          Energy <small>GWh</small>
+          Energy <small>{{ isYearInterval ? 'TWh' : 'GWh' }}</small>
         </div>
         <div
           v-if="hoverOn && !isEnergy"
@@ -344,6 +344,10 @@ export default {
       // const dataLength = this.dataset.length
       // const endDate = dataLength > 0 ? this.dataset[dataLength - 1].date : null
       return this.endDate ? new Date(this.endDate).toISOString() : ''
+    },
+
+    isYearInterval() {
+      return this.interval === 'Fin Year' || this.interval === 'Year'
     }
   },
 
@@ -454,7 +458,9 @@ export default {
             0
           )
           const ftTotal = Math.abs(this.summary[this.domains[index].id])
-          avValue = dataMarketValueSum / ftTotal / 1000
+          avValue = this.isYearInterval
+            ? dataMarketValueSum / ftTotal / 1000 / 1000
+            : dataMarketValueSum / ftTotal / 1000
         } else {
           const ftId = this.domains[index].id
           const dataPowerTotal = data.reduce((a, b) => a + (b[ftId] || 0), 0)
@@ -477,9 +483,10 @@ export default {
         }
       })
 
-      const totalAverageValue = this.isEnergy
-        ? totalPriceMarketValue / energySummaryTotal / 1000
-        : volWeightPriceTotal / energySummaryTotal
+      const totalAverageValue =
+        this.isEnergy && !this.isYearInterval
+          ? totalPriceMarketValue / energySummaryTotal / 1000
+          : volWeightPriceTotal / energySummaryTotal / 1000 / 1000
       this.summary._totalEnergy = total
       this.summary._totalAverageValue = totalAverageValue
       this.summarySources._totalEnergy = totalSources
@@ -513,7 +520,9 @@ export default {
           const category = ft.category
           const value = Math.abs(this.pointSummary[ft.id])
           const ftTotal = Math.abs(this.pointSummary[this.domains[index].id])
-          const avValue = value / ftTotal / 1000
+          const avValue = this.isYearInterval
+            ? value / ftTotal / 1000 / 1000
+            : value / ftTotal / 1000
 
           this.pointSummary[ft.id] = avValue
           totalPriceMarketValue += value
@@ -529,8 +538,9 @@ export default {
       if (this.priceId) {
         this.pointSummary._totalAverageValue = this.pointSummary[this.priceId]
       } else {
-        this.pointSummary._totalAverageValue =
-          totalPriceMarketValue / this.pointSummary._total / 1000
+        this.pointSummary._totalAverageValue = this.isYearInterval
+          ? totalPriceMarketValue / this.pointSummary._total / 1000 / 1000
+          : totalPriceMarketValue / this.pointSummary._total / 1000
       }
       this.pointSummarySources._total = totalSources
       this.pointSummaryLoads._total = totalLoads

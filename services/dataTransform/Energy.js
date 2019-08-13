@@ -500,9 +500,9 @@ export default {
       } else if (range === 'ALL' && interval === 'Quarter') {
         resolve(rollUpAllQuarter(domains, data))
       } else if (range === 'ALL' && interval === 'Fin Year') {
-        resolve(rollUpAllFinYear(domains, data))
+        resolve(rollUpAllFinYear(domains, energyDomains, data))
       } else if (range === 'ALL' && interval === 'Year') {
-        resolve(rollUpAllYear(domains, data))
+        resolve(rollUpAllYear(domains, energyDomains, data))
       }
       resolve(data)
     })

@@ -4,6 +4,7 @@
       :type="type"
       :charts="charts"
       :tables="tables"
+      :feature-emissions="featureEmissions"
       :has-emissions="hasEmissionData"
       :has-price="hasPriceData"
       :has-temperature="hasTemperatureData"
@@ -337,6 +338,10 @@ export default {
   },
 
   computed: {
+    featureEmissions() {
+      return this.$store.getters.featureEmissions
+    },
+
     hiddenFuelTechs() {
       return this.$store.getters.hiddenFuelTechs
     },

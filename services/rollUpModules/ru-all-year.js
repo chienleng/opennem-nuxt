@@ -11,12 +11,17 @@ function setStartYear(date) {
   return d
 }
 
-export default function(ids, data) {
+export default function(ids, energyDomains, data) {
   let nestDate = setStartYear(data[0].date)
 
   data.forEach((d, i) => {
     nestDate = setStartYear(d.date)
     data[i].nestDate = nestDate.toDate()
+
+    // also convert to TWh
+    energyDomains.forEach(domain => {
+      d[domain.id] = d[domain.id] / 1000
+    })
   })
 
   return rollUp(ids, data)

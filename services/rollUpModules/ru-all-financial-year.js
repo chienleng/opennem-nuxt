@@ -26,7 +26,7 @@ function setStartFY(date, qMonth) {
   return d
 }
 
-export default function(ids, data) {
+export default function(ids, energyDomains, data) {
   let currentQ = moment(data[0].date).quarter()
   let nestDate = setStartFY(data[0].date, getQuarterStartMonth(currentQ))
 
@@ -37,6 +37,11 @@ export default function(ids, data) {
     }
     currentQ = q
     data[i].nestDate = nestDate.toDate()
+
+    // also convert to TWh
+    energyDomains.forEach(domain => {
+      d[domain.id] = d[domain.id] / 1000
+    })
   })
 
   return rollUp(ids, data)
