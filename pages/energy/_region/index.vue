@@ -541,9 +541,19 @@ export default {
       title: this.pageTitle,
       meta: [
         {
+          hid: 'twitter:title',
+          name: 'twitter:title',
+          content: this.pageTitle
+        },
+        {
           hid: 'twitter:image:src',
           name: 'twitter:image:src',
           content: this.pageImage
+        },
+        {
+          hid: 'og:title',
+          property: 'og:title',
+          content: this.pageTitle
         },
         {
           hid: 'og:image',

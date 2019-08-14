@@ -20,6 +20,7 @@ module.exports = {
       // Twitter
       { name: 'twitter:card', content: 'summary_large_image' },
       {
+        hid: 'twitter:title',
         name: 'twitter:title',
         content:
           'OpenNEM: An Open Platform for National Electricity Market Data'
@@ -33,6 +34,7 @@ module.exports = {
       },
       // Facebook
       {
+        hid: 'og:title',
         property: 'og:title',
         content:
           'OpenNEM: An Open Platform for National Electricity Market Data'
