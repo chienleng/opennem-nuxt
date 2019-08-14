@@ -647,7 +647,7 @@ export default {
       return `OpenNEM: ${title}`
     },
     pageImage() {
-      return `/images/energy/${this.regionId}.png`
+      return `https://opennem-nuxt.netlify.com/images/energy/${this.regionId}.png`
     },
     range() {
       return this.$store.getters.range

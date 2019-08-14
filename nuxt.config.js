@@ -29,7 +29,7 @@ module.exports = {
       {
         hid: 'twitter:image:src',
         name: 'twitter:image:src',
-        content: '/images/energy/nem.png'
+        content: 'https://opennem-nuxt.netlify.com/images/energy/nem.png'
       },
       // Facebook
       {
@@ -38,12 +38,12 @@ module.exports = {
           'OpenNEM: An Open Platform for National Electricity Market Data'
       },
       { property: 'og:type', content: 'website' },
-      { property: 'og:url', content: 'https://opennem.org.au' },
+      { property: 'og:url', content: 'https://opennem-nuxt.netlify.com' },
       { property: 'og:description', content: pkg.description },
       {
         hid: 'og:image',
         property: 'og:image',
-        content: '/images/energy/nem.png'
+        content: 'https://opennem-nuxt.netlify.com/images/energy/nem.png'
       },
       { property: 'og:image:width', content: '2768' },
       { property: 'og:image:height', content: '1922' }
