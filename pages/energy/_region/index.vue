@@ -722,7 +722,7 @@ export default {
         return incompletes
       }
 
-      if (this.interval === 'Month') {
+      if (this.range === '1Y' && this.interval === 'Month') {
         const incompletes = []
         if (aSD > dStart) {
           incompletes.push({
