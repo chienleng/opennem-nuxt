@@ -38,7 +38,11 @@ module.exports = {
           'OpenNEM: An Open Platform for National Electricity Market Data'
       },
       { property: 'og:type', content: 'website' },
-      { property: 'og:url', content: 'https://opennem-nuxt.netlify.com' },
+      {
+        hid: 'og:url',
+        property: 'og:url',
+        content: 'https://opennem-nuxt.netlify.com'
+      },
       { property: 'og:description', content: pkg.description },
       {
         hid: 'og:image',

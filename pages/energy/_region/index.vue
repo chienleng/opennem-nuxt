@@ -549,6 +549,11 @@ export default {
           hid: 'og:image',
           property: 'og:image',
           content: this.pageImage
+        },
+        {
+          hid: 'og:url',
+          property: 'og:url',
+          content: this.pageUrl
         }
       ]
     }
@@ -645,6 +650,9 @@ export default {
         title = region.label
       }
       return `OpenNEM: ${title}`
+    },
+    pageUrl() {
+      return `https://opennem-nuxt.netlify.com/energy/${this.regionId}`
     },
     pageImage() {
       return `https://opennem-nuxt.netlify.com/images/energy/${this.regionId}.png`
