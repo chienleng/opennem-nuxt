@@ -639,6 +639,7 @@ export default {
     color: #000;
     padding-bottom: $app-padding / 5;
     border-bottom: 1px solid #000;
+    user-select: none;
   }
 
   .cell-value {

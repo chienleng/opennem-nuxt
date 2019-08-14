@@ -39,7 +39,7 @@
           <div
             v-if="step"
             class="chart-title no-hover">
-            <div>
+            <div class="chart-label">
               <strong>Energy</strong>
               <small>{{ isYearInterval ? 'TWh' : 'GWh' }}/{{ interval }}</small>
             </div>
@@ -68,8 +68,8 @@
           </div>
           <div
             v-else
-            class="chart-title">
-            <div>
+            class="chart-title no-hover">
+            <div class="chart-label">
               <strong>Generation</strong>
               <small>MW</small>
             </div>
@@ -128,7 +128,7 @@
           <div
             class="chart-title"
             @click="toggleChart('chartEmissionsVolume')">
-            <div>
+            <div class="chart-label">
               <i
                 :class="{
                   'fa-caret-down': chartEmissionsVolume,
@@ -190,7 +190,7 @@
           <div
             class="chart-title"
             @click="toggleChart('chartEmissionsIntensity')">
-            <div>
+            <div class="chart-label">
               <i
                 :class="{
                   'fa-caret-down': chartEmissionsIntensity,
@@ -251,7 +251,7 @@
           <div
             class="chart-title"
             @click="toggleChart('chartPrice')">
-            <div>
+            <div class="chart-label">
               <i
                 :class="{
                   'fa-caret-down': chartPrice,
@@ -368,7 +368,7 @@
           <div
             class="chart-title"
             @click="toggleChart('chartTemperature')">
-            <div>
+            <div class="chart-label">
               <i
                 :class="{
                   'fa-caret-down': chartTemperature,
@@ -954,7 +954,7 @@ export default {
           const findIndex = r.data.findIndex(
             d => d.type === 'volume_weighted_price'
           )
-          if (findIndex) {
+          if (findIndex !== -1) {
             r.data.splice(findIndex, 1)
           }
         })
@@ -1243,10 +1243,10 @@ export default {
 
   .vis-container {
     width: 100%;
-    padding: 1rem;
 
     @include desktop {
       width: 70%;
+      padding: 1rem;
     }
   }
   .table-container {
@@ -1263,26 +1263,37 @@ export default {
 
     .chart-title {
       font-size: 0.8em;
-      padding: 0.2rem 1rem 0.2rem 1rem;
       cursor: pointer;
       user-select: none;
-      display: flex;
-      justify-content: space-between;
+
+      @include desktop {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.2rem 1rem 0.2rem 1rem;
+      }
 
       &:hover {
         background-color: rgba(255, 255, 255, 0.3);
       }
 
+      .chart-label {
+        padding: 0 0.5rem;
+      }
+
       .hover-date-value {
-        opacity: 0;
         display: flex;
         font-size: 0.9em;
+        // background-color: rgba(255, 255, 255, 0.5);
+        // @include desktop {
+        //   background-color: transparent;
+        // }
       }
 
       .hover-date,
       .hover-values {
+        opacity: 0;
         background: rgba(255, 255, 255, 0.5);
-        padding: 3px 10px 2px;
+        padding: 3px 0.5rem;
         white-space: nowrap;
       }
 
@@ -1290,16 +1301,26 @@ export default {
         font-weight: 600;
         background-color: rgba(199, 69, 35, 0.1);
         color: #444;
-        border-radius: 4px 0 0 4px;
         font-size: 0.9em;
         padding-top: 4px;
+        width: 30%;
+
+        @include desktop {
+          width: auto;
+          border-radius: 20px 0 0 20px;
+        }
       }
 
       .hover-values {
-        border-radius: 0 4px 4px 0;
         display: flex;
         align-items: center;
         font-size: 0.8em;
+        width: 70%;
+
+        span {
+          flex-grow: 1;
+        }
+
         .ft-value {
           margin-right: 1rem;
         }
@@ -1308,6 +1329,11 @@ export default {
         }
         strong {
           font-size: 1.3em;
+        }
+
+        @include desktop {
+          width: auto;
+          border-radius: 0 20px 20px 0;
         }
       }
 
@@ -1329,9 +1355,12 @@ export default {
       }
     }
 
-    &.is-hovered .hover-date-value {
-      opacity: 1;
-      transition: all 0.2s ease-in-out;
+    &.is-hovered {
+      .hover-date,
+      .hover-values {
+        opacity: 1;
+        transition: all 0.2s ease-in-out;
+      }
     }
     &.has-border-bottom {
       border-bottom: 1px dashed #ccc;
@@ -1350,6 +1379,7 @@ export default {
 
   .loader-block {
     background-color: #ddd;
+    border-radius: 20px;
     height: 400px;
     margin: 0.5rem;
     -webkit-animation: pulse 1.4s ease-in-out infinite alternate;
