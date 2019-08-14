@@ -665,7 +665,8 @@ export default {
       return `https://opennem-nuxt.netlify.com/energy/${this.regionId}`
     },
     pageImage() {
-      return `https://opennem-nuxt.netlify.com/images/energy/${this.regionId}.png`
+      const url = 'https://opennem-nuxt.netlify.com/images/energy/'
+      return `${url}${this.regionId}.png`
     },
     range() {
       return this.$store.getters.range
