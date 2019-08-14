@@ -143,12 +143,12 @@
         <div
           v-if="!hoverOn"
           class="summary-col-contribution cell-value">
-          {{ renewables | formatValue }}%
+          {{ renewables | percentageFormatNumber }}
         </div>
         <div
           v-if="hoverOn"
           class="summary-col-contribution cell-value">
-          {{ pointRenewables | formatValue }}%
+          {{ pointRenewables | percentageFormatNumber }}
         </div>
         <div class="summary-col-av-value cell-value" />
       </div>

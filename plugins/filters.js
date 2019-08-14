@@ -3,6 +3,21 @@ import { timeFormat as d3TimeFormat } from 'd3-time-format'
 import { format as d3Format } from 'd3-format'
 import DateDisplay from '~/services/DateDisplay.js'
 
+function smartFormatString(v) {
+  const value = Math.abs(v)
+  let fString = ',.0f'
+  if (value < 1 && value > 0.1) {
+    fString = ',.1f'
+  } else if (value < 0.1 && value > 0.01) {
+    fString = ',.2f'
+  } else if (value < 0.01 && value > 0.001) {
+    fString = ',.3f'
+  } else if (value < 0.001) {
+    fString = ',.4f'
+  }
+  return fString
+}
+
 Vue.filter(
   'customFormatDate',
   (
@@ -34,8 +49,10 @@ Vue.filter('formatDate', time => {
 })
 
 Vue.filter('formatValue', value => {
-  const f = d3Format(',.1f')
-  return f(value)
+  const fString = smartFormatString(value)
+  const f = d3Format(fString)
+  const fValue = f(value)
+  return isFinite(value) && !isNaN(value) && value ? fValue : '–'
 })
 
 Vue.filter('facilityFormatNumber', value => {
@@ -49,8 +66,18 @@ Vue.filter('customFormatValue', (value, { formatter = ',.1f' }) => {
   return f(value)
 })
 
+Vue.filter('percentageFormatNumber', value => {
+  let fString = smartFormatString(value)
+  if (fString === ',.0f') {
+    fString = ',.1f'
+  }
+  const f = d3Format(fString)
+  const fValue = f(value) + '%'
+  return isFinite(value) && !isNaN(value) && value ? fValue : '–'
+})
+
 Vue.filter('formatCurrency', value => {
   const f = d3Format('$,.2f')
   const fValue = f(value)
-  return isFinite(value) ? fValue : '–'
+  return isFinite(value) && !isNaN(value) && value ? fValue : '–'
 })

@@ -10,6 +10,7 @@
       @mouseenter="handleMouseEnter(minDate)"
       @mouseleave="handleMouseLeave">
       <div v-if="isCurrency">{{ minValue | formatCurrency }}</div>
+      <div v-else-if="rowUnit === '%'">{{ minValue | percentageFormatNumber }}</div>
       <div v-else>{{ minValue | formatValue }}{{ rowUnit }}</div>
       <time datetime="minDate">
         {{ minDate | customFormatDate({ range, interval, showIntervalRange: true }) }}
@@ -21,6 +22,7 @@
       @mouseenter="handleMouseEnter(maxDate)"
       @mouseleave="handleMouseLeave">
       <div v-if="isCurrency">{{ maxValue | formatCurrency }}</div>
+      <div v-else-if="rowUnit === '%'">{{ maxValue | percentageFormatNumber }}</div>
       <div v-else>{{ maxValue | formatValue }}{{ rowUnit }}</div>
       <time datetime="maxDate">
         {{ maxDate | customFormatDate({ range, interval, showIntervalRange: true }) }}
