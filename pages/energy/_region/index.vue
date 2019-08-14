@@ -515,6 +515,7 @@ import _includes from 'lodash.includes'
 import Draggable from 'vuedraggable'
 import { saveAs } from 'file-saver'
 
+import REGIONS from '~/constants/regions.js'
 import EventBus from '~/plugins/eventBus.js'
 import Http from '~/services/Http.js'
 import DateDisplay from '~/services/DateDisplay.js'
@@ -534,6 +535,24 @@ import EnergyRecords from '~/components/Energy/Records.vue'
 
 export default {
   layout: 'main',
+
+  head() {
+    return {
+      title: this.pageTitle,
+      meta: [
+        {
+          hid: 'twitter:image:src',
+          name: 'twitter:image:src',
+          content: this.pageImage
+        },
+        {
+          hid: 'og:image',
+          property: 'og:image',
+          content: this.pageImage
+        }
+      ]
+    }
+  },
 
   components: {
     Loader,
@@ -618,6 +637,17 @@ export default {
     },
     regionId() {
       return this.$route.params.region
+    },
+    pageTitle() {
+      let title = 'An Open Platform for National Electricity Market Data'
+      const region = REGIONS.find(d => d.id === this.regionId)
+      if (region && this.regionId !== 'nem') {
+        title = region.label
+      }
+      return `OpenNEM: ${title}`
+    },
+    pageImage() {
+      return `/images/energy/${this.regionId}.png`
     },
     range() {
       return this.$store.getters.range

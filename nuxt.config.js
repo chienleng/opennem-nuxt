@@ -26,7 +26,11 @@ module.exports = {
       },
       { name: 'twitter:site', content: '@OpenNEM' },
       { name: 'twitter:description', content: pkg.description },
-      { name: 'twitter:image:src', content: '/images/summary.png' },
+      {
+        hid: 'twitter:image:src',
+        name: 'twitter:image:src',
+        content: '/images/energy/nem.png'
+      },
       // Facebook
       {
         property: 'og:title',
@@ -36,9 +40,13 @@ module.exports = {
       { property: 'og:type', content: 'website' },
       { property: 'og:url', content: 'https://opennem.org.au' },
       { property: 'og:description', content: pkg.description },
-      { property: 'og:image', content: '/images/summary.png' },
-      { property: 'og:image:width', content: '2048' },
-      { property: 'og:image:height', content: '1010' }
+      {
+        hid: 'og:image',
+        property: 'og:image',
+        content: '/images/energy/nem.png'
+      },
+      { property: 'og:image:width', content: '2768' },
+      { property: 'og:image:height', content: '1922' }
     ],
     link: [
       {
