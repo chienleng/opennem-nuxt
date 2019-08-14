@@ -7,6 +7,29 @@
       @onIntervalChange="handleIntervalChange"
     />
 
+    <transition name="fade">
+      <div
+        v-if="!ready"
+        class="vis-table-container loading-containers">
+        <div class="vis-container">
+          <div
+            class="loader-block"
+            style="height: 30px" />
+          <div
+            class="loader-block"
+            style="height: 400px" />
+        </div>
+        <div class="table-container">
+          <div
+            class="loader-block"
+            style="height: 30px" />
+          <div
+            class="loader-block"
+            style="height: 400px" />
+        </div>
+      </div>
+    </transition>
+
     <div class="vis-table-container">
       <div class="vis-container">
         <div
@@ -499,6 +522,7 @@ import Data from '~/services/Data.js'
 import EnergyDataTransform from '~/services/dataTransform/Energy.js'
 import Domain from '~/services/Domain.js'
 
+import Loader from '~/components/ui/Loader'
 import DataOptionsBar from '~/components/ui/DataOptionsBar'
 import StackedAreaVis from '~/components/Vis/StackedArea.vue'
 import LineVis from '~/components/Vis/Line.vue'
@@ -512,6 +536,7 @@ export default {
   layout: 'main',
 
   components: {
+    Loader,
     Draggable,
     DataOptionsBar,
     StackedAreaVis,
@@ -1078,7 +1103,7 @@ export default {
     },
 
     handleRangeChange(range) {
-      // this.ready = false
+      this.ready = false
       let interval = ''
       switch (range) {
         case '1D':
@@ -1206,6 +1231,10 @@ export default {
 @import '~/assets/scss/responsive-mixins.scss';
 @import '~/assets/scss/variables.scss';
 
+.loading {
+  position: absolute;
+  z-index: 999;
+}
 .vis-table-container {
   display: flex;
   flex-wrap: wrap;
@@ -1306,6 +1335,36 @@ export default {
     }
     &.has-border-bottom {
       border-bottom: 1px dashed #ccc;
+    }
+  }
+}
+
+.loading-containers {
+  position: absolute;
+  width: 100%;
+  flex-wrap: wrap;
+
+  @include desktop {
+    flex-wrap: nowrap;
+  }
+
+  .loader-block {
+    background-color: #ddd;
+    height: 400px;
+    margin: 0.5rem;
+    -webkit-animation: pulse 1.4s ease-in-out infinite alternate;
+    animation: pulse 1.4s ease-in-out infinite alternate;
+  }
+  .vis-container {
+    padding: 1rem 0 1rem 0.5rem;
+    @include desktop {
+      width: 70%;
+    }
+  }
+  .table-container {
+    padding: 1rem 0.5rem 1rem 0;
+    @include desktop {
+      width: 30%;
     }
   }
 }
