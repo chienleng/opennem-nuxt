@@ -1243,10 +1243,10 @@ export default {
 
   .vis-container {
     width: 100%;
-
+    padding: 1rem 0;
     @include desktop {
       width: 70%;
-      padding: 1rem;
+      padding: 0;
     }
   }
   .table-container {

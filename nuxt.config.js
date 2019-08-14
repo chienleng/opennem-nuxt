@@ -8,21 +8,37 @@ module.exports = {
     host: '0.0.0.0'
   },
 
-  /*
-  ** Headers of the page
-  <link href="/your-path-to-fontawesome/css/fontawesome.css" rel="stylesheet">
-  <link href="/your-path-to-fontawesome/css/brands.css" rel="stylesheet">
-  <link href="/your-path-to-fontawesome/css/solid.css" rel="stylesheet">
-  */
   head: {
-    title: pkg.name,
+    title: 'OpenNEM: An Open Platform for National Electricity Market Data',
     meta: [
       { charset: 'utf-8' },
       {
         name: 'viewport',
         content: 'width=device-width, initial-scale=1, user-scalable=no'
       },
-      { hid: 'description', name: 'description', content: pkg.description }
+      { hid: 'description', name: 'description', content: pkg.description },
+      // Twitter
+      { name: 'twitter:card', content: 'summary_large_image' },
+      {
+        name: 'twitter:title',
+        content:
+          'OpenNEM: An Open Platform for National Electricity Market Data'
+      },
+      { name: 'twitter:site', content: '@OpenNEM' },
+      { name: 'twitter:description', content: pkg.description },
+      { name: 'twitter:image:src', content: '/images/summary.png' },
+      // Facebook
+      {
+        property: 'og:title',
+        content:
+          'OpenNEM: An Open Platform for National Electricity Market Data'
+      },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:url', content: 'https://opennem.org.au' },
+      { property: 'og:description', content: pkg.description },
+      { property: 'og:image', content: '/images/summary.png' },
+      { property: 'og:image:width', content: '2048' },
+      { property: 'og:image:height', content: '1010' }
     ],
     link: [
       {
@@ -41,9 +57,80 @@ module.exports = {
         rel: 'stylesheet',
         href: '/css/light.min.css'
       },
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      {
+        rel: 'icon',
+        type: 'image/png',
+        href: '/icons/favicon-196x196.png',
+        sizes: '196x196'
+      },
+      {
+        rel: 'icon',
+        type: 'image/png',
+        href: '/icons/favicon-96x96.png',
+        sizes: '96x96'
+      },
+      {
+        rel: 'icon',
+        type: 'image/png',
+        href: '/icons/favicon-32x32.png',
+        sizes: '32x32'
+      },
+      {
+        rel: 'icon',
+        type: 'image/png',
+        href: '/icons/favicon-16x16.png',
+        sizes: '16x16'
+      },
+      {
+        rel: 'icon',
+        type: 'image/png',
+        href: '/icons/favicon-128x128.png',
+        sizes: '128x128'
+      },
+
+      {
+        rel: 'apple-touch-icon-precomposed',
+        href: '/icons/apple-touch-icon-57x57.png',
+        sizes: '57x57'
+      },
+      {
+        rel: 'apple-touch-icon-precomposed',
+        href: '/icons/apple-touch-icon-114x114.png',
+        sizes: '114x114'
+      },
+      {
+        rel: 'apple-touch-icon-precomposed',
+        href: '/icons/apple-touch-icon-72x72.png',
+        sizes: '72x72'
+      },
+      {
+        rel: 'apple-touch-icon-precomposed',
+        href: '/icons/apple-touch-icon-144x144.png',
+        sizes: '144x144'
+      },
+      {
+        rel: 'apple-touch-icon-precomposed',
+        href: '/icons/apple-touch-icon-60x60.png',
+        sizes: '60x60'
+      },
+      {
+        rel: 'apple-touch-icon-precomposed',
+        href: '/icons/apple-touch-icon-120x120.png',
+        sizes: '120x120'
+      },
+      {
+        rel: 'apple-touch-icon-precomposed',
+        href: '/icons/apple-touch-icon-76x76.png',
+        sizes: '76x76'
+      },
+      {
+        rel: 'apple-touch-icon-precomposed',
+        href: '/icons/apple-touch-icon-152x152.png',
+        sizes: '152x152'
+      }
     ],
     script: [
+      { src: '/scripts/ga.js' },
       { src: 'https://cdn.polyfill.io/v2/polyfill.min.js?features=default' }
     ]
   },
