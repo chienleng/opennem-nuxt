@@ -54,6 +54,7 @@
               :x-guides="xGuides"
               :y-min="energyMin"
               :y-max="energyMax"
+              class="vis-chart"
             />
           </div>
 
@@ -77,7 +78,7 @@
               :y-min="0"
               :y-max="emissionsMax"
               :x-guides="xGuides"
-              class="emissions-volume-vis"
+              class="emissions-volume-vis vis-chart"
             />
           </div>
 
@@ -101,7 +102,7 @@
               :curve="'smooth'"
               :show-zoom-out="false"
               :x-guides="xGuides"
-              class="emissions-intensity-vis"
+              class="emissions-intensity-vis vis-chart"
             />
           </div>
 
@@ -131,7 +132,7 @@
               :show-zoom-out="false"
               :x-guides="xGuides"
               :y-guides="[300, 2000, 6000, 10000, 14000]"
-              class="price-pos-vis"
+              class="price-pos-vis vis-chart"
             />
             <line-vis
               :domain-id="priceDomains[0].id"
@@ -151,7 +152,7 @@
               :show-zoom-out="false"
               :x-guides="xGuides"
               :y-guides="[0, 100, 200, 300]"
-              class="price-vis"
+              class="price-vis vis-chart"
             />
             <line-vis
               :domain-id="'price.below0'"
@@ -171,7 +172,7 @@
               :show-zoom-out="false"
               :x-guides="xGuides"
               :y-guides="[-50, -800]"
-              class="price-neg-vis"
+              class="price-neg-vis vis-chart"
             />
           </div>
 
@@ -198,7 +199,7 @@
               :vis-height="100"
               :show-zoom-out="false"
               :x-guides="xGuides"
-              class="temperature-vis"
+              class="temperature-vis vis-chart"
             />
           </div>
         </div>
@@ -700,6 +701,9 @@ export default {
       user-select: none;
     }
   }
+}
+.vis-chart {
+  margin-right: 10px;
 }
 
 // Chart style adjustments

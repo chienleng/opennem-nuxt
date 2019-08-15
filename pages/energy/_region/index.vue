@@ -114,6 +114,7 @@
             :x-axis-dy="xAxisDy"
             :mobile-screen="tabletBreak"
             :incomplete-intervals="incompleteIntervals"
+            class="vis-chart"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
             @domainOver="handleDomainOver"
@@ -176,7 +177,7 @@
             :zoomed="zoomed"
             :x-guides="xGuides"
             :incomplete-intervals="incompleteIntervals"
-            class="emissions-volume-vis"
+            class="emissions-volume-vis vis-chart"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
           />
@@ -237,7 +238,7 @@
             :show-zoom-out="false"
             :zoomed="zoomed"
             :x-guides="xGuides"
-            class="emissions-intensity-vis"
+            class="emissions-intensity-vis vis-chart"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
           />
@@ -301,7 +302,7 @@
             :show-zoom-out="false"
             :x-guides="xGuides"
             :y-guides="[300, 2000, 6000, 10000, 14000]"
-            class="price-pos-vis"
+            class="price-pos-vis vis-chart"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
           />
@@ -327,7 +328,7 @@
             :show-zoom-out="false"
             :x-guides="xGuides"
             :y-guides="[0, 100, 200, 300]"
-            class="price-vis"
+            class="price-vis vis-chart"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
           />
@@ -354,7 +355,7 @@
             :show-zoom-out="false"
             :x-guides="xGuides"
             :y-guides="[-60, -400]"
-            class="price-neg-vis"
+            class="price-neg-vis vis-chart"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
           />
@@ -432,7 +433,7 @@
             :show-zoom-out="false"
             :zoomed="zoomed"
             :x-guides="xGuides"
-            class="temperature-vis"
+            class="temperature-vis vis-chart"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
           />
@@ -1296,6 +1297,9 @@ export default {
 .loading {
   position: absolute;
   z-index: 999;
+}
+.vis-chart {
+  margin-right: 10px;
 }
 .vis-table-container {
   display: flex;
