@@ -443,6 +443,7 @@
         <summary-table
           v-if="ready"
           id="summary-table"
+          :energy-domains="energyDomains"
           :domains="summaryDomains"
           :price-id="priceDomains.length > 0 ? priceDomains[0].id : null"
           :market-value-domains="mvDomains"

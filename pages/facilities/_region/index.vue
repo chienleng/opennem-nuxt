@@ -19,7 +19,7 @@
         :selected-techs="selectedTechs"
         :sort-by="sortBy"
         :order-by="orderBy"
-        :hide-region-column="!isAllRegion"
+        :hide-region-column="!isNemRegion && !isAllRegion"
         class="facility-list"
         @orderChanged="handleOrderChange"
         @facilitySelect="handleFacilitySelect"
@@ -308,13 +308,12 @@ export default {
     }
   }
   .facility-map {
-    padding: 1rem;
-
+    padding-top: 1rem;
     @include tablet {
       width: 50%;
       position: fixed;
       right: 0;
-      bottom: 3rem;
+      top: 100px;
       padding: 0 1rem 0 0;
     }
   }

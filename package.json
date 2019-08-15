@@ -39,6 +39,7 @@
     "lodash.uniqby": "^4.7.0",
     "moment": "^2.23.0",
     "nuxt": "^2.0.0",
+    "v-tooltip": "^2.0.2",
     "vue-clickaway": "^2.2.2",
     "vue-json-csv": "^1.2.4",
     "vue2-leaflet": "^2.1.1",

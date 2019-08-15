@@ -20,7 +20,9 @@
       @click.exact="handleRowClick(ft)"
       @click.shift.exact="handleRowShiftClicked(ft)">
 
-      <div class="summary-col-label">
+      <div
+        v-tooltip.auto="fuelTechList(ft)"
+        class="summary-col-label">
         <div
           :style="{
             'background-color': ft.hidden ? 'transparent' : ft.colour,
@@ -62,6 +64,10 @@ export default {
   // },
 
   props: {
+    energyDomains: {
+      type: Array,
+      default: () => []
+    },
     originalOrder: {
       type: Array,
       default: () => []
@@ -147,6 +153,22 @@ export default {
   },
 
   methods: {
+    fuelTechList(ft) {
+      const domainIds = _cloneDeep(ft.domainIds)
+      if (domainIds && domainIds.length > 1) {
+        let list = ''
+        domainIds.sort()
+        domainIds.forEach(id => {
+          const find = this.energyDomains.find(eDomain => eDomain.id === id)
+          if (find) {
+            list += `${find.label}<br>`
+          }
+        })
+        return list
+      }
+      return ''
+    },
+
     handleRowClick(ft) {
       if (this.domainToggleable) {
         const fuelTech = ft.fuelTech || ft.id
@@ -176,6 +198,7 @@ export default {
         return {
           category: d.category,
           colour: d.colour,
+          domainIds: d.domainIds,
           fuelTech: d.fuelTech,
           id: d.id,
           label: d.label,

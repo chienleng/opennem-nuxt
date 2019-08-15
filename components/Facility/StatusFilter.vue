@@ -143,7 +143,7 @@ export default {
 .dropdown-label {
   font-family: $family-primary;
   margin-right: 0.5rem;
-  font-size: 12px;
+  font-size: 11px;
 
   strong {
     font-weight: 600;

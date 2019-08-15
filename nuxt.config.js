@@ -183,7 +183,11 @@ module.exports = {
   /*
   ** Plugins to load before mounting the App
   */
-  plugins: ['~plugins/filters.js', { src: '~/plugins/leaflet', ssr: false }],
+  plugins: [
+    '~plugins/filters.js',
+    '~plugins/tooltip.js',
+    { src: '~/plugins/leaflet', ssr: false }
+  ],
 
   /*
   ** Nuxt.js modules

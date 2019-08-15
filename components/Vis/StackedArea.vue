@@ -862,14 +862,19 @@ export default {
       let className = ''
       const that = this
       if (!this.zoomed) {
-        if (this.range === '3D') {
+        if (this.range === '1D') {
+          className = 'interval-5m'
+        } else if (this.range === '3D') {
           tickLength = timeDay.every(0.5)
+          className = 'range-3d'
         } else if (this.range === '7D') {
           tickLength = timeDay.every(1)
         } else if (this.range === '30D') {
           const every = this.mobileScreen ? 1 : 0.5
           tickLength = timeMonday.every(every)
-          className = 'interval-day'
+          if (!this.mobileScreen) {
+            className = 'interval-day'
+          }
         } else if (this.range === '1Y') {
           if (this.interval === 'Day') {
             const every = this.mobileScreen ? 8 : 4

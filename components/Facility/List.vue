@@ -150,6 +150,7 @@
 import _debounce from 'lodash.debounce'
 import _includes from 'lodash.includes'
 import * as FUEL_TECHS from '~/constants/fuelTech.js'
+import REGIONS from '~/constants/regions.js'
 import Totals from './Totals'
 
 const colHeaders = [
@@ -351,8 +352,8 @@ export default {
       return ft || '—'
     },
     getRegionLabel(code) {
-      // return getRegionAbbrByCode(code)
-      return code
+      const find = REGIONS.find(region => region.id === code)
+      return find ? find.abbr : code
     },
     getColour(fuelTech) {
       const ftColour = FUEL_TECHS.DEFAULT_FUEL_TECH_COLOUR[fuelTech]
@@ -500,14 +501,14 @@ export default {
   align-items: center;
   margin-bottom: 5px;
   position: sticky;
-  top: 60px;
+  top: 44px;
   background-color: $beige-lighter;
   padding-bottom: 5px;
   z-index: 11;
   border-bottom: 1px solid #333;
 
   @include tablet {
-    top: 50px;
+    top: 40px;
     margin-left: -7px;
     margin-right: -7px;
     padding-left: 7px;

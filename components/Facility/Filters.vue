@@ -113,7 +113,9 @@
                 </div>
               </div>
 
-              <div class="buttons">
+              <div
+                class="buttons"
+                style="border-top: 1px solid #eee;">
                 <a
                   class="button is-rounded is-small is-inverted"
                   @click="clearSelectedTechs">Clear</a>
@@ -435,12 +437,12 @@ export default {
 
 .facilities-options {
   width: 100%;
-  padding: 1rem 1rem 1rem;
+  padding: 3px 0;
 }
 .dropdown-label {
   font-family: $family-primary;
   margin-right: 0.5rem;
-  font-size: 12px;
+  font-size: 11px;
   strong {
     font-weight: 600;
   }
@@ -483,10 +485,6 @@ export default {
   margin: 5px 0 5px 10px;
   align-items: center;
 
-  @include tablet {
-    margin: 0;
-  }
-
   .filter-station {
     position: relative;
     margin: 0;
@@ -525,10 +523,10 @@ export default {
     width: 28px;
     height: 28px;
     color: $opennem-link-color;
+    min-width: 0;
   }
 
   .buttons {
-    border-top: 1px solid #eee;
     padding: 0.4rem 0.5rem 0.1rem;
     margin-top: 0.3rem;
     display: flex;
@@ -537,9 +535,9 @@ export default {
 
     .button {
       font-size: 10px;
-      margin-left: 0;
-      margin-left: 0.7rem;
       border: 1px solid #eee;
+      padding-left: 1rem;
+      padding-right: 1rem;
     }
   }
 }
@@ -587,6 +585,6 @@ export default {
 .facility-view-toggle {
   position: absolute;
   right: 1rem;
-  top: 10px;
+  top: 0px;
 }
 </style>

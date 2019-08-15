@@ -39,6 +39,8 @@ path.line-path {
   stroke: none;
 }
 .x-axis .tick:last-child {
+  .interval-5m,
+  .range-3d,
   .interval-day,
   .interval-year {
     opacity: 0;

@@ -25,13 +25,13 @@
       </no-ssr>
     </div> -->
 
-    <!-- <totals
+    <totals
       v-if="widthBreak"
       :position="'fixed'"
       :div-width="divWidth"
       :total-facilities="totalFacilities"
       :total-cap="totalCap"
-    /> -->
+    />
   </div>
 </template>
 
@@ -46,12 +46,12 @@ import * as FUEL_TECHS from '~/constants/fuelTech.js'
 // import * as L from 'vue2-leaflet'
 
 // import TileSelector from './MapTileSelector';
-// import Totals from './Totals';
+import Totals from './Totals'
 
 export default {
   components: {
     // TileSelector,
-    // Totals
+    Totals
   },
   props: {
     data: {

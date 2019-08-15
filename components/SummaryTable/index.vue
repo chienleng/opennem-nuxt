@@ -81,6 +81,7 @@
       :summary="summarySources"
       :summary-total="summarySourcesTotal"
       :domain-toggleable="domainToggleable"
+      :energy-domains="energyDomains"
       @update="handleSourcesOrderUpdate"
       @fuelTechsHidden="handleSourceFuelTechsHidden"
     />
@@ -170,6 +171,10 @@ export default {
   },
 
   props: {
+    energyDomains: {
+      type: Array,
+      default: () => []
+    },
     domains: {
       type: Array,
       default: () => []

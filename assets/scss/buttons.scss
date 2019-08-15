@@ -16,8 +16,12 @@ $button-hover-background: hsla(0,0%,100%,.9);
   color: $opennem-link-color;
   min-width: 62px;
 
+  &.is-primary.is-inverted {
+    background-color: $button-background;
+  }
+
   &.is-small {
-    padding-top: 4px;
+    font-size: 0.76rem;
   }
 
   &:hover {
