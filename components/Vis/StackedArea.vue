@@ -204,9 +204,17 @@ export default {
       type: Array,
       default: () => []
     },
+    xAxisDy: {
+      type: Number,
+      default: () => 12
+    },
     incompleteIntervals: {
       type: Array,
       default: () => []
+    },
+    mobileScreen: {
+      type: Boolean,
+      default: () => false
     }
   },
 
@@ -851,15 +859,35 @@ export default {
 
     customXAxis(g) {
       let tickLength = null
-      if (!this.zoomed && this.range === 'ALL') {
-        if (
-          this.interval === 'Month' ||
-          this.interval === 'Season' ||
-          this.interval === 'Quarter' ||
-          this.interval === 'Fin Year' ||
-          this.interval === 'Year'
-        ) {
-          tickLength = timeYear.every(1)
+      let className = ''
+      const that = this
+      if (!this.zoomed) {
+        if (this.range === '3D') {
+          tickLength = timeDay.every(0.5)
+        } else if (this.range === '7D') {
+          tickLength = timeDay.every(1)
+        } else if (this.range === '30D') {
+          const every = this.mobileScreen ? 1 : 0.5
+          tickLength = timeMonday.every(every)
+          className = 'interval-day'
+        } else if (this.range === '1Y') {
+          if (this.interval === 'Day') {
+            const every = this.mobileScreen ? 8 : 4
+            tickLength = timeMonday.every(every)
+          } else if (this.interval === 'Week') {
+            const every = this.mobileScreen ? 8 : 4
+            tickLength = timeMonday.every(every)
+          } else if (this.interval === 'Month') {
+            const every = this.mobileScreen ? 8 : 4
+            tickLength = timeMonday.every(every)
+          }
+        } else if (this.range === 'ALL') {
+          const every = this.mobileScreen ? 2 : 1
+          tickLength = timeYear.every(every)
+
+          if (this.interval === 'Year') {
+            className = 'interval-year'
+          }
         }
       }
       this.xAxis.ticks(tickLength)
@@ -871,14 +899,15 @@ export default {
         if (secondaryText !== '') {
           el.append('tspan')
             .text(secondaryText)
-            .attr('x', 2)
-            .attr('dy', 12)
+            .attr('x', 1)
+            .attr('dy', that.xAxisDy)
         }
       }
 
       g.call(this.xAxis)
       g.selectAll('.tick text').each(insertSecondaryAxisTick)
       g.selectAll('.tick text')
+        .attr('class', className)
         .attr('x', 2)
         .attr('y', 5)
       g.selectAll('.tick line').attr('y1', 20)

@@ -111,6 +111,8 @@
             :vis-height="stackedAreaHeight"
             :zoomed="zoomed"
             :x-guides="xGuides"
+            :x-axis-dy="xAxisDy"
+            :mobile-screen="tabletBreak"
             :incomplete-intervals="incompleteIntervals"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
@@ -484,6 +486,7 @@
 
           <donut-vis
             v-show="chartSummaryPie"
+            :unit="chartUnit"
             :domains="donutDomains"
             :dataset="filteredDataset"
             :dynamic-extent="dateFilter"
@@ -614,6 +617,9 @@ export default {
   },
 
   computed: {
+    chartUnit() {
+      return this.$store.getters.chartUnit
+    },
     featureEmissions() {
       return this.$store.getters.featureEmissions
     },
@@ -644,11 +650,17 @@ export default {
     responsiveBreakWidth() {
       return this.$store.getters.responsiveBreakWidth
     },
+    tabletBreak() {
+      return this.windowWidth < 769
+    },
     widthBreak() {
       return this.windowWidth < 1024
     },
     barWidth() {
       return this.widthBreak ? 250 : 130
+    },
+    xAxisDy() {
+      return this.tabletBreak ? 8 : 12
     },
     regionId() {
       return this.$route.params.region

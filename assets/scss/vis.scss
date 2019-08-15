@@ -38,10 +38,20 @@ path.line-path {
 .domain {
   stroke: none;
 }
+.x-axis .tick:last-child {
+  .interval-day,
+  .interval-year {
+    opacity: 0;
+  }
+}
 .x-axis .tick text {
   color: #666;
   text-anchor: start;
-  font-size: 9px;
+  font-size: 7px;
+
+  @include tablet {
+    font-size: 9px;
+  }
 }
 .x-axis .tick line {
   stroke-dasharray: 4.8;

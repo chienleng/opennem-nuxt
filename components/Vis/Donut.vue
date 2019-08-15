@@ -19,7 +19,7 @@
       <g
         v-else
         class="total">
-        <text dy="10">{{ total | formatValue }}</text>
+        <text dy="10">{{ total | formatValue }}{{ unit }}</text>
       </g>
     </svg>
   </div>
@@ -33,6 +33,10 @@ import { select as d3Select, selectAll as d3SelectAll } from 'd3-selection'
 
 export default {
   props: {
+    unit: {
+      type: String,
+      default: () => ''
+    },
     dataset: {
       type: Array,
       default: () => []
@@ -200,8 +204,8 @@ export default {
   text-align: center;
 }
 .total text {
-  fill: #333;
-  font-size: 24px;
+  fill: #444;
+  font-size: 17px;
 
   &.total-label {
     fill: #666;
