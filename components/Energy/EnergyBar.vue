@@ -26,7 +26,6 @@
 </template>
 
 <script>
-import { select as d3Select, selectAll as d3SelectAll } from 'd3-selection'
 import { scaleLinear as d3ScaleLinear } from 'd3-scale'
 import { max as d3Max } from 'd3-array'
 import _debounce from 'lodash.debounce'
