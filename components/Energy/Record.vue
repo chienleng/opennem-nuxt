@@ -1,12 +1,18 @@
 <template>
-  <tr :class="{ 'divider': divider }">
+  <tr
+    :class="{
+      'divider': divider,
+      'has-date-focus': recordSelectDate
+  }">
     <th>
       {{ rowLabel }}
       <small>{{ rowUnit }}</small>
     </th>
 
     <td
+      :class="{ 'on': minOn }"
       class="has-text-right"
+      @click="handleMinClick(minDate)"
       @mouseenter="handleMouseEnter(minDate)"
       @mouseleave="handleMouseLeave">
       <div v-if="isCurrency">{{ minValue | formatCurrency }}</div>
@@ -18,7 +24,9 @@
     </td>
 
     <td
+      :class="{ 'on': maxOn }"
       class="has-text-right"
+      @click="handleMaxClick(maxDate)"
       @mouseenter="handleMouseEnter(maxDate)"
       @mouseleave="handleMouseLeave">
       <div v-if="isCurrency">{{ maxValue | formatCurrency }}</div>
@@ -73,6 +81,20 @@ export default {
     divider: {
       type: Boolean,
       default: () => false
+    },
+    recordSelectDate: {
+      type: Number,
+      default: () => null
+    }
+  },
+
+  computed: {
+    minOn() {
+      return this.minDate === this.recordSelectDate
+    },
+
+    maxOn() {
+      return this.maxDate === this.recordSelectDate
     }
   },
 
@@ -83,6 +105,22 @@ export default {
 
     handleMouseLeave() {
       this.$emit('recordMouseLeave')
+    },
+
+    handleMinClick(date) {
+      if (this.minOn) {
+        this.$emit('recordDeselect')
+      } else {
+        this.$emit('recordSelect', date)
+      }
+    },
+
+    handleMaxClick(date) {
+      if (this.maxOn) {
+        this.$emit('recordDeselect')
+      } else {
+        this.$emit('recordSelect', date)
+      }
     }
   }
 }
@@ -108,6 +146,19 @@ td {
   cursor: pointer;
   &:hover {
     background-color: rgba(255, 255, 255, 0.7);
+  }
+
+  &.on {
+    background-color: rgba(199, 69, 35, 0.1);
+  }
+}
+
+tr.has-date-focus {
+  td:not(.on) {
+    cursor: default;
+    &:hover {
+      background-color: inherit;
+    }
   }
 }
 

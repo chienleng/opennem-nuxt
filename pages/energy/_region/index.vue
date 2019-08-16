@@ -114,10 +114,12 @@
             :x-axis-dy="xAxisDy"
             :mobile-screen="tabletBreak"
             :incomplete-intervals="incompleteIntervals"
+            :date-focus="dateFocus"
             class="vis-chart"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
             @domainOver="handleDomainOver"
+            @svgClick="handleSvgClick"
           />
         </div>
 
@@ -177,9 +179,11 @@
             :zoomed="zoomed"
             :x-guides="xGuides"
             :incomplete-intervals="incompleteIntervals"
+            :date-focus="dateFocus"
             class="emissions-volume-vis vis-chart"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
+            @svgClick="handleSvgClick"
           />
         </div>
 
@@ -238,9 +242,11 @@
             :show-zoom-out="false"
             :zoomed="zoomed"
             :x-guides="xGuides"
+            :date-focus="dateFocus"
             class="emissions-intensity-vis vis-chart"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
+            @svgClick="handleSvgClick"
           />
         </div>
 
@@ -302,9 +308,11 @@
             :show-zoom-out="false"
             :x-guides="xGuides"
             :y-guides="[300, 2000, 6000, 10000, 14000]"
+            :date-focus="dateFocus"
             class="price-pos-vis vis-chart"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
+            @svgClick="handleSvgClick"
           />
           <line-vis
             v-if="chartPrice"
@@ -328,9 +336,11 @@
             :show-zoom-out="false"
             :x-guides="xGuides"
             :y-guides="[0, 100, 200, 300]"
+            :date-focus="dateFocus"
             class="price-vis vis-chart"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
+            @svgClick="handleSvgClick"
           />
           <line-vis
             v-if="chartPrice"
@@ -355,9 +365,11 @@
             :show-zoom-out="false"
             :x-guides="xGuides"
             :y-guides="[-60, -400]"
+            :date-focus="dateFocus"
             class="price-neg-vis vis-chart"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
+            @svgClick="handleSvgClick"
           />
         </div>
 
@@ -365,9 +377,10 @@
           v-if="ready && hasTemperatureData"
           :class="{
             'is-hovered': hoverOn,
-            'has-border-bottom': !chartTemperature
+            'has-border-bottom': !chartTemperature,
+            'adjustment': chartPrice
           }"
-          class="chart">
+          class="temperature-chart chart">
           <div
             class="chart-title"
             @click="toggleChart('chartTemperature')">
@@ -433,9 +446,11 @@
             :show-zoom-out="false"
             :zoomed="zoomed"
             :x-guides="xGuides"
+            :date-focus="dateFocus"
             class="temperature-vis vis-chart"
             @eventChange="handleEventChange"
             @dateOver="handleDateOver"
+            @svgClick="handleSvgClick"
           />
         </div>
       </div>
@@ -504,6 +519,9 @@
           :interval="interval"
           :price-id="priceDomains.length > 0 ? priceDomains[0].id : null"
           :temperature-id="temperatureMeanId"
+          :date-focus="dateFocus"
+          @recordSelect="handleRecordSelect"
+          @recordDeselect="handleRecordDeselect"
           @recordMouseEnter="handleRecordMouseEnter"
           @recordMouseLeave="handleRecordMouseLeave" />
       </div>
@@ -614,7 +632,9 @@ export default {
       windowWidth: 0,
       energyMin: 0,
       energyMax: 1000,
-      emissionsIntensityMin: 0
+      emissionsIntensityMin: 0,
+      dateFocus: false,
+      isTouchDevice: false
     }
   },
 
@@ -970,6 +990,28 @@ export default {
   },
 
   mounted() {
+    function is_touch_device() {
+      var prefixes = ' -webkit- -moz- -o- -ms- '.split(' ')
+      var mq = function(query) {
+        return window.matchMedia(query).matches
+      }
+
+      if (
+        'ontouchstart' in window ||
+        (window.DocumentTouch && document instanceof DocumentTouch)
+      ) {
+        return true
+      }
+
+      // include the 'heartz' as a way to have a non matching MQ to help terminate the join
+      // https://git.io/vznFH
+      var query = ['(', prefixes.join('touch-enabled),('), 'heartz', ')'].join(
+        ''
+      )
+      return mq(query)
+    }
+
+    this.isTouchDevice = is_touch_device()
     this.windowWidth = window.innerWidth
     this.visHeight = this.widthBreak ? 578 : 350
     this.$nextTick(() => {
@@ -1171,6 +1213,7 @@ export default {
     },
 
     handleRangeChange(range) {
+      this.dateFocus = false
       this.ready = false
       let interval = ''
       switch (range) {
@@ -1200,6 +1243,7 @@ export default {
     },
 
     handleIntervalChange(interval) {
+      this.dateFocus = false
       this.$store.dispatch('interval', interval)
       EnergyDataTransform.mergeResponses(
         this.responses,
@@ -1293,6 +1337,20 @@ export default {
     handleRecordMouseLeave() {
       this.hoverOn = false
       this.hoverDate = null
+    },
+
+    handleRecordSelect() {
+      this.dateFocus = !this.dateFocus
+    },
+
+    handleRecordDeselect() {
+      this.dateFocus = false
+    },
+
+    handleSvgClick() {
+      if (!this.isTouchDevice) {
+        this.dateFocus = !this.dateFocus
+      }
     }
   }
 }
@@ -1317,7 +1375,7 @@ export default {
 
   .vis-container {
     width: 100%;
-    padding: 1rem 0;
+    padding: 1rem 0 0;
     @include desktop {
       width: 70%;
       padding: 0;
@@ -1325,7 +1383,7 @@ export default {
   }
   .table-container {
     width: 100%;
-    padding: 1rem;
+    padding: 0 1rem 1rem;
 
     @include desktop {
       width: 30%;
@@ -1340,10 +1398,11 @@ export default {
       cursor: pointer;
       user-select: none;
 
-      @include desktop {
+      @include tablet {
         display: flex;
         justify-content: space-between;
         padding: 0.2rem 1rem 0.2rem 1rem;
+        height: 25px;
       }
 
       &:hover {
@@ -1351,7 +1410,7 @@ export default {
       }
 
       .chart-label {
-        padding: 0 0.5rem;
+        padding: 2px 0.5rem;
       }
 
       .hover-date-value {
@@ -1379,7 +1438,7 @@ export default {
         padding-top: 4px;
         width: 30%;
 
-        @include desktop {
+        @include tablet {
           width: auto;
           border-radius: 20px 0 0 20px;
         }
@@ -1495,6 +1554,9 @@ export default {
 ::v-deep .price-neg-vis .line-group path,
 ::v-deep .price-pos-vis .line-group path {
   stroke-dasharray: 1;
+}
+.temperature-chart.adjustment {
+  margin-top: -14px;
 }
 
 .bar-donut-wrapper {

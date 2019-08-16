@@ -20,8 +20,11 @@
           :max-value="maxDemand"
           :range="range"
           :interval="interval"
-          @recordMouseEnter="handleMouseEnter"
-          @recordMouseLeave="handleMouseLeave"/>
+          :record-select-date="recordSelectDate"
+          @recordSelect="handleRecordSelect"
+          @recordDeselect="handleRecordDeselect"
+          @recordMouseEnter="handleRecordEnter"
+          @recordMouseLeave="handleRecordLeave" />
 
         <energy-record
           :row-label="'Renewables'"
@@ -33,8 +36,11 @@
           :range="range"
           :interval="interval"
           :divider="true"
-          @recordMouseEnter="handleMouseEnter"
-          @recordMouseLeave="handleMouseLeave"/>
+          :record-select-date="recordSelectDate"
+          @recordSelect="handleRecordSelect"
+          @recordDeselect="handleRecordDeselect"
+          @recordMouseEnter="handleRecordEnter"
+          @recordMouseLeave="handleRecordLeave" />
         
         <energy-record
           :row-label="'Generation'"
@@ -45,8 +51,11 @@
           :max-value="maxGeneration"
           :range="range"
           :interval="interval"
-          @recordMouseEnter="handleMouseEnter"
-          @recordMouseLeave="handleMouseLeave"/>
+          :record-select-date="recordSelectDate"
+          @recordSelect="handleRecordSelect"
+          @recordDeselect="handleRecordDeselect"
+          @recordMouseEnter="handleRecordEnter"
+          @recordMouseLeave="handleRecordLeave" />
         
         <energy-record
           :row-label="'Renewables'"
@@ -58,8 +67,11 @@
           :range="range"
           :interval="interval"
           :divider="true"
-          @recordMouseEnter="handleMouseEnter"
-          @recordMouseLeave="handleMouseLeave"/>
+          :record-select-date="recordSelectDate"
+          @recordSelect="handleRecordSelect"
+          @recordDeselect="handleRecordDeselect"
+          @recordMouseEnter="handleRecordEnter"
+          @recordMouseLeave="handleRecordLeave" />
 
         <energy-record
           v-if="priceId"
@@ -72,8 +84,11 @@
           :range="range"
           :interval="interval"
           :is-currency="true"
-          @recordMouseEnter="handleMouseEnter"
-          @recordMouseLeave="handleMouseLeave"/>
+          :record-select-date="recordSelectDate"
+          @recordSelect="handleRecordSelect"
+          @recordDeselect="handleRecordDeselect"
+          @recordMouseEnter="handleRecordEnter"
+          @recordMouseLeave="handleRecordLeave" />
 
         <energy-record
           v-if="temperatureId"
@@ -85,8 +100,11 @@
           :max-value="maxTemperature"
           :range="range"
           :interval="interval"
-          @recordMouseEnter="handleMouseEnter"
-          @recordMouseLeave="handleMouseLeave"/>
+          :record-select-date="recordSelectDate"
+          @recordSelect="handleRecordSelect"
+          @recordDeselect="handleRecordDeselect"
+          @recordMouseEnter="handleRecordEnter"
+          @recordMouseLeave="handleRecordLeave" />
 
       </tbody>
     </table>
@@ -124,11 +142,17 @@ export default {
     interval: {
       type: String,
       default: () => ''
+    },
+    dateFocus: {
+      type: Boolean,
+      default: () => false
     }
   },
 
   data() {
     return {
+      recordSelectDate: null,
+
       minDemand: null,
       minDemandDate: null,
       maxDemand: null,
@@ -168,6 +192,11 @@ export default {
   watch: {
     dataset(d) {
       this.updateMinMax(d)
+    },
+    dateFocus(d) {
+      if (!d) {
+        this.recordSelectDate = null
+      }
     }
   },
 
@@ -350,12 +379,26 @@ export default {
       this.maxTemperatureDate = maxTemperatureDate
     },
 
-    handleMouseEnter(date) {
-      this.$emit('recordMouseEnter', date)
+    handleRecordEnter(date) {
+      if (!this.dateFocus) {
+        this.$emit('recordMouseEnter', date)
+      }
     },
 
-    handleMouseLeave() {
-      this.$emit('recordMouseLeave')
+    handleRecordLeave() {
+      if (!this.dateFocus) {
+        this.$emit('recordMouseLeave')
+      }
+    },
+
+    handleRecordSelect(date) {
+      this.recordSelectDate = date
+      this.$emit('recordSelect', date)
+    },
+
+    handleRecordDeselect() {
+      this.recordSelectDate = null
+      this.$emit('recordDeselect')
     }
   }
 }

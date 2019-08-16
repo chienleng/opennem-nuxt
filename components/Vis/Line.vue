@@ -220,6 +220,10 @@ export default {
     xGuides: {
       type: Array,
       default: () => []
+    },
+    dateFocus: {
+      type: Boolean,
+      default: () => false
     }
   },
 
@@ -332,7 +336,9 @@ export default {
       this.zoomRedraw()
     },
     hoverDate(date) {
-      this.updateCursorLineTooltip(new Date(date).getTime())
+      if (!this.dateFocus) {
+        this.updateCursorLineTooltip(new Date(date).getTime())
+      }
     }
   },
 
@@ -469,23 +475,34 @@ export default {
       })
       $svg.on('mouseleave', () => {
         // this.$cursorLineGroup.attr('opacity', 0)
-        EventBus.$emit('vis.mouseleave')
+        if (!this.dateFocus) {
+          EventBus.$emit('vis.mouseleave')
+        }
+      })
+      $svg.on('click', () => {
+        this.$emit('svgClick')
       })
 
       // - find date when on the hoverLayer or brushLayer or when brushing
       this.$hoverLayer.on('touchmove mousemove', function() {
-        self.$emit('eventChange', this)
-        self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
+        if (!self.dateFocus) {
+          self.$emit('eventChange', this)
+          self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
+        }
       })
       this.brushX.on('brush', function() {
-        self.$emit('eventChange', this)
-        self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
+        if (!self.dateFocus) {
+          self.$emit('eventChange', this)
+          self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
+        }
       })
       this.$xAxisBrushGroup
         .selectAll('.brush')
         .on('touchmove mousemove', function() {
-          self.$emit('eventChange', this)
-          self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
+          if (!self.dateFocus) {
+            self.$emit('eventChange', this)
+            self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
+          }
         })
     },
 
@@ -546,8 +563,10 @@ export default {
       // Event handling
       // - find date and domain
       this.$lineGroup.selectAll('path').on('touchmove mousemove', function() {
-        self.$emit('eventChange', this)
-        self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
+        if (!self.dateFocus) {
+          self.$emit('eventChange', this)
+          self.$emit('dateOver', this, self.getXAxisDateByMouse(this))
+        }
       })
     },
 
@@ -782,6 +801,8 @@ export default {
 
       // Turn off the brush selection
       selectAll('.brush').call(this.brushX.move, null)
+
+      if (this.dateFocus) return
 
       // Get the brush selection (start/end) points -> dates
       const s = event.selection
