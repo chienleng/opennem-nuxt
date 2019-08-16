@@ -22,6 +22,7 @@
             v-show="showRegionLink(region.id)"
             :key="region.id" 
             :to="`/${currentView}/${region.id}`"
+            :class="{'has-divider': region.id === 'nem'}"
             class="dropdown-item"
             @click.native="handleClick">
             {{ region.label }}
@@ -78,3 +79,9 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.has-divider {
+  border-bottom: 1px solid #ddd;
+}
+</style>

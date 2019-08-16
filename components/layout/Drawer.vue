@@ -33,6 +33,7 @@
           v-show="showRegionLink(region.id)"
           :key="region.id" 
           :to="`/${currentView}/${region.id}`"
+          :class="{'has-divider': region.id === 'nem'}"
           class="menu-item">
           {{ region.label }}
           <span class="icon">
@@ -173,12 +174,12 @@ export default {
     color: #000;
     border-bottom: 1px solid #dedede;
 
-    &:hover {
-      background: #dedede;
+    &.has-divider {
+      border-bottom-color: #aaa;
     }
 
-    &.all-regions {
-      border-bottom-color: #999;
+    &:hover {
+      background: #dedede;
     }
 
     &.nuxt-link-active {
