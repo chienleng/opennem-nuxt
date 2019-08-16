@@ -13,10 +13,15 @@ export const state = () => ({
   fuelTechGroupName: 'Default',
   fuelTechOrder: cloneDeep(FUEL_TECHS.DEFAULT_FUEL_TECH_ORDER),
   hiddenFuelTechs: [],
+  energyDomains: [],
+  priceDomains: [],
+  temperatureDomains: [],
+  marketValueDomains: [],
   range: '7D',
   interval: '30m',
   dateFilter: [],
   exportData: [],
+  facilityExportData: [],
   responsiveBreakWidth: 769,
   chartEmissionsVolume: true,
   chartEmissionsIntensity: true,
@@ -50,6 +55,18 @@ export const mutations = {
   hiddenFuelTechs(state, data) {
     state.hiddenFuelTechs = data
   },
+  energyDomains(state, data) {
+    state.energyDomains = data
+  },
+  priceDomains(state, data) {
+    state.priceDomains = data
+  },
+  temperatureDomains(state, data) {
+    state.temperatureDomains = data
+  },
+  marketValueDomains(state, data) {
+    state.marketValueDomains = data
+  },
   range(state, data) {
     state.range = data
   },
@@ -61,6 +78,9 @@ export const mutations = {
   },
   exportData(state, data) {
     state.exportData = data
+  },
+  facilityExportData(state, data) {
+    state.facilityExportData = data
   },
   responsiveBreakWidth(state, data) {
     state.responsiveBreakWidth = data
@@ -120,6 +140,10 @@ export const getters = {
   },
   fuelTechOrder: state => state.fuelTechOrder,
   hiddenFuelTechs: state => state.hiddenFuelTechs,
+  energyDomains: state => state.energyDomains,
+  priceDomains: state => state.priceDomains,
+  temperatureDomains: state => state.temperatureDomains,
+  marketValueDomains: state => state.marketValueDomains,
   range: state => state.range,
   energyCurveType: state => {
     switch (state.range) {
@@ -167,6 +191,7 @@ export const getters = {
   interval: state => state.interval,
   dateFilter: state => state.dateFilter,
   exportData: state => state.exportData,
+  facilityExportData: state => state.facilityExportData,
   responsiveBreakWidth: state => state.responsiveBreakWidth,
   chartEmissionsVolume: state => state.chartEmissionsVolume,
   chartEmissionsIntensity: state => state.chartEmissionsIntensity,
@@ -197,6 +222,18 @@ export const actions = {
   hiddenFuelTechs({ commit }, data) {
     commit('hiddenFuelTechs', data)
   },
+  energyDomains({ commit }, data) {
+    commit('energyDomains', data)
+  },
+  priceDomains({ commit }, data) {
+    commit('priceDomains', data)
+  },
+  temperatureDomains({ commit }, data) {
+    commit('temperatureDomains', data)
+  },
+  marketValueDomains({ commit }, data) {
+    commit('marketValueDomains', data)
+  },
   range({ commit }, data) {
     commit('range', data)
   },
@@ -208,6 +245,9 @@ export const actions = {
   },
   exportData({ commit }, data) {
     commit('exportData', data)
+  },
+  facilityExportData({ commit }, data) {
+    commit('facilityExportData', data)
   },
   responsiveBreakWidth({ commit }, data) {
     commit('responsiveBreakWidth', data)

@@ -256,9 +256,6 @@ export default {
       if (domains) {
         this.updateDatasetGroups(this.dataset, domains)
       }
-    },
-    filteredDataset(updated) {
-      this.$store.dispatch('exportData', updated)
     }
   },
 

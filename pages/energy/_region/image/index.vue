@@ -460,9 +460,6 @@ export default {
         this.updateDatasetGroups(this.dataset, domains)
       }
     },
-    filteredDataset(updated) {
-      this.$store.dispatch('exportData', updated)
-    },
     hiddenFuelTechs() {
       this.updateEnergyMinMax()
     }

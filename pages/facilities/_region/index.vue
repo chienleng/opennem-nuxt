@@ -54,6 +54,7 @@ import _debounce from 'lodash.debounce'
 import _includes from 'lodash.includes'
 import _orderBy from 'lodash.orderby'
 import * as FUEL_TECHS from '~/constants/fuelTech.js'
+import REGIONS from '~/constants/regions.js'
 import Http from '~/services/Http.js'
 import FacilityDataTransformService from '~/services/dataTransform/Facility.js'
 import FacilityFilters from '~/components/Facility/Filters.vue'
@@ -221,18 +222,18 @@ export default {
         that.totalFacilities = facilities.length
 
         const exportData = facilities.map((d) => { // eslint-disable-line
+          const region = REGIONS.find(r => r.id === d.regionId)
           return {
             'Facility Name': d.displayName,
             Status: d.status,
-            // Region: getRegionLabelByCode(d.regionId),
-            Region: d.regionId,
+            Region: region.label,
             Technology: d.fuelTechs.map(ft => FUEL_TECHS.FUEL_TECH_LABEL[ft]),
             'Generator Capacity (MW)': d.generatorCap,
             Latitude: d.location.latitude,
             Longitude: d.location.longitude
           }
         })
-        // that.$store.dispatch('facilityExportData', exportData)
+        that.$store.dispatch('facilityExportData', exportData)
       })
     },
 

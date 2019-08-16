@@ -272,9 +272,6 @@ export default {
         this.updateDatasetGroups(this.dataset, domains)
       }
     },
-    filteredDataset(updated) {
-      this.$store.dispatch('exportData', updated)
-    },
     fuelTechGroup() {
       this.parseAllResponses(this.allResponses)
     }

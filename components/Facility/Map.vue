@@ -417,7 +417,6 @@ export default {
 
       const bounds = this.facilitiesFeature.getBounds()
       if (!_isEmpty(bounds)) {
-        console.log('fit bounds')
         this.map.fitBounds(this.facilitiesFeature.getBounds())
       }
     }

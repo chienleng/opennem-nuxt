@@ -1089,6 +1089,7 @@ export default {
         this.fuelTechEnergyOrder,
         this.type
       )
+      this.$store.dispatch('energyDomains', this.energyDomains)
     },
 
     updateMarketValueDomains(res) {
@@ -1097,6 +1098,7 @@ export default {
         this.fuelTechEnergyOrder,
         'market_value'
       )
+      this.$store.dispatch('marketValueDomains', this.marketValueDomains)
     },
 
     updateEmissionDomains(res) {
@@ -1119,10 +1121,13 @@ export default {
       this.temperatureMeanId = temperatureDomainsAndIds.meanId
       this.temperatureMinId = temperatureDomainsAndIds.minId
       this.temperatureMaxId = temperatureDomainsAndIds.maxId
+
+      this.$store.dispatch('temperatureDomains', this.temperatureDomains)
     },
 
     updatePriceDomains(res) {
       this.priceDomains = Domain.getPriceDomains(res)
+      this.$store.dispatch('priceDomains', this.priceDomains)
     },
 
     updatedFilteredDataset(dataset) {

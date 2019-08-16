@@ -28,12 +28,19 @@
       v-if="!widthBreak"
       class="share-buttons buttons has-addons">
       <button
+        v-if="!isFacilitiesView"
         class="button is-rounded"
         @click="handleExportImage">
         <i class="fal fa-fw fa-chart-bar" />
         <span class="label-image">Image</span>
       </button>
-      <button class="button is-rounded">
+      <button
+        :class="{
+          'is-loading': generating,
+          'is-primary': generating
+        }"
+        class="button is-rounded"
+        @click="handleExportDataClick">
         <download-csv
           :data="exportData"
           :name="`${filename}.csv`"
@@ -48,6 +55,7 @@
 
 <script>
 import { timeFormat as d3TimeFormat } from 'd3-time-format'
+import { format as d3Format } from 'd3-format'
 import _debounce from 'lodash.debounce'
 import DownloadCsv from 'vue-json-csv'
 import REGIONS from '~/constants/regions.js'
@@ -68,6 +76,7 @@ export default {
   data() {
     return {
       ready: false,
+      generating: false,
       openDrawer: false,
       windowWidth: 0,
       regions: REGIONS
@@ -84,14 +93,77 @@ export default {
     interval() {
       return this.$store.getters.interval
     },
+    hasMarketValue() {
+      return this.range !== '1D' && this.range !== '3D' && this.range !== '7D'
+    },
     dateFilter() {
       return this.$store.getters.dateFilter
     },
     widthBreak() {
       return this.windowWidth < this.responsiveBreakWidth
     },
-    exportData() {
+    isFacilitiesView() {
+      return this.$store.getters.currentView === 'facilities'
+    },
+    energyDomains() {
+      return this.$store.getters.energyDomains
+    },
+    priceDomains() {
+      return this.$store.getters.priceDomains
+    },
+    temperatureDomains() {
+      return this.$store.getters.temperatureDomains
+    },
+    marketValueDomains() {
+      return this.$store.getters.marketValueDomains
+    },
+    energyExportData() {
       return this.$store.getters.exportData
+    },
+    chartUnit() {
+      return this.$store.getters.chartUnit
+    },
+    exportData() {
+      const timeFormat = d3TimeFormat('%Y-%m-%d %H:%M')
+      const format = d3Format('.2f')
+      if (this.isFacilitiesView) {
+        return this.$store.getters.facilityExportData
+      }
+      return this.energyExportData.map(d => {
+        let obj = {
+          date: `${timeFormat(d.date)}`
+        }
+        this.energyDomains.forEach(domain => {
+          obj[`${domain.label} - ${this.chartUnit}`] = format(d[domain.id])
+        })
+        this.temperatureDomains.forEach(domain => {
+          let label = 'Temperature'
+          switch (domain.type) {
+            case 'temperature_mean':
+              label += ' Mean'
+              break
+            case 'temperature_min':
+              label += ' Min'
+              break
+            case 'temperature_max':
+              label += ' Max'
+              break
+            default:
+          }
+          obj[`${label} - C`] = format(d[domain.id])
+        })
+        this.priceDomains.forEach(domain => {
+          const label =
+            domain.type === 'price' ? 'Price' : 'Volume Weighted Price'
+          obj[`${label} - AUD/MWh`] = format(d[domain.id])
+        })
+        if (this.hasMarketValue) {
+          this.marketValueDomains.forEach(domain => {
+            obj[`${domain.label} Market Value - AUD`] = format(d[domain.id])
+          })
+        }
+        return obj
+      })
     },
     regionId() {
       return this.$route.params.region
@@ -101,10 +173,13 @@ export default {
       return region ? region.label : ''
     },
     filename() {
+      if (this.isFacilitiesView) {
+        return 'facilities'
+      }
       let date = ''
       let region = this.regionLabel
       if (this.exportData.length > 0) {
-        date = d3TimeFormat('%Y%m%d')(this.exportData[0].date)
+        date = d3TimeFormat('%Y%m%d')(this.energyExportData[0].date)
       }
       if (this.regionId === 'nem') {
         region = 'OpenNEM'
@@ -141,6 +216,12 @@ export default {
         path: `/energy/${this.regionId}/image`,
         query
       })
+    },
+    handleExportDataClick() {
+      this.generating = true
+      setTimeout(() => {
+        this.generating = false
+      }, 1000)
     }
   }
 }
