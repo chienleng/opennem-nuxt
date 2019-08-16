@@ -1221,8 +1221,11 @@ export default {
           this.interval,
           dateRange[0]
         )
-        // const endTime = DateDisplay.snapToClosestInterval(this.interval, dateRange[1])
-        const endTime = dateRange[1]
+        const endTime = DateDisplay.snapToClosestInterval(
+          this.interval,
+          dateRange[1]
+        )
+        // const endTime = dateRange[1]
         this.filteredDataset = EnergyDataTransform.filterDataByStartEndDates(
           this.dataset,
           startTime,

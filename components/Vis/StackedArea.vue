@@ -564,7 +564,9 @@ export default {
       const find = this.dataset.find((d, i) => {
         const match = d.date === time
         if (match) {
-          nextDatePeriod = this.dataset[i + 1].date
+          if (this.dataset[i + 1]) {
+            nextDatePeriod = this.dataset[i + 1].date
+          }
         }
         return match
       })
