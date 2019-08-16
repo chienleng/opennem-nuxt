@@ -566,9 +566,23 @@ export default {
     },
 
     updateCursorLineTooltip(date) {
+      const valueFormat = d3Format(',.1f')
+      const time = new Date(date).getTime()
+      let nextDatePeriod = null
+      const find = this.dataset.find((d, i) => {
+        const match = d.date === time
+        if (match) {
+          nextDatePeriod = this.dataset[i + 1].date
+        }
+        return match
+      })
+      let value = 0
+      let minValue = null
+      let maxValue = null
+
       const xDate = this.x(date)
       let yValue = null
-      const nextPeriod = this.x(date + millisecondsByInterval[this.interval])
+      const nextPeriod = this.x(nextDatePeriod)
       const bandwidth =
         this.interval !== '5m' && this.interval !== '30m'
           ? nextPeriod - xDate
@@ -582,12 +596,6 @@ export default {
         false,
         true
       )
-      const valueFormat = d3Format(',.1f')
-      const time = new Date(date).getTime()
-      const find = this.dataset.find(d => d.date === time)
-      let value = 0
-      let minValue = null
-      let maxValue = null
 
       if (find) {
         const dId = this.valueDomainId || this.domainId

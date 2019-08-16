@@ -558,8 +558,22 @@ export default {
     },
 
     updateCursorLineTooltip(date) {
+      const valueFormat = d3Format(',.1f')
+      const time = new Date(date).getTime()
+      let nextDatePeriod = null
+      const find = this.dataset.find((d, i) => {
+        const match = d.date === time
+        if (match) {
+          nextDatePeriod = this.dataset[i + 1].date
+        }
+        return match
+      })
+      let total = null
+      let label = ''
+      let value = 0
+
       const xDate = this.x(date)
-      const nextPeriod = this.x(date + millisecondsByInterval[this.interval])
+      const nextPeriod = this.x(nextDatePeriod)
       const bandwidth =
         this.interval !== '5m' && this.interval !== '30m'
           ? nextPeriod - xDate
@@ -573,12 +587,6 @@ export default {
         false,
         true
       )
-      const valueFormat = d3Format(',.1f')
-      const time = new Date(date).getTime()
-      const find = this.dataset.find(d => d.date === time)
-      let total = null
-      let label = ''
-      let value = 0
 
       // if (find && this.currentDomainOver && find[this.currentDomainOver]) {
       //   label = this.currentDomainOver
@@ -883,8 +891,8 @@ export default {
             const every = this.mobileScreen ? 8 : 4
             tickLength = timeMonday.every(every)
           } else if (this.interval === 'Month') {
-            const every = this.mobileScreen ? 8 : 4
-            tickLength = timeMonday.every(every)
+            const every = this.mobileScreen ? 2 : 1
+            tickLength = timeMonth.every(every)
           }
         } else if (this.range === 'ALL') {
           const every = this.mobileScreen ? 2 : 1
@@ -892,6 +900,14 @@ export default {
 
           if (this.interval === 'Year') {
             className = 'interval-year'
+          }
+        }
+      } else {
+        if (this.range === '1Y') {
+          if (this.interval === 'Week') {
+            tickLength = 7
+          } else if (this.interval === 'Month') {
+            tickLength = timeMonth.every(1)
           }
         }
       }
