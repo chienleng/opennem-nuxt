@@ -1022,9 +1022,9 @@ export default {
           this.visHeight = this.widthBreak ? 578 : 350
         }, 200)
       )
+      this.fetchData(this.regionId, this.range)
+      this.mounted = true
     })
-    this.fetchData(this.regionId, this.range)
-    this.mounted = true
   },
 
   beforeDestroy() {
