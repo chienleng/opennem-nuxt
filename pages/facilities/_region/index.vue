@@ -66,6 +66,11 @@ const ASCENDING = 'asc'
 const DESCENDING = 'desc'
 
 export default {
+  asyncData({ params }) {
+    console.log('yep')
+    return { regionId: params.region }
+  },
+
   layout: 'main',
 
   components: {
@@ -89,19 +94,20 @@ export default {
       orderBy: ASCENDING,
       totalFacilities: 0,
       shouldZoomWhenSelected: false,
-      windowWidth: 0
+      windowWidth: 0,
+      regionId: 'nem'
     }
   },
 
   computed: {
-    regionId() {
-      return this.$route.params.region
-    },
+    // regionId() {
+    //   return this.$route.params.region
+    // },
     isNemRegion() {
-      return this.$route.params.region === 'nem'
+      return this.regionId === 'nem'
     },
     isAllRegion() {
-      return this.$route.params.region === 'all'
+      return this.regionId === 'all'
     },
     widthBreak() {
       return this.windowWidth < 769
