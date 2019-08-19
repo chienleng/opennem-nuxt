@@ -990,6 +990,7 @@ export default {
   },
 
   mounted() {
+    console.log('mounted')
     function is_touch_device() {
       var prefixes = ' -webkit- -moz- -o- -ms- '.split(' ')
       var mq = function(query) {
@@ -1027,6 +1028,10 @@ export default {
       this.fetchData(this.regionId, this.range)
       this.mounted = true
     })
+
+    setTimeout(() => {
+      console.log('timeout')
+    }, 1000)
   },
 
   beforeDestroy() {
