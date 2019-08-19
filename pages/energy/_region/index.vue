@@ -557,6 +557,10 @@ import VisTooltip from '~/components/ui/Tooltip'
 import EnergyRecords from '~/components/Energy/Records.vue'
 
 export default {
+  async asyncData({ redirect, params }) {
+    const regionId = params.region
+    redirect(`/energy/${regionId}`)
+  },
   layout: 'main',
 
   head() {
