@@ -1018,10 +1018,12 @@ export default {
       window.addEventListener(
         'resize',
         _debounce(() => {
+          console.log('resize')
           this.windowWidth = window.innerWidth
           this.visHeight = this.widthBreak ? 578 : 350
         }, 200)
       )
+      console.log('in next tick')
       this.fetchData(this.regionId, this.range)
       this.mounted = true
     })
@@ -1036,6 +1038,7 @@ export default {
 
   methods: {
     fetchData(region, range) {
+      console.log('fetching')
       const urls = Data.getEnergyUrls(region, range)
 
       if (urls.length > 0) {
