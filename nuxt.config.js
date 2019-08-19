@@ -2,7 +2,7 @@ const pkg = require('./package')
 const webpack = require('webpack')
 
 module.exports = {
-  mode: 'spa',
+  mode: 'universal',
 
   server: {
     host: '0.0.0.0'
@@ -160,6 +160,7 @@ module.exports = {
   css: ['@/assets/scss/app.scss'],
 
   generate: {
+    subFolders: true,
     routes: [
       '/energy/nem',
       '/energy/nsw1',
